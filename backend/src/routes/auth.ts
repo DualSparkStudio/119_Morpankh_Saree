@@ -1,0 +1,13 @@
+import { Router } from 'express';
+import { login, register, verifyOTP, resendOTP, refreshToken } from '../controllers/auth';
+
+const router = Router();
+
+router.post('/register', register);
+router.post('/login', login);
+router.post('/verify-otp', verifyOTP);
+router.post('/resend-otp', resendOTP);
+router.post('/refresh-token', refreshToken);
+
+export default router;
+

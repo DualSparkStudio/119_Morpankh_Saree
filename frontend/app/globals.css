@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand Colors */
+  --color-royal-blue: #1e3a8a;
+  --color-deep-indigo: #312e81;
+  --color-off-white: #faf9f6;
+  --color-soft-cream: #fffef9;
+  --color-gold: #d4af37;
+  --color-gold-light: #f4e4bc;
+  
+  /* Typography */
+  --font-heading: var(--font-playfair);
+  --font-body: var(--font-inter);
+  
+  /* Spacing & Sizing */
+  --container-max-width: 1280px;
+}
+
+@theme inline {
+  --color-background: var(--color-soft-cream);
+  --color-foreground: #1a1a1a;
+  --color-primary: var(--color-royal-blue);
+  --color-secondary: var(--color-deep-indigo);
+  --color-accent: var(--color-gold);
+  --color-royal-blue: #1e3a8a;
+  --color-deep-indigo: #312e81;
+  --color-off-white: #faf9f6;
+  --color-soft-cream: #fffef9;
+  --color-gold: #d4af37;
+  --color-gold-light: #f4e4bc;
+  
+  --font-heading: var(--font-playfair);
+  --font-body: var(--font-inter);
+  --font-sans: var(--font-inter);
+  
+  --font-family-heading: var(--font-playfair), serif;
+  --font-family-body: var(--font-inter), sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-soft-cream);
+  color: var(--color-foreground);
+  font-family: var(--font-body), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), serif;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-deep-indigo);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
