@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Keep standalone but we'll serve static files only
+  // Don't use the standalone server to avoid port conflicts
   output: 'standalone',
-  // This allows Next.js to be served from Express backend
-  // In production, API calls use relative paths (/api) since same domain
 };
 
 module.exports = nextConfig;

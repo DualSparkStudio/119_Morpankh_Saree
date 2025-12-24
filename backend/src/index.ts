@@ -77,7 +77,6 @@ app.use('/api/payments', paymentRoutes);
 if (process.env.NODE_ENV === 'production') {
   const frontendBuildPath = path.join(__dirname, '../../frontend/.next');
   const staticPath = path.join(frontendBuildPath, 'static');
-  const standalonePath = path.join(frontendBuildPath, 'standalone');
   
   // Serve Next.js static assets
   if (fs.existsSync(staticPath)) {
@@ -90,63 +89,49 @@ if (process.env.NODE_ENV === 'production') {
     app.use(express.static(publicPath));
   }
   
-  // Try to use Next.js standalone server
-  let nextHandler = null;
-  if (fs.existsSync(standalonePath)) {
-    try {
-      // Next.js standalone creates server.js in standalone/frontend/server.js
-      const nextServerPath = path.join(standalonePath, 'frontend/server.js');
-      if (fs.existsSync(nextServerPath)) {
-        // Load the handler function only - don't let it start its own server
-        const nextServer = require(nextServerPath);
-        // The handler should be a function, not a server instance
-        if (typeof nextServer === 'function') {
-          nextHandler = nextServer;
-        } else if (nextServer.default && typeof nextServer.default === 'function') {
-          nextHandler = nextServer.default;
-        } else if (nextServer.handler && typeof nextServer.handler === 'function') {
-          nextHandler = nextServer.handler;
-        }
-        if (nextHandler) {
-          console.log('✅ Next.js standalone server loaded');
-        } else {
-          console.warn('⚠️ Next.js handler not found in expected format');
-        }
-      }
-    } catch (e: unknown) {
-      const errorMessage = e instanceof Error ? e.message : String(e);
-      console.warn('⚠️ Next.js standalone server not available:', errorMessage);
+  // Serve Next.js HTML files from export/out directory or .next/server/pages
+  const htmlPaths = [
+    path.join(__dirname, '../../frontend/.next/server/pages'),
+    path.join(__dirname, '../../frontend/out'),
+    path.join(__dirname, '../../frontend/.next/standalone/frontend/.next/server/pages'),
+  ];
+  
+  let htmlBasePath = null;
+  for (const htmlPath of htmlPaths) {
+    if (fs.existsSync(htmlPath)) {
+      htmlBasePath = htmlPath;
+      break;
     }
   }
   
-  // Handle all non-API routes with Next.js
-  if (nextHandler) {
-    app.all('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
-        return next();
-      }
-      return nextHandler(req, res);
-    });
-  } else {
-    // Fallback: serve index.html for SPA routing
-    app.get('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
-        return next();
-      }
-      // Try to find and serve the HTML file
-      const possiblePaths = [
-        path.join(__dirname, '../../frontend/.next/server/pages/index.html'),
-        path.join(__dirname, '../../frontend/.next/standalone/frontend/.next/server/pages/index.html'),
-      ];
-      
-      for (const indexPath of possiblePaths) {
-        if (fs.existsSync(indexPath)) {
-          return res.sendFile(indexPath);
-        }
-      }
-      next();
-    });
+  // Serve static HTML files
+  if (htmlBasePath) {
+    app.use(express.static(htmlBasePath));
   }
+  
+  // Fallback: serve index.html for all non-API routes (SPA routing)
+  app.get('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    // Skip API routes, static assets, and health check
+    if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
+      return next();
+    }
+    
+    // Try to find and serve the HTML file
+    const possiblePaths = [
+      path.join(__dirname, '../../frontend/.next/server/pages/index.html'),
+      path.join(__dirname, '../../frontend/out/index.html'),
+      path.join(__dirname, '../../frontend/.next/standalone/frontend/.next/server/pages/index.html'),
+    ];
+    
+    for (const indexPath of possiblePaths) {
+      if (fs.existsSync(indexPath)) {
+        return res.sendFile(path.resolve(indexPath));
+      }
+    }
+    
+    // If no HTML file found, return 404
+    next();
+  });
 }
 
 // Error handling
@@ -160,17 +145,21 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Start server - Render will provide PORT via environment variable
-// Only start if this is the main module (not being imported)
-if (require.main === module) {
-  app.listen(PORT, () => {
+// Guard against double-start
+let serverStarted = false;
+
+if (!serverStarted) {
+  serverStarted = true;
+  const server = app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
-  }).on('error', (error: NodeJS.ErrnoException) => {
-    console.error('❌ Failed to start server');
+  });
+  
+  server.on('error', (error: NodeJS.ErrnoException) => {
+    // Error handler - fires if port is already in use
+    console.error('❌ Failed to start server:', error.message);
     if (error.code === 'EADDRINUSE') {
       console.error(`Port ${PORT} is already in use`);
-      console.error('This usually means a previous instance is still running');
-    } else {
-      console.error('Error:', error.message);
+      console.error('This usually means Render is restarting - wait a moment and try again');
     }
     process.exit(1);
   });
