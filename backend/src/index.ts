@@ -260,13 +260,13 @@ app.use('/api/payments', paymentRoutes);
           // Don't set nextHandler to null - it can still work even if prepare fails
         });
       } catch (nextError: unknown) {
-      const errorMsg = nextError instanceof Error ? nextError.message : String(nextError);
-      const errorStack = nextError instanceof Error ? nextError.stack : '';
-      console.error('❌ Failed to create Next.js handler:', errorMsg);
-      if (errorStack) {
-        console.error('❌ Stack:', errorStack);
+        const errorMsg = nextError instanceof Error ? nextError.message : String(nextError);
+        const errorStack = nextError instanceof Error ? nextError.stack : '';
+        console.error('❌ Failed to create Next.js handler:', errorMsg);
+        if (errorStack) {
+          console.error('❌ Stack:', errorStack);
+        }
       }
-    }
     
     // Handle all non-API routes with Next.js
     if (nextHandler) {
@@ -292,6 +292,7 @@ app.use('/api/payments', paymentRoutes);
           details: 'Check Render deployment logs for Next.js initialization errors.'
         });
       });
+    }
     }
   }
 }
