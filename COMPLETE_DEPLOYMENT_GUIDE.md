@@ -13,6 +13,12 @@ This guide covers everything: Deploy both Frontend and Backend together using Bl
 - [ ] Razorpay account (for payment gateway)
 - [ ] 20-30 minutes for setup
 
+**Note:** `render.yaml` is configured with **FREE tier** by default. No payment required for testing!
+- Web Service: Free (spins down after 15 min inactivity)
+- Database: Free for 90 days, then $7/month
+
+See `RENDER_FREE_VS_PAID.md` for details on upgrading to paid plans.
+
 ---
 
 ## ⚡ METHOD 1: Deploy Everything Together on ONE URL (Recommended)
@@ -28,8 +34,24 @@ This guide covers everything: Deploy both Frontend and Backend together using Bl
 
 2. **Go to Render Dashboard**
    - Click **New** → **Blueprint**
-   - Connect your GitHub repository
-   - Select your repository: `119_Morpankh_Saree` (or your repo name)
+   
+   **If your repository `119_Morpankh_Saree` is not showing:**
+   
+   **Option A: Re-authenticate GitHub**
+   - Click **"Configure account"** (gear icon) next to GitHub
+   - Re-authenticate with GitHub
+   - **Grant Render access to ALL repositories** (or at least your specific repo)
+   - Refresh the page
+   - Your repo should now appear
+   
+   **Option B: Use Repository URL Directly**
+   - Look for **"Use public repository URL"** or **"Connect public repository"** option
+   - Enter: `https://github.com/DualSparkStudio/119_Morpankh_Saree`
+   - Click **Connect**
+   
+   **Option C: Manual Connection**
+   - If Blueprint doesn't work, use **New** → **Web Service** instead
+   - Connect GitHub manually and search for your repo
 
 3. **Render Detects Services**
    - Render will automatically detect `render.yaml`

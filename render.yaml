@@ -4,7 +4,7 @@ services:
     name: morpankh-saree
     env: node
     region: mumbai
-    plan: starter
+    plan: free  # Free tier - spins down after 15 min inactivity
     buildCommand: cd frontend && npm install && npm run build && cd ../backend && npm install && npm run build && npx prisma generate
     startCommand: cd backend && npm start
     rootDir: .
@@ -37,6 +37,6 @@ databases:
   - name: morpankh-saree-db
     databaseName: morpankh_saree
     user: morpankh_user
-    plan: starter
+    plan: free  # Free tier - 90 days trial, then $7/month
     region: mumbai
 
