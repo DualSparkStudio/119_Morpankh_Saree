@@ -75,97 +75,127 @@ app.use('/api/payments', paymentRoutes);
 
 // Serve Next.js frontend (only in production)
 if (process.env.NODE_ENV === 'production') {
-  const frontendPath = path.resolve(__dirname, '../../frontend');
-  const frontendBuildPath = path.join(frontendPath, '.next');
-  const staticPath = path.join(frontendBuildPath, 'static');
+  // Calculate frontend path - handle both local and Render deployment
+  // On Render: __dirname = /opt/render/project/src/backend/dist
+  // So ../../frontend = /opt/render/project/src/frontend
+  // Also try process.cwd() which might be /opt/render/project/src
+  const possibleFrontendPaths = [
+    path.resolve(__dirname, '../../frontend'),
+    path.resolve(process.cwd(), 'frontend'),
+    path.resolve(process.cwd(), '../frontend'),
+    '/opt/render/project/src/frontend', // Render specific path
+  ];
   
-  console.log('📁 Frontend path:', frontendPath);
-  console.log('📁 Frontend exists:', fs.existsSync(frontendPath));
-  console.log('📁 .next exists:', fs.existsSync(frontendBuildPath));
-  
-  // Serve Next.js static assets
-  if (fs.existsSync(staticPath)) {
-    app.use('/_next/static', express.static(staticPath, { maxAge: '1y' }));
-    console.log('✅ Static assets path configured');
-  } else {
-    console.warn('⚠️ Static path not found:', staticPath);
+  let frontendPath: string | null = null;
+  for (const possiblePath of possibleFrontendPaths) {
+    if (fs.existsSync(possiblePath)) {
+      frontendPath = possiblePath;
+      console.log('✅ Found frontend at:', frontendPath);
+      break;
+    }
   }
   
-  // Serve Next.js public assets
-  const publicPath = path.join(frontendPath, 'public');
-  if (fs.existsSync(publicPath)) {
-    app.use(express.static(publicPath));
-    console.log('✅ Public assets path configured');
+  if (!frontendPath) {
+    console.error('❌ Frontend directory not found! Tried paths:');
+    possibleFrontendPaths.forEach(p => console.error('   -', p));
+    console.error('❌ Current working directory:', process.cwd());
+    console.error('❌ __dirname:', __dirname);
   } else {
-    console.warn('⚠️ Public path not found:', publicPath);
-  }
-  
-  // Use Next.js package to create handler
-  let nextHandler: ((req: express.Request, res: express.Response) => void) | null = null;
-  let nextApp: any = null;
-  
-  try {
-    // Try to load next package (now installed in backend)
-    let next: any = null;
-    const nextPaths = [
-      'next', // Try from backend's node_modules first
-      path.join(frontendPath, 'node_modules/next'),
-      path.join(__dirname, '../../node_modules/next'),
-    ];
+    const frontendBuildPath = path.join(frontendPath, '.next');
+    const staticPath = path.join(frontendBuildPath, 'static');
     
-    for (const nextPath of nextPaths) {
-      try {
-        next = require(nextPath);
-        console.log('✅ Next.js package loaded from:', nextPath);
-        break;
-      } catch (e) {
-        // Try next path
+    console.log('📁 Frontend path:', frontendPath);
+    console.log('📁 Frontend exists:', fs.existsSync(frontendPath));
+    console.log('📁 .next exists:', fs.existsSync(frontendBuildPath));
+    
+    // Serve Next.js static assets
+    if (fs.existsSync(staticPath)) {
+      app.use('/_next/static', express.static(staticPath, { maxAge: '1y' }));
+      console.log('✅ Static assets path configured:', staticPath);
+    } else {
+      console.warn('⚠️ Static path not found:', staticPath);
+    }
+    
+    // Serve Next.js public assets
+    const publicPath = path.join(frontendPath, 'public');
+    if (fs.existsSync(publicPath)) {
+      app.use(express.static(publicPath));
+      console.log('✅ Public assets path configured:', publicPath);
+    } else {
+      console.warn('⚠️ Public path not found:', publicPath);
+    }
+    
+    // Use Next.js package to create handler
+    let nextHandler: ((req: express.Request, res: express.Response) => void) | null = null;
+    let nextApp: any = null;
+    
+    try {
+      // Try to load next package (now installed in backend)
+      let next: any = null;
+      const nextPaths = [
+        'next', // Try from backend's node_modules first
+        path.join(frontendPath, 'node_modules/next'),
+        path.join(__dirname, '../../node_modules/next'),
+        path.join(process.cwd(), 'node_modules/next'),
+      ];
+      
+      for (const nextPath of nextPaths) {
+        try {
+          next = require(nextPath);
+          console.log('✅ Next.js package loaded from:', nextPath);
+          break;
+        } catch (e) {
+          // Try next path
+        }
+      }
+      
+      if (!next) {
+        throw new Error('Next.js package not found in any expected location');
+      }
+      
+      // Create Next.js app instance
+      nextApp = next.default({
+        dev: false,
+        dir: frontendPath,
+      });
+      
+      // Prepare Next.js (this is async but we'll handle it)
+      nextApp.prepare().then(() => {
+        console.log('✅ Next.js prepared successfully');
+      }).catch((err: unknown) => {
+        console.error('❌ Next.js preparation failed:', err);
+      });
+      
+      // Get the request handler
+      nextHandler = nextApp.getRequestHandler();
+      console.log('✅ Next.js handler created successfully');
+    } catch (nextError: unknown) {
+      const errorMsg = nextError instanceof Error ? nextError.message : String(nextError);
+      const errorStack = nextError instanceof Error ? nextError.stack : '';
+      console.error('❌ Failed to create Next.js handler:', errorMsg);
+      if (errorStack) {
+        console.error('❌ Stack:', errorStack);
       }
     }
     
-    if (!next) {
-      throw new Error('Next.js package not found in any expected location');
+    // Handle all non-API routes with Next.js
+    if (nextHandler) {
+      app.all('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        // Skip API routes, static assets, and health check
+        if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
+          return next();
+        }
+        // Use Next.js handler
+        return nextHandler!(req, res);
+      });
+      console.log('✅ Next.js route handler configured');
+    } else {
+      // Fallback removed - we'll show error if handler not available
+      console.error('❌ Next.js handler not available - frontend will not work!');
     }
-    
-    // Create Next.js app instance
-    nextApp = next.default({
-      dev: false,
-      dir: frontendPath,
-    });
-    
-    // Prepare Next.js (this is async but we'll handle it)
-    nextApp.prepare().then(() => {
-      console.log('✅ Next.js prepared successfully');
-    }).catch((err: unknown) => {
-      console.error('❌ Next.js preparation failed:', err);
-    });
-    
-    // Get the request handler
-    nextHandler = nextApp.getRequestHandler();
-    console.log('✅ Next.js handler created successfully');
-  } catch (nextError: unknown) {
-    const errorMsg = nextError instanceof Error ? nextError.message : String(nextError);
-    const errorStack = nextError instanceof Error ? nextError.stack : '';
-    console.error('❌ Failed to create Next.js handler:', errorMsg);
-    if (errorStack) {
-      console.error('❌ Stack:', errorStack);
-    }
-  }
-  
-  // Handle all non-API routes with Next.js
-  if (nextHandler) {
-    app.all('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      // Skip API routes, static assets, and health check
-      if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
-        return next();
-      }
-      // Use Next.js handler
-      return nextHandler!(req, res);
-    });
-    console.log('✅ Next.js route handler configured');
   } else {
-    // Fallback: Try to serve static HTML files
-    console.warn('⚠️ Next.js handler not available, using fallback static serving');
+    // Frontend path not found - show helpful error
+    console.error('❌ Frontend directory not found - cannot serve frontend!');
     
     // Check for HTML files in various possible locations
     const htmlPaths = [
