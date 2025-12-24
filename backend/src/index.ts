@@ -194,13 +194,13 @@ app.use('/api/payments', paymentRoutes);
       console.log('✅ Frontend build found at:', frontendBuildPath);
       
       // Serve Next.js static assets
-    if (fs.existsSync(staticPath)) {
-      app.use('/_next/static', express.static(staticPath, { maxAge: '1y' }));
-      console.log('✅ Static assets path configured:', staticPath);
-    } else {
-      console.warn('⚠️ Static path not found:', staticPath);
-    }
-    
+      if (fs.existsSync(staticPath)) {
+        app.use('/_next/static', express.static(staticPath, { maxAge: '1y' }));
+        console.log('✅ Static assets path configured:', staticPath);
+      } else {
+        console.warn('⚠️ Static path not found:', staticPath);
+      }
+      
       // Serve Next.js public assets
       const publicPath = path.join(frontendPath, 'public');
       if (fs.existsSync(publicPath)) {
@@ -214,52 +214,52 @@ app.use('/api/payments', paymentRoutes);
       let nextApp: any = null;
       
       try {
-      // Try to load next package (now installed in backend)
-      let next: any = null;
-      const nextPaths = [
-        'next', // Try from backend's node_modules first (installed in backend/package.json)
-        path.join(process.cwd(), 'node_modules/next'), // From backend/node_modules
-        path.join(frontendPath, 'node_modules/next'), // From frontend/node_modules
-        path.join(__dirname, '../../node_modules/next'), // From root/node_modules
-        path.join(process.cwd(), '..', 'node_modules/next'), // From root/node_modules (alternative)
-      ];
-      
-      console.log('🔍 Attempting to load Next.js package from paths:');
-      for (const nextPath of nextPaths) {
-        try {
-          console.log(`   Trying: ${nextPath}`);
-          next = require(nextPath);
-          console.log('✅ Next.js package loaded from:', nextPath);
-          break;
-        } catch (e) {
-          const errMsg = e instanceof Error ? e.message : String(e);
-          console.log(`   ❌ Failed: ${errMsg}`);
-          // Try next path
+        // Try to load next package (now installed in backend)
+        let next: any = null;
+        const nextPaths = [
+          'next', // Try from backend's node_modules first (installed in backend/package.json)
+          path.join(process.cwd(), 'node_modules/next'), // From backend/node_modules
+          path.join(frontendPath, 'node_modules/next'), // From frontend/node_modules
+          path.join(__dirname, '../../node_modules/next'), // From root/node_modules
+          path.join(process.cwd(), '..', 'node_modules/next'), // From root/node_modules (alternative)
+        ];
+        
+        console.log('🔍 Attempting to load Next.js package from paths:');
+        for (const nextPath of nextPaths) {
+          try {
+            console.log(`   Trying: ${nextPath}`);
+            next = require(nextPath);
+            console.log('✅ Next.js package loaded from:', nextPath);
+            break;
+          } catch (e) {
+            const errMsg = e instanceof Error ? e.message : String(e);
+            console.log(`   ❌ Failed: ${errMsg}`);
+            // Try next path
+          }
         }
-      }
-      
-      if (!next) {
-        throw new Error('Next.js package not found in any expected location');
-      }
-      
-      // Create Next.js app instance
-      nextApp = next.default({
-        dev: process.env.NODE_ENV !== 'production',
-        dir: frontendPath,
-      });
-      
-      // Get the request handler (can be called before prepare)
-      nextHandler = nextApp.getRequestHandler();
-      console.log('✅ Next.js handler created successfully');
-      
-      // Prepare Next.js (this is async but we'll handle it)
-      nextApp.prepare().then(() => {
-        console.log('✅ Next.js prepared successfully');
-      }).catch((err: unknown) => {
-        console.error('❌ Next.js preparation failed:', err);
-        // Don't set nextHandler to null - it can still work even if prepare fails
-      });
-    } catch (nextError: unknown) {
+        
+        if (!next) {
+          throw new Error('Next.js package not found in any expected location');
+        }
+        
+        // Create Next.js app instance
+        nextApp = next.default({
+          dev: process.env.NODE_ENV !== 'production',
+          dir: frontendPath,
+        });
+        
+        // Get the request handler (can be called before prepare)
+        nextHandler = nextApp.getRequestHandler();
+        console.log('✅ Next.js handler created successfully');
+        
+        // Prepare Next.js (this is async but we'll handle it)
+        nextApp.prepare().then(() => {
+          console.log('✅ Next.js prepared successfully');
+        }).catch((err: unknown) => {
+          console.error('❌ Next.js preparation failed:', err);
+          // Don't set nextHandler to null - it can still work even if prepare fails
+        });
+      } catch (nextError: unknown) {
       const errorMsg = nextError instanceof Error ? nextError.message : String(nextError);
       const errorStack = nextError instanceof Error ? nextError.stack : '';
       console.error('❌ Failed to create Next.js handler:', errorMsg);
