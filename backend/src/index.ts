@@ -47,6 +47,14 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Log all requests for debugging (can be removed in production)
+app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (req.path.includes('.css') || req.path.startsWith('/_next/static')) {
+    console.log('🎨 CSS/Static request:', req.method, req.path);
+  }
+  next();
+});
+
 // Rate limiting
 app.use('/api/', rateLimiter);
 
@@ -203,11 +211,30 @@ app.use('/api/payments', paymentRoutes);
       
       // Serve Next.js static assets - MUST be before Next.js handler
       if (fs.existsSync(staticPath)) {
+        // Log static assets directory structure
+        try {
+          const staticContents = fs.readdirSync(staticPath);
+          console.log('📦 Static assets directory contents:', staticContents.join(', '));
+          
+          // Check for CSS directory
+          const cssPath = path.join(staticPath, 'css');
+          if (fs.existsSync(cssPath)) {
+            const cssFiles = fs.readdirSync(cssPath);
+            console.log('🎨 CSS files found:', cssFiles.slice(0, 5).join(', '), cssFiles.length > 5 ? `... (${cssFiles.length} total)` : '');
+          } else {
+            console.warn('⚠️ CSS directory not found at:', cssPath);
+          }
+        } catch (e) {
+          console.warn('⚠️ Could not read static assets directory:', e);
+        }
+        
         app.use('/_next/static', express.static(staticPath, { 
           maxAge: '1y',
-          immutable: true 
+          immutable: true,
+          etag: true
         }));
         console.log('✅ Static assets path configured:', staticPath);
+        console.log('✅ Serving static assets at: /_next/static/*');
       } else {
         console.warn('⚠️ Static path not found:', staticPath);
       }
@@ -294,6 +321,11 @@ app.use('/api/payments', paymentRoutes);
     // IMPORTANT: This must be registered AFTER static assets middleware
     if (nextHandler) {
       app.all('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        // Log CSS and static asset requests for debugging
+        if (req.path.includes('.css') || req.path.startsWith('/_next/static')) {
+          console.log('🎨 CSS/Static request:', req.path, req.method);
+        }
+        
         // Skip only API routes and health check - let Next.js handle everything else
         // Next.js will handle: /_next/*, RSC routes (?_rsc=...), and all page routes
         if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
