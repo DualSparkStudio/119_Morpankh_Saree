@@ -29,7 +29,8 @@ import paymentRoutes from './routes/payment';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+// Render provides PORT via environment variable - use it directly
+const PORT = parseInt(process.env.PORT || '10000', 10);
 
 // Middleware
 app.use(helmet({
@@ -146,8 +147,18 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
-app.listen(PORT, () => {
+// Start server - Render will provide PORT via environment variable
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
+}).on('error', (error: NodeJS.ErrnoException) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`❌ Port ${PORT} is already in use`);
+    console.error('This usually means the server is already running or a previous instance is still active');
+    process.exit(1);
+  } else {
+    console.error('❌ Server error:', error);
+    process.exit(1);
+  }
 });
 
 export default app;
