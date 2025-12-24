@@ -77,7 +77,6 @@ app.use('/api/payments', paymentRoutes);
 if (process.env.NODE_ENV === 'production') {
   const frontendPath = path.join(__dirname, '../../frontend');
   const frontendBuildPath = path.join(frontendPath, '.next');
-  const standalonePath = path.join(frontendBuildPath, 'standalone');
   const staticPath = path.join(frontendBuildPath, 'static');
   
   // Serve Next.js static assets
@@ -91,70 +90,52 @@ if (process.env.NODE_ENV === 'production') {
     app.use(express.static(publicPath));
   }
   
-  // Try to use Next.js standalone handler
+  // Use Next.js package to create handler
   let nextHandler: ((req: express.Request, res: express.Response) => void) | null = null;
   
-  // First, try using next package directly (requires source code)
   try {
-    const nextPath = path.join(frontendPath, 'node_modules/next');
-    if (fs.existsSync(nextPath)) {
-      const next = require(nextPath);
-      if (next.default && typeof next.default.createServer === 'function') {
-        const nextApp = next.default({ dev: false, dir: frontendPath });
-        const handler = nextApp.getRequestHandler();
-        nextHandler = handler;
-        console.log('✅ Next.js handler created using next package');
+    // Try to load next package from frontend's node_modules
+    const nextPackagePath = path.join(frontendPath, 'node_modules/next');
+    console.log('🔍 Looking for Next.js at:', nextPackagePath);
+    console.log('🔍 Frontend path exists:', fs.existsSync(frontendPath));
+    console.log('🔍 Next package exists:', fs.existsSync(nextPackagePath));
+    
+    if (fs.existsSync(nextPackagePath)) {
+      // Use Next.js (standard approach)
+      const next = require(nextPackagePath);
+      console.log('✅ Next.js package loaded, type:', typeof next);
+      console.log('✅ Next.js default:', typeof next.default);
+      
+      // Create Next.js app instance
+      // next.default is the createServer function
+      const nextApp = next.default({
+        dev: false,
+        dir: frontendPath,
+      });
+      
+      // Get the request handler
+      nextHandler = nextApp.getRequestHandler();
+      console.log('✅ Next.js handler created successfully');
+    } else {
+      console.warn('⚠️ Next.js package not found at:', nextPackagePath);
+      // Try alternative path (if node_modules is at root)
+      const rootNextPath = path.join(__dirname, '../../node_modules/next');
+      if (fs.existsSync(rootNextPath)) {
+        console.log('✅ Found Next.js at root:', rootNextPath);
+        const next = require(rootNextPath);
+        const nextApp = next.default({
+          dev: false,
+          dir: frontendPath,
+        });
+        nextHandler = nextApp.getRequestHandler();
+        console.log('✅ Next.js handler created from root');
       }
     }
-  } catch (nextPackageError) {
-    // If next package approach fails, try standalone
-    console.log('⚠️ Next package approach failed, trying standalone...');
-  }
-  
-  // If next package approach didn't work, try standalone server.js
-  if (!nextHandler && fs.existsSync(standalonePath)) {
-    try {
-      const nextServerPath = path.join(standalonePath, 'frontend/server.js');
-      if (fs.existsSync(nextServerPath)) {
-        const originalPort = process.env.PORT;
-        delete process.env.PORT;
-        
-        try {
-          const nextServerModule = require(nextServerPath);
-          
-          if (originalPort) {
-            process.env.PORT = originalPort;
-          }
-          
-          // Try different exports
-          if (typeof nextServerModule === 'function') {
-            nextHandler = nextServerModule;
-          } else if (nextServerModule.default && typeof nextServerModule.default === 'function') {
-            nextHandler = nextServerModule.default;
-          } else if (nextServerModule.handler && typeof nextServerModule.handler === 'function') {
-            nextHandler = nextServerModule.handler;
-          } else if (nextServerModule.requestHandler && typeof nextServerModule.requestHandler === 'function') {
-            nextHandler = nextServerModule.requestHandler;
-          }
-          
-          if (nextHandler) {
-            console.log('✅ Next.js standalone handler loaded');
-          } else {
-            console.warn('⚠️ Next.js handler not found. Module type:', typeof nextServerModule);
-            console.warn('⚠️ Available keys:', Object.keys(nextServerModule || {}));
-          }
-        } catch (loadError: unknown) {
-          if (originalPort) {
-            process.env.PORT = originalPort;
-          }
-          const errorMsg = loadError instanceof Error ? loadError.message : String(loadError);
-          console.warn('⚠️ Failed to load Next.js server:', errorMsg);
-        }
-      }
-    } catch (e: unknown) {
-      const errorMessage = e instanceof Error ? e.message : String(e);
-      console.warn('⚠️ Next.js standalone handler not available:', errorMessage);
-    }
+  } catch (nextError: unknown) {
+    const errorMsg = nextError instanceof Error ? nextError.message : String(nextError);
+    const errorStack = nextError instanceof Error ? nextError.stack : '';
+    console.error('❌ Failed to create Next.js handler:', errorMsg);
+    console.error('❌ Stack:', errorStack);
   }
   
   // Handle all non-API routes with Next.js

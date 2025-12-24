@@ -1,8 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Keep standalone but we'll serve static files only
-  // Don't use the standalone server to avoid port conflicts
-  output: 'standalone',
+  // Remove standalone - we'll use next package directly with Express
+  // This allows us to use next.getRequestHandler() in the backend
 };
 
 module.exports = nextConfig;
