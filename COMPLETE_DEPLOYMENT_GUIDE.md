@@ -61,7 +61,7 @@ See `RENDER_FREE_VS_PAID.md` for details on upgrading to paid plans.
 
 4. **Review Configuration**
    - Check all services are listed
-   - Verify region (Mumbai recommended)
+   - Verify region (Singapore - closest to India)
    - Review build commands
 
 5. **Click "Apply"**

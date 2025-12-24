@@ -3,7 +3,7 @@ services:
   - type: web
     name: morpankh-saree
     env: node
-    region: mumbai
+    region: singapore  # Closest to India (Mumbai not available)
     plan: free  # Free tier - spins down after 15 min inactivity
     buildCommand: cd frontend && npm install && npm run build && cd ../backend && npm install && npm run build && npx prisma generate
     startCommand: cd backend && npm start
@@ -38,5 +38,5 @@ databases:
     databaseName: morpankh_saree
     user: morpankh_user
     plan: free  # Free tier - 90 days trial, then $7/month
-    region: mumbai
+    region: singapore  # Closest to India (Mumbai not available)
 
