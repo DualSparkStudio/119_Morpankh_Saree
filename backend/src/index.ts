@@ -50,7 +50,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/api/', rateLimiter);
 
 // Health check
-app.get('/health', (req, res) => {
+app.get('/health', (req: express.Request, res: express.Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
@@ -100,14 +100,15 @@ if (process.env.NODE_ENV === 'production') {
         nextHandler = nextServer.default || nextServer;
         console.log('✅ Next.js standalone server loaded');
       }
-    } catch (e) {
-      console.warn('⚠️ Next.js standalone server not available:', e.message);
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      console.warn('⚠️ Next.js standalone server not available:', errorMessage);
     }
   }
   
   // Handle all non-API routes with Next.js
   if (nextHandler) {
-    app.all('*', (req, res, next) => {
+    app.all('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
       if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
         return next();
       }
@@ -115,7 +116,7 @@ if (process.env.NODE_ENV === 'production') {
     });
   } else {
     // Fallback: serve index.html for SPA routing
-    app.get('*', (req, res, next) => {
+    app.get('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
       if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
         return next();
       }
@@ -140,7 +141,7 @@ app.use(errorHandler);
 
 // 404 handler (only for API routes if frontend not served)
 if (process.env.NODE_ENV !== 'production') {
-  app.use((req, res) => {
+  app.use((req: express.Request, res: express.Response) => {
     res.status(404).json({ error: 'Route not found' });
   });
 }
