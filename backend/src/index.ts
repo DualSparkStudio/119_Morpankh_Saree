@@ -176,22 +176,24 @@ app.use('/api/payments', paymentRoutes);
     const frontendBuildPath = path.join(frontendPath, '.next');
     const staticPath = path.join(frontendBuildPath, 'static');
     
+    // Declare nextHandler in this scope
+    let nextHandler: ((req: express.Request, res: express.Response) => void) | null = null;
+    
     console.log('📁 Frontend path:', frontendPath);
     console.log('📁 Frontend exists:', fs.existsSync(frontendPath));
     console.log('📁 .next exists:', fs.existsSync(frontendBuildPath));
     
-    // Check if frontend is built
+    // Check if frontend is built - CRITICAL for production
     if (!fs.existsSync(frontendBuildPath)) {
-      console.error('❌ Frontend is not built! .next folder not found at:', frontendBuildPath);
-      console.error('❌ Please build the frontend first: cd frontend && npm run build');
+      console.error('❌ CRITICAL: Frontend is not built! .next folder not found at:', frontendBuildPath);
       console.error('❌ Frontend path:', frontendPath);
-      console.error('❌ This will cause Next.js handler to fail!');
-      // Don't return - still try to create handler, it might fail gracefully
+      console.error('❌ Next.js handler cannot be created without a build.');
+      console.error('❌ This usually means the frontend build step failed in render.yaml');
+      // nextHandler is already null
     } else {
       console.log('✅ Frontend build found at:', frontendBuildPath);
-    }
-    
-    // Serve Next.js static assets
+      
+      // Serve Next.js static assets
     if (fs.existsSync(staticPath)) {
       app.use('/_next/static', express.static(staticPath, { maxAge: '1y' }));
       console.log('✅ Static assets path configured:', staticPath);
@@ -199,20 +201,19 @@ app.use('/api/payments', paymentRoutes);
       console.warn('⚠️ Static path not found:', staticPath);
     }
     
-    // Serve Next.js public assets
-    const publicPath = path.join(frontendPath, 'public');
-    if (fs.existsSync(publicPath)) {
-      app.use(express.static(publicPath));
-      console.log('✅ Public assets path configured:', publicPath);
-    } else {
-      console.warn('⚠️ Public path not found:', publicPath);
-    }
-    
-    // Use Next.js package to create handler
-    let nextHandler: ((req: express.Request, res: express.Response) => void) | null = null;
-    let nextApp: any = null;
-    
-    try {
+      // Serve Next.js public assets
+      const publicPath = path.join(frontendPath, 'public');
+      if (fs.existsSync(publicPath)) {
+        app.use(express.static(publicPath));
+        console.log('✅ Public assets path configured:', publicPath);
+      } else {
+        console.warn('⚠️ Public path not found:', publicPath);
+      }
+      
+      // Use Next.js package to create handler
+      let nextApp: any = null;
+      
+      try {
       // Try to load next package (now installed in backend)
       let next: any = null;
       const nextPaths = [
@@ -223,12 +224,16 @@ app.use('/api/payments', paymentRoutes);
         path.join(process.cwd(), '..', 'node_modules/next'), // From root/node_modules (alternative)
       ];
       
+      console.log('🔍 Attempting to load Next.js package from paths:');
       for (const nextPath of nextPaths) {
         try {
+          console.log(`   Trying: ${nextPath}`);
           next = require(nextPath);
           console.log('✅ Next.js package loaded from:', nextPath);
           break;
         } catch (e) {
+          const errMsg = e instanceof Error ? e.message : String(e);
+          console.log(`   ❌ Failed: ${errMsg}`);
           // Try next path
         }
       }
@@ -277,11 +282,15 @@ app.use('/api/payments', paymentRoutes);
     } else {
       // Fallback: Add a basic route handler if Next.js is not available
       console.error('❌ Next.js handler not available - using fallback route handler');
-      app.get('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      console.error('❌ This means Next.js handler creation failed. Check logs above for details.');
+      app.all('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
         if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
           return next();
         }
-        res.status(404).json({ error: 'Frontend not available. Please ensure Next.js is properly built and configured.' });
+        res.status(404).json({ 
+          error: 'Frontend not available. Please ensure Next.js is properly built and configured.',
+          details: 'Check Render deployment logs for Next.js initialization errors.'
+        });
       });
     }
   }
