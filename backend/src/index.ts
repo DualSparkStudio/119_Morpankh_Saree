@@ -75,67 +75,81 @@ app.use('/api/payments', paymentRoutes);
 
 // Serve Next.js frontend (only in production)
 if (process.env.NODE_ENV === 'production') {
-  const frontendPath = path.join(__dirname, '../../frontend');
+  const frontendPath = path.resolve(__dirname, '../../frontend');
   const frontendBuildPath = path.join(frontendPath, '.next');
   const staticPath = path.join(frontendBuildPath, 'static');
+  
+  console.log('📁 Frontend path:', frontendPath);
+  console.log('📁 Frontend exists:', fs.existsSync(frontendPath));
+  console.log('📁 .next exists:', fs.existsSync(frontendBuildPath));
   
   // Serve Next.js static assets
   if (fs.existsSync(staticPath)) {
     app.use('/_next/static', express.static(staticPath, { maxAge: '1y' }));
+    console.log('✅ Static assets path configured');
+  } else {
+    console.warn('⚠️ Static path not found:', staticPath);
   }
   
   // Serve Next.js public assets
   const publicPath = path.join(frontendPath, 'public');
   if (fs.existsSync(publicPath)) {
     app.use(express.static(publicPath));
+    console.log('✅ Public assets path configured');
+  } else {
+    console.warn('⚠️ Public path not found:', publicPath);
   }
   
   // Use Next.js package to create handler
   let nextHandler: ((req: express.Request, res: express.Response) => void) | null = null;
+  let nextApp: any = null;
   
   try {
-    // Try to load next package from frontend's node_modules
-    const nextPackagePath = path.join(frontendPath, 'node_modules/next');
-    console.log('🔍 Looking for Next.js at:', nextPackagePath);
-    console.log('🔍 Frontend path exists:', fs.existsSync(frontendPath));
-    console.log('🔍 Next package exists:', fs.existsSync(nextPackagePath));
+    // Try to load next package (now installed in backend)
+    let next: any = null;
+    const nextPaths = [
+      'next', // Try from backend's node_modules first
+      path.join(frontendPath, 'node_modules/next'),
+      path.join(__dirname, '../../node_modules/next'),
+    ];
     
-    if (fs.existsSync(nextPackagePath)) {
-      // Use Next.js (standard approach)
-      const next = require(nextPackagePath);
-      console.log('✅ Next.js package loaded, type:', typeof next);
-      console.log('✅ Next.js default:', typeof next.default);
-      
-      // Create Next.js app instance
-      // next.default is the createServer function
-      const nextApp = next.default({
-        dev: false,
-        dir: frontendPath,
-      });
-      
-      // Get the request handler
-      nextHandler = nextApp.getRequestHandler();
-      console.log('✅ Next.js handler created successfully');
-    } else {
-      console.warn('⚠️ Next.js package not found at:', nextPackagePath);
-      // Try alternative path (if node_modules is at root)
-      const rootNextPath = path.join(__dirname, '../../node_modules/next');
-      if (fs.existsSync(rootNextPath)) {
-        console.log('✅ Found Next.js at root:', rootNextPath);
-        const next = require(rootNextPath);
-        const nextApp = next.default({
-          dev: false,
-          dir: frontendPath,
-        });
-        nextHandler = nextApp.getRequestHandler();
-        console.log('✅ Next.js handler created from root');
+    for (const nextPath of nextPaths) {
+      try {
+        next = require(nextPath);
+        console.log('✅ Next.js package loaded from:', nextPath);
+        break;
+      } catch (e) {
+        // Try next path
       }
     }
+    
+    if (!next) {
+      throw new Error('Next.js package not found in any expected location');
+    }
+    
+    // Create Next.js app instance
+    nextApp = next.default({
+      dev: false,
+      dir: frontendPath,
+    });
+    
+    // Prepare Next.js (this is async but we'll handle it)
+    nextApp.prepare().then(() => {
+      console.log('✅ Next.js prepared successfully');
+    }).catch((err: unknown) => {
+      console.error('❌ Next.js preparation failed:', err);
+    });
+    
+    // Get the request handler
+    nextHandler = nextApp.getRequestHandler();
+    console.log('✅ Next.js handler created successfully');
   } catch (nextError: unknown) {
     const errorMsg = nextError instanceof Error ? nextError.message : String(nextError);
     const errorStack = nextError instanceof Error ? nextError.stack : '';
     console.error('❌ Failed to create Next.js handler:', errorMsg);
-    console.error('❌ Stack:', errorStack);
+    if (errorStack) {
+      console.error('❌ Stack:', errorStack);
+    }
   }
   
   // Handle all non-API routes with Next.js
@@ -148,6 +162,7 @@ if (process.env.NODE_ENV === 'production') {
       // Use Next.js handler
       return nextHandler!(req, res);
     });
+    console.log('✅ Next.js route handler configured');
   } else {
     // Fallback: Try to serve static HTML files
     console.warn('⚠️ Next.js handler not available, using fallback static serving');
@@ -177,13 +192,15 @@ if (process.env.NODE_ENV === 'production') {
         path.join(__dirname, '../../frontend/.next'),
         path.join(__dirname, '../../frontend/.next/standalone'),
         path.join(__dirname, '../../frontend'),
+        __dirname,
+        path.join(__dirname, '../..'),
       ];
       checkDirs.forEach(dir => {
         if (fs.existsSync(dir)) {
           console.log(`📁 Directory exists: ${dir}`);
           try {
             const contents = fs.readdirSync(dir);
-            console.log(`   Contents: ${contents.slice(0, 5).join(', ')}${contents.length > 5 ? '...' : ''}`);
+            console.log(`   Contents: ${contents.slice(0, 10).join(', ')}${contents.length > 10 ? '...' : ''}`);
           } catch (e) {
             // Ignore read errors
           }
@@ -209,9 +226,23 @@ if (process.env.NODE_ENV === 'production') {
         }
       }
       
-      // If no HTML found, return a helpful error
+      // If no HTML found, return a helpful error message
       console.warn(`⚠️ No HTML file found for path: ${req.path}`);
-      next();
+      console.warn(`⚠️ Current working directory: ${process.cwd()}`);
+      console.warn(`⚠️ __dirname: ${__dirname}`);
+      res.status(404).send(`
+        <html>
+          <head><title>404 - Frontend Not Found</title></head>
+          <body>
+            <h1>404 - Frontend Not Found</h1>
+            <p>The Next.js frontend could not be loaded.</p>
+            <p>Please check the deployment logs for more information.</p>
+            <p>Path: ${req.path}</p>
+            <p>Working Directory: ${process.cwd()}</p>
+            <p>__dirname: ${__dirname}</p>
+          </body>
+        </html>
+      `);
     });
   }
 }
