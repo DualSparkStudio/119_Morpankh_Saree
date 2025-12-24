@@ -86,11 +86,12 @@ app.use('/api/payments', paymentRoutes);
   // startCommand runs from backend/, so process.cwd() = /opt/render/project/src/backend
   // So ../frontend = /opt/render/project/src/frontend
   const possibleFrontendPaths = [
+    path.resolve(process.cwd(), '../frontend'), // From backend/ -> ../frontend (MOST LIKELY ON RENDER)
     path.resolve(__dirname, '../../frontend'), // From backend/dist -> ../../frontend
-    path.resolve(process.cwd(), '../frontend'), // From backend/ -> ../frontend
     path.resolve(process.cwd(), 'frontend'), // From root/ -> frontend
-    '/opt/render/project/src/frontend', // Render specific path
     path.join(process.cwd(), '..', 'frontend'), // Alternative path resolution
+    '/opt/render/project/src/frontend', // Render specific absolute path
+    path.resolve(__dirname, '..', '..', 'frontend'), // Alternative relative from dist
   ];
   
   console.log('🔍 Checking frontend paths:');
@@ -189,7 +190,14 @@ app.use('/api/payments', paymentRoutes);
       console.error('❌ Frontend path:', frontendPath);
       console.error('❌ Next.js handler cannot be created without a build.');
       console.error('❌ This usually means the frontend build step failed in render.yaml');
-      // nextHandler is already null
+      console.error('❌ Attempting to list frontend directory contents:');
+      try {
+        const frontendContents = fs.readdirSync(frontendPath);
+        console.error('   Contents:', frontendContents.join(', '));
+      } catch (e) {
+        console.error('   Cannot read frontend directory');
+      }
+      // nextHandler is already null - will use fallback handler
     } else {
       console.log('✅ Frontend build found at:', frontendBuildPath);
       
@@ -217,8 +225,9 @@ app.use('/api/payments', paymentRoutes);
         // Try to load next package (now installed in backend)
         let next: any = null;
         const nextPaths = [
-          'next', // Try from backend's node_modules first (installed in backend/package.json)
-          path.join(process.cwd(), 'node_modules/next'), // From backend/node_modules
+          'next', // Try from backend's node_modules first (installed in backend/package.json) - MOST LIKELY
+          path.join(process.cwd(), 'node_modules/next'), // From backend/node_modules (explicit path)
+          path.join(__dirname, '../node_modules/next'), // From backend/dist/../node_modules
           path.join(frontendPath, 'node_modules/next'), // From frontend/node_modules
           path.join(__dirname, '../../node_modules/next'), // From root/node_modules
           path.join(process.cwd(), '..', 'node_modules/next'), // From root/node_modules (alternative)
@@ -266,9 +275,12 @@ app.use('/api/payments', paymentRoutes);
         if (errorStack) {
           console.error('❌ Stack:', errorStack);
         }
+        // Ensure nextHandler is null if creation failed
+        nextHandler = null;
       }
+    }
     
-    // Handle all non-API routes with Next.js
+    // Handle all non-API routes with Next.js (outside the .next check)
     if (nextHandler) {
       app.all('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
         // Skip API routes, static assets, and health check
