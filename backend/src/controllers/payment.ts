@@ -3,13 +3,30 @@ import { AuthRequest } from '../middleware/auth';
 import Razorpay from 'razorpay';
 import { AppError } from '../middleware/errorHandler';
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || '',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || '',
-});
+// Initialize Razorpay only if keys are provided
+let razorpay: Razorpay | null = null;
+const razorpayKeyId = process.env.RAZORPAY_KEY_ID;
+const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
+
+if (razorpayKeyId && razorpayKeySecret) {
+  try {
+    razorpay = new Razorpay({
+      key_id: razorpayKeyId,
+      key_secret: razorpayKeySecret,
+    });
+  } catch (error) {
+    console.warn('⚠️ Razorpay initialization failed:', error);
+  }
+} else {
+  console.warn('⚠️ Razorpay keys not configured. Payment features will be disabled.');
+}
 
 export const createRazorpayOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
+    if (!razorpay) {
+      return next(new AppError('Payment gateway not configured. Please contact administrator.', 503));
+    }
+
     const { amount, currency = 'INR', orderId } = req.body;
 
     if (!amount || amount < 1) {
