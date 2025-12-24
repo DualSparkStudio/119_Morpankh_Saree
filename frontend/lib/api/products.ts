@@ -28,6 +28,7 @@ export interface Product {
   };
   variants?: ProductVariant[];
   isFeatured?: boolean;
+  isActive?: boolean;
   inventory?: Array<{
     type: string;
     quantity: number;
