@@ -73,8 +73,8 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/payments', paymentRoutes);
 
-// Serve Next.js frontend (only in production)
-if (process.env.NODE_ENV === 'production') {
+// Serve Next.js frontend (in all environments)
+{
   // Calculate frontend path - handle both local and Render deployment
   // On Render: __dirname = /opt/render/project/src/backend/dist
   // So ../../frontend = /opt/render/project/src/frontend
@@ -213,7 +213,7 @@ if (process.env.NODE_ENV === 'production') {
       
       // Create Next.js app instance
       nextApp = next.default({
-        dev: false,
+        dev: process.env.NODE_ENV !== 'production',
         dir: frontendPath,
       });
       
@@ -248,8 +248,14 @@ if (process.env.NODE_ENV === 'production') {
       });
       console.log('✅ Next.js route handler configured');
     } else {
-      // Fallback removed - we'll show error if handler not available
-      console.error('❌ Next.js handler not available - frontend will not work!');
+      // Fallback: Add a basic route handler if Next.js is not available
+      console.error('❌ Next.js handler not available - using fallback route handler');
+      app.get('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+        if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
+          return next();
+        }
+        res.status(404).json({ error: 'Frontend not available. Please ensure Next.js is properly built and configured.' });
+      });
     }
   }
 }
