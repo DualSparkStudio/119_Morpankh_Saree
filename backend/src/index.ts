@@ -289,11 +289,11 @@ app.use('/api/payments', paymentRoutes);
     // Handle all non-API routes with Next.js (outside the .next check)
     if (nextHandler) {
       app.all('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        // Skip API routes, static assets, and health check
-        if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
+        // Skip only API routes and health check - let Next.js handle everything else including /_next
+        if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
           return next();
         }
-        // Use Next.js handler
+        // Use Next.js handler for all other routes (including /_next/image, /_next/static, etc.)
         return nextHandler!(req, res);
       });
       console.log('✅ Next.js route handler configured');
