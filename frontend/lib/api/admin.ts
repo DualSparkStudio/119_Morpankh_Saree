@@ -1,4 +1,4 @@
-import api from './api';
+import api from '../api';
 import { Product } from './products';
 
 export interface DashboardStats {
