@@ -16,6 +16,8 @@ export interface Product {
   slug: string;
   description?: string;
   shortDescription?: string;
+  sku: string;
+  barcode?: string;
   basePrice: number;
   compareAtPrice?: number;
   images: string[];

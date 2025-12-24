@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import compression from 'compression';
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 
@@ -73,7 +74,6 @@ app.use('/api/payments', paymentRoutes);
 
 // Serve Next.js frontend (only in production)
 if (process.env.NODE_ENV === 'production') {
-  const fs = require('fs');
   const frontendBuildPath = path.join(__dirname, '../../frontend/.next');
   const staticPath = path.join(frontendBuildPath, 'static');
   const standalonePath = path.join(frontendBuildPath, 'standalone');
