@@ -1,5 +1,14 @@
 # Deployment Guide - Render
 
+> **Note:** This project uses **Render Managed PostgreSQL**. See `RENDER_DEPLOYMENT_GUIDE.md` for complete step-by-step instructions.
+
+## Quick Start
+
+1. **Create PostgreSQL Database** on Render
+2. **Deploy Backend** as Web Service
+3. **Deploy Frontend** as Static Site or Web Service
+4. **Run Migrations** via Render Shell
+
 ## Backend Deployment (Render Web Service)
 
 ### 1. Create New Web Service
@@ -13,31 +22,49 @@
    - **Branch:** main
    - **Root Directory:** backend
    - **Runtime:** Node
-   - **Build Command:** `npm install && npm run build`
+   - **Build Command:** `npm install && npm run build && npx prisma generate`
    - **Start Command:** `npm start`
 
 ### 2. Environment Variables
 
 Add these in Render Dashboard → Environment:
 
+**Important:** Use the **Internal Database URL** from your Render PostgreSQL instance.
+
 ```env
+# Database (from Render Managed PostgreSQL - use Internal URL)
 DATABASE_URL=postgresql://user:password@host:5432/dbname
-REDIS_URL=redis://host:port
+
+# JWT Secrets (generate strong random strings, min 32 chars)
 JWT_SECRET=your-super-secret-jwt-key-min-32-chars
 JWT_REFRESH_SECRET=your-super-secret-refresh-key-min-32-chars
+
+# Razorpay
 RAZORPAY_KEY_ID=your-razorpay-key-id
 RAZORPAY_KEY_SECRET=your-razorpay-key-secret
+
+# Application
 PORT=10000
 NODE_ENV=production
-FRONTEND_URL=https://your-frontend-domain.com
+FRONTEND_URL=https://your-frontend-url.onrender.com
+
+# Optional
+REDIS_URL=redis://host:port  # Or use Upstash Redis
 ```
 
-### 3. PostgreSQL Database
+### 3. PostgreSQL Database (Render Managed)
 
-1. In Render Dashboard, create a new PostgreSQL database
-2. Copy the Internal Database URL
-3. Run migrations:
+1. In Render Dashboard, click **New** → **PostgreSQL**
+2. Configure:
+   - **Name:** morpankh-saree-db
+   - **Database:** morpankh_saree
+   - **Region:** Mumbai (or closest)
+   - **Plan:** Starter or higher
+3. **Copy the Internal Database URL** (not external)
+4. Add to backend environment variables as `DATABASE_URL`
+5. Run migrations after first deployment:
    ```bash
+   # Via Render Shell
    cd backend
    npx prisma migrate deploy
    ```
@@ -74,9 +101,11 @@ FRONTEND_URL=https://your-frontend-domain.com
 ### Environment Variables
 
 ```env
-NEXT_PUBLIC_API_URL=https://your-backend-url.onrender.com/api
+NEXT_PUBLIC_API_URL=https://morpankh-saree-backend.onrender.com/api
 NEXT_PUBLIC_RAZORPAY_KEY_ID=your-razorpay-key-id
 ```
+
+**Note:** Replace `morpankh-saree-backend.onrender.com` with your actual backend service URL.
 
 ---
 

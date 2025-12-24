@@ -23,8 +23,8 @@ export const paymentApi = {
   },
 
   verifyPayment: async (data: PaymentVerificationRequest) => {
-    const { data } = await api.post('/payments/razorpay/verify', data);
-    return data;
+    const { data: response } = await api.post('/payments/razorpay/verify', data);
+    return response;
   },
 
   getPaymentStatus: async (orderId: string) => {

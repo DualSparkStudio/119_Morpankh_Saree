@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import dotenv from 'dotenv';
+import path from 'path';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 
@@ -30,10 +31,15 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false, // Allow Next.js to handle CSP
+}));
 app.use(compression());
+// CORS - allow same origin in production (single URL)
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: process.env.NODE_ENV === 'production' 
+    ? false // Same origin, no CORS needed
+    : (process.env.FRONTEND_URL || 'http://localhost:3000'),
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
@@ -65,13 +71,79 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/payments', paymentRoutes);
 
+// Serve Next.js frontend (only in production)
+if (process.env.NODE_ENV === 'production') {
+  const fs = require('fs');
+  const frontendBuildPath = path.join(__dirname, '../../frontend/.next');
+  const staticPath = path.join(frontendBuildPath, 'static');
+  const standalonePath = path.join(frontendBuildPath, 'standalone');
+  
+  // Serve Next.js static assets
+  if (fs.existsSync(staticPath)) {
+    app.use('/_next/static', express.static(staticPath, { maxAge: '1y' }));
+  }
+  
+  // Serve Next.js public assets
+  const publicPath = path.join(__dirname, '../../frontend/public');
+  if (fs.existsSync(publicPath)) {
+    app.use(express.static(publicPath));
+  }
+  
+  // Try to use Next.js standalone server
+  let nextHandler = null;
+  if (fs.existsSync(standalonePath)) {
+    try {
+      // Next.js standalone creates server.js in standalone/frontend/server.js
+      const nextServerPath = path.join(standalonePath, 'frontend/server.js');
+      if (fs.existsSync(nextServerPath)) {
+        const nextServer = require(nextServerPath);
+        nextHandler = nextServer.default || nextServer;
+        console.log('✅ Next.js standalone server loaded');
+      }
+    } catch (e) {
+      console.warn('⚠️ Next.js standalone server not available:', e.message);
+    }
+  }
+  
+  // Handle all non-API routes with Next.js
+  if (nextHandler) {
+    app.all('*', (req, res, next) => {
+      if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
+        return next();
+      }
+      return nextHandler(req, res);
+    });
+  } else {
+    // Fallback: serve index.html for SPA routing
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
+        return next();
+      }
+      // Try to find and serve the HTML file
+      const possiblePaths = [
+        path.join(__dirname, '../../frontend/.next/server/pages/index.html'),
+        path.join(__dirname, '../../frontend/.next/standalone/frontend/.next/server/pages/index.html'),
+      ];
+      
+      for (const indexPath of possiblePaths) {
+        if (fs.existsSync(indexPath)) {
+          return res.sendFile(indexPath);
+        }
+      }
+      next();
+    });
+  }
+}
+
 // Error handling
 app.use(errorHandler);
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
-});
+// 404 handler (only for API routes if frontend not served)
+if (process.env.NODE_ENV !== 'production') {
+  app.use((req, res) => {
+    res.status(404).json({ error: 'Route not found' });
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

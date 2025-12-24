@@ -129,11 +129,20 @@ NEXT_PUBLIC_RAZORPAY_KEY_ID="your-razorpay-key"
 
 ## 🚢 Deployment
 
-The project is configured for deployment on **Render**:
+The project is configured for deployment on **Render** with **Render Managed PostgreSQL**.
+
+**📖 Complete Deployment Guide:** See [`COMPLETE_DEPLOYMENT_GUIDE.md`](./COMPLETE_DEPLOYMENT_GUIDE.md) for step-by-step instructions.
+
+**Quick Links:**
+- **Full Guide:** [`COMPLETE_DEPLOYMENT_GUIDE.md`](./COMPLETE_DEPLOYMENT_GUIDE.md) - Everything in one place
+- **Quick Start:** [`RENDER_QUICK_START.md`](./RENDER_QUICK_START.md) - 5-step deployment
+- **Detailed Guide:** [`RENDER_DEPLOYMENT_GUIDE.md`](./RENDER_DEPLOYMENT_GUIDE.md) - Comprehensive guide
+
+**Deployment Stack:**
 - Frontend: Static site or web service
 - Backend: Web service
-- Database: PostgreSQL (Managed)
-- Redis: Upstash or Render Redis
+- Database: Render Managed PostgreSQL
+- Redis: Upstash or Render Redis (optional)
 
 ## 📝 License
 
