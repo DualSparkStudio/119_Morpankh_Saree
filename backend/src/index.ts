@@ -305,7 +305,6 @@ app.use('/api/payments', paymentRoutes);
         });
       });
     }
-    }
   }
 }
 
