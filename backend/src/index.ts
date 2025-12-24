@@ -97,9 +97,21 @@ if (process.env.NODE_ENV === 'production') {
       // Next.js standalone creates server.js in standalone/frontend/server.js
       const nextServerPath = path.join(standalonePath, 'frontend/server.js');
       if (fs.existsSync(nextServerPath)) {
+        // Load the handler function only - don't let it start its own server
         const nextServer = require(nextServerPath);
-        nextHandler = nextServer.default || nextServer;
-        console.log('✅ Next.js standalone server loaded');
+        // The handler should be a function, not a server instance
+        if (typeof nextServer === 'function') {
+          nextHandler = nextServer;
+        } else if (nextServer.default && typeof nextServer.default === 'function') {
+          nextHandler = nextServer.default;
+        } else if (nextServer.handler && typeof nextServer.handler === 'function') {
+          nextHandler = nextServer.handler;
+        }
+        if (nextHandler) {
+          console.log('✅ Next.js standalone server loaded');
+        } else {
+          console.warn('⚠️ Next.js handler not found in expected format');
+        }
       }
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : String(e);
@@ -148,18 +160,21 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Start server - Render will provide PORT via environment variable
-const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-}).on('error', (error: NodeJS.ErrnoException) => {
-  if (error.code === 'EADDRINUSE') {
-    console.error(`❌ Port ${PORT} is already in use`);
-    console.error('This usually means the server is already running or a previous instance is still active');
+// Only start if this is the main module (not being imported)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  }).on('error', (error: NodeJS.ErrnoException) => {
+    console.error('❌ Failed to start server');
+    if (error.code === 'EADDRINUSE') {
+      console.error(`Port ${PORT} is already in use`);
+      console.error('This usually means a previous instance is still running');
+    } else {
+      console.error('Error:', error.message);
+    }
     process.exit(1);
-  } else {
-    console.error('❌ Server error:', error);
-    process.exit(1);
-  }
-});
+  });
+}
 
 export default app;
 
