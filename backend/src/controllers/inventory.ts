@@ -6,33 +6,58 @@ import { AppError } from '../middleware/errorHandler';
 export const scanStock = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const scannedBy = req.userId!;
-    const { barcode, quantity, transactionType, stockType, reason, notes } = req.body;
+    const { barcode, variant_code, quantity, transactionType, stockType, reason, notes } = req.body;
 
-    if (!barcode || !quantity || !transactionType || !stockType) {
-      return next(new AppError('Missing required fields', 400));
+    // Support both barcode and variant_code (QR code value)
+    const scanValue = variant_code || barcode;
+
+    if (!scanValue || !quantity || !transactionType || !stockType) {
+      return next(new AppError('Missing required fields (barcode/variant_code, quantity, transactionType, stockType)', 400));
     }
 
-    // Find product by barcode (check both product and variant barcodes)
-    const product = await prisma.product.findFirst({
-      where: {
-        OR: [
-          { barcode },
-          { variants: { some: { barcode } } },
-        ],
-      },
-      include: {
-        variants: {
-          where: { barcode },
+    // Find product/variant by barcode or variant_code
+    // Priority: variant_code > variant barcode > product barcode
+    let variant = null;
+    let product = null;
+
+    // First, try to find by variant_code (QR code)
+    if (variant_code) {
+      variant = await prisma.productVariant.findUnique({
+        where: { variantCode: variant_code },
+        include: {
+          product: true,
         },
-        inventory: true,
-      },
-    });
+      });
+      if (variant) {
+        product = variant.product;
+      }
+    }
+
+    // If not found by variant_code, try barcode (variant or product)
+    if (!product) {
+      product = await prisma.product.findFirst({
+        where: {
+          OR: [
+            { barcode: scanValue },
+            { variants: { some: { barcode: scanValue } } },
+          ],
+        },
+        include: {
+          variants: {
+            where: { barcode: scanValue },
+          },
+          inventory: true,
+        },
+      });
+
+      if (product) {
+        variant = product.variants[0] || null;
+      }
+    }
 
     if (!product) {
-      return next(new AppError('Product not found with this barcode', 404));
+      return next(new AppError('Product not found with this barcode/variant_code', 404));
     }
-
-    const variant = product.variants[0] || null;
 
     // Find or create inventory record
     let inventory = await prisma.inventory.findFirst({
@@ -55,6 +80,13 @@ export const scanStock = async (req: AuthRequest, res: Response, next: NextFunct
     }
 
     // Update inventory quantity
+    // For OUT transactions, check if sufficient stock exists
+    if (transactionType === 'OUT') {
+      if (inventory.quantity < parseInt(quantity)) {
+        return next(new AppError(`Insufficient stock. Available: ${inventory.quantity}, Requested: ${quantity}`, 400));
+      }
+    }
+
     const quantityChange = transactionType === 'IN' ? parseInt(quantity) : -parseInt(quantity);
     const newQuantity = Math.max(0, inventory.quantity + quantityChange);
 

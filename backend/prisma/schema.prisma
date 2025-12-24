@@ -63,6 +63,7 @@ model User {
   orders        Order[]
   reviews       Review[]
   wishlist      WishlistItem[]
+  cart          Cart?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -117,12 +118,16 @@ model Product {
   compareAtPrice  Float?
   costPrice       Float?
   images          String[]
+  fabricType      String?          // Silk, Cotton, Linen, etc.
+  sareeLength     Float?           // Length in meters
+  blouseIncluded  Boolean          @default(false)
   isActive        Boolean          @default(true)
   isFeatured      Boolean          @default(false)
   tags            String[]
   variants        ProductVariant[]
   inventory       Inventory[]
   orderItems      OrderItem[]
+  cartItems      CartItem[]
   reviews         Review[]
   wishlistItems   WishlistItem[]
   stockLogs       StockLog[]
@@ -140,13 +145,17 @@ model ProductVariant {
   color       String?
   fabric      String?
   occasion    String?
+  borderDesign String?       // e.g., "Zari Border", "Plain", "Embroidered"
+  patternType  String?       // e.g., "Floral", "Geometric", "Abstract"
   price       Float?        // Override base price if needed
   sku         String        @unique
   barcode     String?       @unique
+  variantCode String?       @unique // QR code value (e.g., "SR-SILK-RED-001")
   isActive    Boolean       @default(true)
   inventory   Inventory[]
   stockLogs   StockLog[]
   orderItems  OrderItem[]
+  cartItems   CartItem[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
@@ -347,5 +356,32 @@ model Settings {
   updatedAt DateTime @updatedAt
 
   @@map("settings")
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String?    @unique // Nullable for guest carts
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String        @id @default(cuid())
+  cartId    String
+  cart      Cart          @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  quantity Int           @default(1)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@unique([cartId, productId, variantId])
+  @@map("cart_items")
 }
 
