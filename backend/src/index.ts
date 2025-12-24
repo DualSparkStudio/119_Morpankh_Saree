@@ -100,6 +100,64 @@ if (process.env.NODE_ENV === 'production') {
     possibleFrontendPaths.forEach(p => console.error('   -', p));
     console.error('❌ Current working directory:', process.cwd());
     console.error('❌ __dirname:', __dirname);
+    
+    // Fallback: Try to serve static HTML files if frontend path not found
+    console.warn('⚠️ Attempting fallback static serving...');
+    
+    // Check for HTML files in various possible locations
+    const htmlPaths = [
+      path.join(__dirname, '../../frontend/.next/server/pages'),
+      path.join(__dirname, '../../frontend/out'),
+      path.join(__dirname, '../../frontend/.next/standalone/frontend/.next/server/pages'),
+    ];
+    
+    let htmlBasePath = null;
+    for (const htmlPath of htmlPaths) {
+      if (fs.existsSync(htmlPath)) {
+        htmlBasePath = htmlPath;
+        console.log(`✅ Found HTML files at: ${htmlPath}`);
+        break;
+      }
+    }
+    
+    if (htmlBasePath) {
+      app.use(express.static(htmlBasePath));
+    }
+    
+    // Fallback: serve index.html for all non-API routes
+    app.get('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+      if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
+        return next();
+      }
+      
+      const possiblePaths = [
+        path.join(__dirname, '../../frontend/.next/server/pages/index.html'),
+        path.join(__dirname, '../../frontend/out/index.html'),
+        path.join(__dirname, '../../frontend/.next/standalone/frontend/.next/server/pages/index.html'),
+      ];
+      
+      for (const indexPath of possiblePaths) {
+        if (fs.existsSync(indexPath)) {
+          return res.sendFile(path.resolve(indexPath));
+        }
+      }
+      
+      // If no HTML found, return a helpful error message
+      console.warn(`⚠️ No HTML file found for path: ${req.path}`);
+      res.status(404).send(`
+        <html>
+          <head><title>404 - Frontend Not Found</title></head>
+          <body>
+            <h1>404 - Frontend Not Found</h1>
+            <p>The Next.js frontend could not be loaded.</p>
+            <p>Please check the deployment logs for more information.</p>
+            <p>Path: ${req.path}</p>
+            <p>Working Directory: ${process.cwd()}</p>
+            <p>__dirname: ${__dirname}</p>
+          </body>
+        </html>
+      `);
+    });
   } else {
     const frontendBuildPath = path.join(frontendPath, '.next');
     const staticPath = path.join(frontendBuildPath, 'static');
@@ -193,87 +251,6 @@ if (process.env.NODE_ENV === 'production') {
       // Fallback removed - we'll show error if handler not available
       console.error('❌ Next.js handler not available - frontend will not work!');
     }
-  } else {
-    // Frontend path not found - show helpful error
-    console.error('❌ Frontend directory not found - cannot serve frontend!');
-    
-    // Check for HTML files in various possible locations
-    const htmlPaths = [
-      path.join(__dirname, '../../frontend/.next/server/pages'),
-      path.join(__dirname, '../../frontend/out'),
-      path.join(__dirname, '../../frontend/.next/standalone/frontend/.next/server/pages'),
-    ];
-    
-    let htmlBasePath = null;
-    for (const htmlPath of htmlPaths) {
-      if (fs.existsSync(htmlPath)) {
-        htmlBasePath = htmlPath;
-        console.log(`✅ Found HTML files at: ${htmlPath}`);
-        break;
-      }
-    }
-    
-    if (htmlBasePath) {
-      app.use(express.static(htmlBasePath));
-    } else {
-      console.warn('⚠️ No HTML files found in expected locations');
-      // Log what directories do exist for debugging
-      const checkDirs = [
-        path.join(__dirname, '../../frontend/.next'),
-        path.join(__dirname, '../../frontend/.next/standalone'),
-        path.join(__dirname, '../../frontend'),
-        __dirname,
-        path.join(__dirname, '../..'),
-      ];
-      checkDirs.forEach(dir => {
-        if (fs.existsSync(dir)) {
-          console.log(`📁 Directory exists: ${dir}`);
-          try {
-            const contents = fs.readdirSync(dir);
-            console.log(`   Contents: ${contents.slice(0, 10).join(', ')}${contents.length > 10 ? '...' : ''}`);
-          } catch (e) {
-            // Ignore read errors
-          }
-        }
-      });
-    }
-    
-    // Fallback: serve index.html for all non-API routes
-    app.get('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
-        return next();
-      }
-      
-      const possiblePaths = [
-        path.join(__dirname, '../../frontend/.next/server/pages/index.html'),
-        path.join(__dirname, '../../frontend/out/index.html'),
-        path.join(__dirname, '../../frontend/.next/standalone/frontend/.next/server/pages/index.html'),
-      ];
-      
-      for (const indexPath of possiblePaths) {
-        if (fs.existsSync(indexPath)) {
-          return res.sendFile(path.resolve(indexPath));
-        }
-      }
-      
-      // If no HTML found, return a helpful error message
-      console.warn(`⚠️ No HTML file found for path: ${req.path}`);
-      console.warn(`⚠️ Current working directory: ${process.cwd()}`);
-      console.warn(`⚠️ __dirname: ${__dirname}`);
-      res.status(404).send(`
-        <html>
-          <head><title>404 - Frontend Not Found</title></head>
-          <body>
-            <h1>404 - Frontend Not Found</h1>
-            <p>The Next.js frontend could not be loaded.</p>
-            <p>Please check the deployment logs for more information.</p>
-            <p>Path: ${req.path}</p>
-            <p>Working Directory: ${process.cwd()}</p>
-            <p>__dirname: ${__dirname}</p>
-          </body>
-        </html>
-      `);
-    });
   }
 }
 
