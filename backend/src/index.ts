@@ -201,9 +201,12 @@ app.use('/api/payments', paymentRoutes);
     } else {
       console.log('✅ Frontend build found at:', frontendBuildPath);
       
-      // Serve Next.js static assets
+      // Serve Next.js static assets - MUST be before Next.js handler
       if (fs.existsSync(staticPath)) {
-        app.use('/_next/static', express.static(staticPath, { maxAge: '1y' }));
+        app.use('/_next/static', express.static(staticPath, { 
+          maxAge: '1y',
+          immutable: true 
+        }));
         console.log('✅ Static assets path configured:', staticPath);
       } else {
         console.warn('⚠️ Static path not found:', staticPath);
@@ -212,7 +215,8 @@ app.use('/api/payments', paymentRoutes);
       // Serve Next.js public assets
       const publicPath = path.join(frontendPath, 'public');
       if (fs.existsSync(publicPath)) {
-        app.use(express.static(publicPath));
+        app.use('/images', express.static(path.join(publicPath, 'images'), { maxAge: '1y' }));
+        app.use(express.static(publicPath, { maxAge: '1y' }));
         console.log('✅ Public assets path configured:', publicPath);
       } else {
         console.warn('⚠️ Public path not found:', publicPath);
@@ -287,13 +291,15 @@ app.use('/api/payments', paymentRoutes);
     }
     
     // Handle all non-API routes with Next.js (outside the .next check)
+    // IMPORTANT: This must be registered AFTER static assets middleware
     if (nextHandler) {
       app.all('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        // Skip only API routes and health check - let Next.js handle everything else including /_next
+        // Skip only API routes and health check - let Next.js handle everything else
+        // Next.js will handle: /_next/*, RSC routes (?_rsc=...), and all page routes
         if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
           return next();
         }
-        // Use Next.js handler for all other routes (including /_next/image, /_next/static, etc.)
+        // Use Next.js handler for all other routes (pages, /_next/image, RSC, etc.)
         return nextHandler!(req, res);
       });
       console.log('✅ Next.js route handler configured');
