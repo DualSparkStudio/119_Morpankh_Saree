@@ -251,8 +251,14 @@ app.use('/api/payments', paymentRoutes);
           throw new Error('Next.js package not found in any expected location');
         }
         
+        // Handle different Next.js export formats (ESM vs CommonJS)
+        const nextFactory = next.default || next;
+        if (typeof nextFactory !== 'function') {
+          throw new Error('Next.js export is not a function. Found: ' + typeof nextFactory);
+        }
+        
         // Create Next.js app instance
-        nextApp = next.default({
+        nextApp = nextFactory({
           dev: process.env.NODE_ENV !== 'production',
           dir: frontendPath,
         });
