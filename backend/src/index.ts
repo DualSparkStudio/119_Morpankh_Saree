@@ -75,16 +75,29 @@ app.use('/api/payments', paymentRoutes);
 
 // Serve Next.js frontend (in all environments)
 {
+  console.log('🔍 Starting Next.js frontend setup...');
+  console.log('📂 Current working directory:', process.cwd());
+  console.log('📂 __dirname:', __dirname);
+  console.log('🌍 NODE_ENV:', process.env.NODE_ENV);
+  
   // Calculate frontend path - handle both local and Render deployment
   // On Render: __dirname = /opt/render/project/src/backend/dist
   // So ../../frontend = /opt/render/project/src/frontend
-  // Also try process.cwd() which might be /opt/render/project/src
+  // startCommand runs from backend/, so process.cwd() = /opt/render/project/src/backend
+  // So ../frontend = /opt/render/project/src/frontend
   const possibleFrontendPaths = [
-    path.resolve(__dirname, '../../frontend'),
-    path.resolve(process.cwd(), 'frontend'),
-    path.resolve(process.cwd(), '../frontend'),
+    path.resolve(__dirname, '../../frontend'), // From backend/dist -> ../../frontend
+    path.resolve(process.cwd(), '../frontend'), // From backend/ -> ../frontend
+    path.resolve(process.cwd(), 'frontend'), // From root/ -> frontend
     '/opt/render/project/src/frontend', // Render specific path
+    path.join(process.cwd(), '..', 'frontend'), // Alternative path resolution
   ];
+  
+  console.log('🔍 Checking frontend paths:');
+  possibleFrontendPaths.forEach(p => {
+    const exists = fs.existsSync(p);
+    console.log(`   ${exists ? '✅' : '❌'} ${p}`);
+  });
   
   let frontendPath: string | null = null;
   for (const possiblePath of possibleFrontendPaths) {
@@ -100,6 +113,7 @@ app.use('/api/payments', paymentRoutes);
     possibleFrontendPaths.forEach(p => console.error('   -', p));
     console.error('❌ Current working directory:', process.cwd());
     console.error('❌ __dirname:', __dirname);
+    console.error('❌ Make sure frontend is built: cd frontend && npm run build');
     
     // Fallback: Try to serve static HTML files if frontend path not found
     console.warn('⚠️ Attempting fallback static serving...');
@@ -166,6 +180,17 @@ app.use('/api/payments', paymentRoutes);
     console.log('📁 Frontend exists:', fs.existsSync(frontendPath));
     console.log('📁 .next exists:', fs.existsSync(frontendBuildPath));
     
+    // Check if frontend is built
+    if (!fs.existsSync(frontendBuildPath)) {
+      console.error('❌ Frontend is not built! .next folder not found at:', frontendBuildPath);
+      console.error('❌ Please build the frontend first: cd frontend && npm run build');
+      console.error('❌ Frontend path:', frontendPath);
+      console.error('❌ This will cause Next.js handler to fail!');
+      // Don't return - still try to create handler, it might fail gracefully
+    } else {
+      console.log('✅ Frontend build found at:', frontendBuildPath);
+    }
+    
     // Serve Next.js static assets
     if (fs.existsSync(staticPath)) {
       app.use('/_next/static', express.static(staticPath, { maxAge: '1y' }));
@@ -191,10 +216,11 @@ app.use('/api/payments', paymentRoutes);
       // Try to load next package (now installed in backend)
       let next: any = null;
       const nextPaths = [
-        'next', // Try from backend's node_modules first
-        path.join(frontendPath, 'node_modules/next'),
-        path.join(__dirname, '../../node_modules/next'),
-        path.join(process.cwd(), 'node_modules/next'),
+        'next', // Try from backend's node_modules first (installed in backend/package.json)
+        path.join(process.cwd(), 'node_modules/next'), // From backend/node_modules
+        path.join(frontendPath, 'node_modules/next'), // From frontend/node_modules
+        path.join(__dirname, '../../node_modules/next'), // From root/node_modules
+        path.join(process.cwd(), '..', 'node_modules/next'), // From root/node_modules (alternative)
       ];
       
       for (const nextPath of nextPaths) {
@@ -217,16 +243,17 @@ app.use('/api/payments', paymentRoutes);
         dir: frontendPath,
       });
       
+      // Get the request handler (can be called before prepare)
+      nextHandler = nextApp.getRequestHandler();
+      console.log('✅ Next.js handler created successfully');
+      
       // Prepare Next.js (this is async but we'll handle it)
       nextApp.prepare().then(() => {
         console.log('✅ Next.js prepared successfully');
       }).catch((err: unknown) => {
         console.error('❌ Next.js preparation failed:', err);
+        // Don't set nextHandler to null - it can still work even if prepare fails
       });
-      
-      // Get the request handler
-      nextHandler = nextApp.getRequestHandler();
-      console.log('✅ Next.js handler created successfully');
     } catch (nextError: unknown) {
       const errorMsg = nextError instanceof Error ? nextError.message : String(nextError);
       const errorStack = nextError instanceof Error ? nextError.stack : '';
