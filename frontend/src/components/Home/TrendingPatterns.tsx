@@ -7,7 +7,7 @@ const TrendingPatterns = () => {
     name: `Trending Saree ${i + 1}`,
     price: (1999 + i * 400).toLocaleString(),
     image: `/images/products/product-${i + 9}.jpg`,
-    placeholderImage: `https://picsum.photos/seed/trending${i + 1}/300/400`,
+    placeholderImage: `https://source.unsplash.com/300x400/?saree,indian+traditional+wear,trending+${i + 1}`,
   }))
 
   return (

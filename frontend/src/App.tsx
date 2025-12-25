@@ -8,6 +8,9 @@ import Checkout from './pages/Checkout'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import Policy from './pages/Policy'
+import Wishlist from './pages/Wishlist'
+import Cart from './pages/Cart'
+import Profile from './pages/Profile'
 
 function App() {
   return (
@@ -22,6 +25,9 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/policy" element={<Policy />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </main>
       <Footer />

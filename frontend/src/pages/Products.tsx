@@ -15,7 +15,7 @@ const Products = () => {
     name: `Product ${i + 1}`,
     price: (1999 + i * 500).toLocaleString(),
     image: `/images/products/product-${i + 1}.jpg`,
-    placeholderImage: `https://picsum.photos/seed/product${i + 1}/300/400`,
+    placeholderImage: `https://source.unsplash.com/300x400/?saree,indian+traditional+wear,product+${i + 1}`,
   }))
 
   const toggleCategory = (category: string) => {

@@ -10,7 +10,7 @@ const ProductDetail = () => {
   const images = Array.from({ length: 5 }, (_, i) => ({
     id: i,
     url: `/images/products/product-${productId}-${i + 1}.jpg`,
-    placeholderUrl: `https://picsum.photos/seed/product${productId}img${i + 1}/400/600`,
+    placeholderUrl: `https://source.unsplash.com/400x600/?saree,indian+traditional+wear,product+${productId}+${i + 1}`,
   }))
 
   const relatedProducts = Array.from({ length: 4 }, (_, i) => ({
@@ -18,7 +18,7 @@ const ProductDetail = () => {
     name: `Related Product ${i + 1}`,
     price: (1999 + i * 500).toLocaleString(),
     image: `/images/products/product-${i + 20}.jpg`,
-    placeholderImage: `https://picsum.photos/seed/related${i + 1}/300/400`,
+    placeholderImage: `https://source.unsplash.com/300x400/?saree,indian+traditional+wear,related+${i + 1}`,
   }))
 
   return (
