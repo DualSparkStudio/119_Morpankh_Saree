@@ -2,14 +2,14 @@ import { Link } from 'react-router-dom'
 
 const CategorySection = () => {
   const categories = [
-    { id: 1, name: 'Silk', image: '/images/categories/silk.jpg',       placeholderImage: 'https://source.unsplash.com/150x150/?silk+saree,indian+textile' },
-    { id: 2, name: 'Cotton', image: '/images/categories/cotton.jpg', placeholderImage: 'https://source.unsplash.com/150x150/?cotton+saree,indian+textile' },
-    { id: 3, name: 'Designer', image: '/images/categories/designer.jpg', placeholderImage: 'https://source.unsplash.com/150x150/?designer+saree,indian+fashion' },
-    { id: 4, name: 'Printed', image: '/images/categories/printed.jpg', placeholderImage: 'https://source.unsplash.com/150x150/?printed+saree,indian+textile' },
-    { id: 5, name: 'Dress', image: '/images/categories/dress.jpg', placeholderImage: 'https://source.unsplash.com/150x150/?indian+dress,traditional+wear' },
-    { id: 6, name: 'Traditional', image: '/images/categories/traditional.jpg', placeholderImage: 'https://source.unsplash.com/150x150/?traditional+saree,indian+culture' },
-    { id: 7, name: 'Modern', image: '/images/categories/modern.jpg', placeholderImage: 'https://source.unsplash.com/150x150/?modern+saree,contemporary+indian+wear' },
-    { id: 8, name: 'Bridal', image: '/images/categories/bridal.jpg', placeholderImage: 'https://source.unsplash.com/150x150/?bridal+saree,wedding+wear' },
+    { id: 1, name: 'Silk', image: '/images/categories/silk.jpg',       placeholderImage: 'https://images.unsplash.com/photo-1570000000001?w=150&h=150&fit=crop&q=80' },
+    { id: 2, name: 'Cotton', image: '/images/categories/cotton.jpg', placeholderImage: 'https://images.unsplash.com/photo-1570000000002?w=150&h=150&fit=crop&q=80' },
+    { id: 3, name: 'Designer', image: '/images/categories/designer.jpg', placeholderImage: 'https://images.unsplash.com/photo-1570000000003?w=150&h=150&fit=crop&q=80' },
+    { id: 4, name: 'Printed', image: '/images/categories/printed.jpg', placeholderImage: 'https://images.unsplash.com/photo-1570000000004?w=150&h=150&fit=crop&q=80' },
+    { id: 5, name: 'Dress', image: '/images/categories/dress.jpg', placeholderImage: 'https://images.unsplash.com/photo-1570000000005?w=150&h=150&fit=crop&q=80' },
+    { id: 6, name: 'Traditional', image: '/images/categories/traditional.jpg', placeholderImage: 'https://images.unsplash.com/photo-1570000000006?w=150&h=150&fit=crop&q=80' },
+    { id: 7, name: 'Modern', image: '/images/categories/modern.jpg', placeholderImage: 'https://images.unsplash.com/photo-1570000000007?w=150&h=150&fit=crop&q=80' },
+    { id: 8, name: 'Bridal', image: '/images/categories/bridal.jpg', placeholderImage: 'https://images.unsplash.com/photo-1570000000008?w=150&h=150&fit=crop&q=80' },
   ]
 
   return (

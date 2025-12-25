@@ -8,35 +8,35 @@ const HeroCarousel = () => {
     {
       id: 1,
       image: '/images/banners/banner-1.jpg',
-      placeholderImage: 'https://source.unsplash.com/1920x700/?saree,indian+traditional+wear,banner+1',
+      placeholderImage: 'https://images.unsplash.com/photo-1570000000001?w=1920&h=700&fit=crop&q=80',
       title: 'Premium Indian Sarees',
       subtitle: 'Discover elegance in every thread'
     },
     {
       id: 2,
       image: '/images/banners/banner-2.jpg',
-      placeholderImage: 'https://source.unsplash.com/1920x700/?traditional+saree,indian+heritage,banner+2',
+      placeholderImage: 'https://images.unsplash.com/photo-1570000000002?w=1920&h=700&fit=crop&q=80',
       title: 'Traditional Collection',
       subtitle: 'Timeless beauty and craftsmanship'
     },
     {
       id: 3,
       image: '/images/banners/banner-3.jpg',
-      placeholderImage: 'https://source.unsplash.com/1920x700/?designer+saree,indian+fashion,banner+3',
+      placeholderImage: 'https://images.unsplash.com/photo-1570000000003?w=1920&h=700&fit=crop&q=80',
       title: 'Designer Sarees',
       subtitle: 'Modern elegance meets tradition'
     },
     {
       id: 4,
       image: '/images/banners/banner-4.jpg',
-      placeholderImage: 'https://source.unsplash.com/1920x700/?silk+saree,luxury+fabric,banner+4',
+      placeholderImage: 'https://images.unsplash.com/photo-1570000000004?w=1920&h=700&fit=crop&q=80',
       title: 'Luxury Fabrics',
       subtitle: 'Silk, Cotton, and more'
     },
     {
       id: 5,
       image: '/images/banners/banner-5.jpg',
-      placeholderImage: 'https://source.unsplash.com/1920x700/?wedding+saree,special+occasion,banner+5',
+      placeholderImage: 'https://images.unsplash.com/photo-1570000000005?w=1920&h=700&fit=crop&q=80',
       title: 'Special Occasions',
       subtitle: 'Perfect for every celebration'
     }

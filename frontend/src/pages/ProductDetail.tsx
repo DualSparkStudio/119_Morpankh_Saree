@@ -10,7 +10,7 @@ const ProductDetail = () => {
   const images = Array.from({ length: 5 }, (_, i) => ({
     id: i,
     url: `/images/products/product-${productId}-${i + 1}.jpg`,
-    placeholderUrl: `https://source.unsplash.com/400x600/?saree,indian+traditional+wear,product+${productId}+${i + 1}`,
+    placeholderUrl: `https://images.unsplash.com/photo-${1570000000000 + (productId * 10 + i + 1) * 100000}?w=400&h=600&fit=crop&q=80`,
   }))
 
   const relatedProducts = Array.from({ length: 4 }, (_, i) => ({
@@ -18,7 +18,7 @@ const ProductDetail = () => {
     name: `Related Product ${i + 1}`,
     price: (1999 + i * 500).toLocaleString(),
     image: `/images/products/product-${i + 20}.jpg`,
-    placeholderImage: `https://source.unsplash.com/300x400/?saree,indian+traditional+wear,related+${i + 1}`,
+    placeholderImage: `https://images.unsplash.com/photo-${1570000000000 + (i + 20) * 100000}?w=300&h=400&fit=crop&q=80`,
   }))
 
   return (

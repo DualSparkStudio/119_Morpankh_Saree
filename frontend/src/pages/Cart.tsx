@@ -8,7 +8,7 @@ const Cart = () => {
     price: (2999 + i * 500),
     quantity: i + 1,
     image: `/images/products/product-${i + 1}.jpg`,
-    placeholderImage: `https://source.unsplash.com/300x400/?saree,indian+traditional+wear,cart+${i + 1}`,
+    placeholderImage: `https://images.unsplash.com/photo-${1570000000000 + (i + 1) * 100000}?w=300&h=400&fit=crop&q=80`,
   }))
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)

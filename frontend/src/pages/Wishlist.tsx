@@ -7,7 +7,7 @@ const Wishlist = () => {
     name: `Wishlist Saree ${i + 1}`,
     price: (2999 + i * 500).toLocaleString(),
     image: `/images/products/product-${i + 1}.jpg`,
-    placeholderImage: `https://source.unsplash.com/300x400/?saree,indian+traditional+wear,wishlist+${i + 1}`,
+    placeholderImage: `https://images.unsplash.com/photo-${1570000000000 + (i + 1) * 100000}?w=300&h=400&fit=crop&q=80`,
   }))
 
   return (
