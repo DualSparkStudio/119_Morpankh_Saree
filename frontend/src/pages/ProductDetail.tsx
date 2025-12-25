@@ -43,7 +43,14 @@ const ProductDetail = () => {
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement
-                      target.src = `https://via.placeholder.com/150/312e81/ffffff?text=Img+${index + 1}`
+                      target.style.display = 'none'
+                      const parent = target.parentElement
+                      if (parent && !parent.querySelector('.image-fallback')) {
+                        const fallback = document.createElement('div')
+                        fallback.className = 'image-fallback absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-200 to-purple-400 text-white text-xs'
+                        fallback.textContent = `${index + 1}`
+                        parent.appendChild(fallback)
+                      }
                     }}
                   />
                 </button>
@@ -59,7 +66,14 @@ const ProductDetail = () => {
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
-                    target.src = `https://via.placeholder.com/600x800/312e81/ffffff?text=Product+Image`
+                    target.style.display = 'none'
+                    const parent = target.parentElement
+                    if (parent && !parent.querySelector('.image-fallback')) {
+                      const fallback = document.createElement('div')
+                      fallback.className = 'image-fallback absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 text-white text-center p-8'
+                      fallback.innerHTML = '<div><div class="text-3xl font-heading mb-2">Product Image</div><div class="text-sm opacity-90">Image Coming Soon</div></div>'
+                      parent.appendChild(fallback)
+                    }
                   }}
                 />
               </div>
@@ -135,7 +149,14 @@ const ProductDetail = () => {
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement
-                        target.src = `https://via.placeholder.com/300x400/312e81/ffffff?text=${encodeURIComponent(product.name)}`
+                        target.style.display = 'none'
+                        const parent = target.parentElement
+                        if (parent && !parent.querySelector('.image-fallback')) {
+                          const fallback = document.createElement('div')
+                          fallback.className = 'image-fallback absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 text-white text-center p-4'
+                          fallback.innerHTML = `<div><div class="text-lg font-heading mb-1">${product.name}</div><div class="text-xs opacity-90">Image Coming Soon</div></div>`
+                          parent.appendChild(fallback)
+                        }
                       }}
                     />
                   </div>
