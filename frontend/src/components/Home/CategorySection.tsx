@@ -2,14 +2,14 @@ import { Link } from 'react-router-dom'
 
 const CategorySection = () => {
   const categories = [
-    { id: 1, name: 'Silk', image: '/images/categories/silk.jpg' },
-    { id: 2, name: 'Cotton', image: '/images/categories/cotton.jpg' },
-    { id: 3, name: 'Designer', image: '/images/categories/designer.jpg' },
-    { id: 4, name: 'Printed', image: '/images/categories/printed.jpg' },
-    { id: 5, name: 'Dress', image: '/images/categories/dress.jpg' },
-    { id: 6, name: 'Traditional', image: '/images/categories/traditional.jpg' },
-    { id: 7, name: 'Modern', image: '/images/categories/modern.jpg' },
-    { id: 8, name: 'Bridal', image: '/images/categories/bridal.jpg' },
+    { id: 1, name: 'Silk', image: '/images/categories/silk.jpg', placeholderImage: 'https://picsum.photos/seed/silk/150/150' },
+    { id: 2, name: 'Cotton', image: '/images/categories/cotton.jpg', placeholderImage: 'https://picsum.photos/seed/cotton/150/150' },
+    { id: 3, name: 'Designer', image: '/images/categories/designer.jpg', placeholderImage: 'https://picsum.photos/seed/designer/150/150' },
+    { id: 4, name: 'Printed', image: '/images/categories/printed.jpg', placeholderImage: 'https://picsum.photos/seed/printed/150/150' },
+    { id: 5, name: 'Dress', image: '/images/categories/dress.jpg', placeholderImage: 'https://picsum.photos/seed/dress/150/150' },
+    { id: 6, name: 'Traditional', image: '/images/categories/traditional.jpg', placeholderImage: 'https://picsum.photos/seed/traditional/150/150' },
+    { id: 7, name: 'Modern', image: '/images/categories/modern.jpg', placeholderImage: 'https://picsum.photos/seed/modern/150/150' },
+    { id: 8, name: 'Bridal', image: '/images/categories/bridal.jpg', placeholderImage: 'https://picsum.photos/seed/bridal/150/150' },
   ]
 
   return (
@@ -29,15 +29,17 @@ const CategorySection = () => {
                 key={category.id}
                 className="flex flex-col items-center gap-3 min-w-[120px]"
               >
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-purple-200 to-purple-400 overflow-hidden border-4 border-white shadow-lg">
+                <div className="w-24 h-24 rounded-full bg-gray-100 overflow-hidden border-4 border-white shadow-lg">
                   <img
                     src={category.image}
                     alt={category.name}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      // Fallback to gradient background if image fails
+                      // Fallback to placeholder image
                       const target = e.target as HTMLImageElement
-                      target.style.display = 'none'
+                      if (target.src !== category.placeholderImage) {
+                        target.src = category.placeholderImage
+                      }
                     }}
                   />
                 </div>

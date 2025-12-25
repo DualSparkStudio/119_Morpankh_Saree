@@ -8,30 +8,35 @@ const HeroCarousel = () => {
     {
       id: 1,
       image: '/images/banners/banner-1.jpg',
+      placeholderImage: 'https://picsum.photos/seed/banner1/1920/700',
       title: 'Premium Indian Sarees',
       subtitle: 'Discover elegance in every thread'
     },
     {
       id: 2,
       image: '/images/banners/banner-2.jpg',
+      placeholderImage: 'https://picsum.photos/seed/banner2/1920/700',
       title: 'Traditional Collection',
       subtitle: 'Timeless beauty and craftsmanship'
     },
     {
       id: 3,
       image: '/images/banners/banner-3.jpg',
+      placeholderImage: 'https://picsum.photos/seed/banner3/1920/700',
       title: 'Designer Sarees',
       subtitle: 'Modern elegance meets tradition'
     },
     {
       id: 4,
       image: '/images/banners/banner-4.jpg',
+      placeholderImage: 'https://picsum.photos/seed/banner4/1920/700',
       title: 'Luxury Fabrics',
       subtitle: 'Silk, Cotton, and more'
     },
     {
       id: 5,
       image: '/images/banners/banner-5.jpg',
+      placeholderImage: 'https://picsum.photos/seed/banner5/1920/700',
       title: 'Special Occasions',
       subtitle: 'Perfect for every celebration'
     }
@@ -62,11 +67,10 @@ const HeroCarousel = () => {
                 alt={slide.title}
                 className="w-full h-full object-cover"
                 onError={(e) => {
-                  // Fallback to gradient if image fails to load
+                  // Fallback to placeholder image
                   const target = e.target as HTMLImageElement
-                  target.style.display = 'none'
-                  if (target.parentElement) {
-                    target.parentElement.className += ' bg-gradient-to-br from-purple-400 via-purple-500 to-purple-600'
+                  if (target.src !== slide.placeholderImage) {
+                    target.src = slide.placeholderImage
                   }
                 }}
               />

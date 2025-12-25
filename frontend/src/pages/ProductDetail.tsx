@@ -10,6 +10,7 @@ const ProductDetail = () => {
   const images = Array.from({ length: 5 }, (_, i) => ({
     id: i,
     url: `/images/products/product-${productId}-${i + 1}.jpg`,
+    placeholderUrl: `https://picsum.photos/seed/product${productId}img${i + 1}/400/600`,
   }))
 
   const relatedProducts = Array.from({ length: 4 }, (_, i) => ({
@@ -17,6 +18,7 @@ const ProductDetail = () => {
     name: `Related Product ${i + 1}`,
     price: (1999 + i * 500).toLocaleString(),
     image: `/images/products/product-${i + 20}.jpg`,
+    placeholderImage: `https://picsum.photos/seed/related${i + 1}/300/400`,
   }))
 
   return (
@@ -43,13 +45,8 @@ const ProductDetail = () => {
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement
-                      target.style.display = 'none'
-                      const parent = target.parentElement
-                      if (parent && !parent.querySelector('.image-fallback')) {
-                        const fallback = document.createElement('div')
-                        fallback.className = 'image-fallback absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-200 to-purple-400 text-white text-xs'
-                        fallback.textContent = `${index + 1}`
-                        parent.appendChild(fallback)
+                      if (target.src !== img.placeholderUrl) {
+                        target.src = img.placeholderUrl
                       }
                     }}
                   />
@@ -66,13 +63,9 @@ const ProductDetail = () => {
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement
-                    target.style.display = 'none'
-                    const parent = target.parentElement
-                    if (parent && !parent.querySelector('.image-fallback')) {
-                      const fallback = document.createElement('div')
-                      fallback.className = 'image-fallback absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 text-white text-center p-8'
-                      fallback.innerHTML = '<div><div class="text-3xl font-heading mb-2">Product Image</div><div class="text-sm opacity-90">Image Coming Soon</div></div>'
-                      parent.appendChild(fallback)
+                    const placeholder = images[selectedImage].placeholderUrl
+                    if (target.src !== placeholder) {
+                      target.src = placeholder
                     }
                   }}
                 />
@@ -149,13 +142,8 @@ const ProductDetail = () => {
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement
-                        target.style.display = 'none'
-                        const parent = target.parentElement
-                        if (parent && !parent.querySelector('.image-fallback')) {
-                          const fallback = document.createElement('div')
-                          fallback.className = 'image-fallback absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 text-white text-center p-4'
-                          fallback.innerHTML = `<div><div class="text-lg font-heading mb-1">${product.name}</div><div class="text-xs opacity-90">Image Coming Soon</div></div>`
-                          parent.appendChild(fallback)
+                        if (target.src !== product.placeholderImage) {
+                          target.src = product.placeholderImage
                         }
                       }}
                     />

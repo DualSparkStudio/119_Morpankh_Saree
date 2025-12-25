@@ -6,6 +6,7 @@ const PremiumPatterns = () => {
     name: `Premium Saree ${i + 1}`,
     price: (2999 + i * 500).toLocaleString(),
     image: `/images/products/product-${i + 1}.jpg`,
+    placeholderImage: `https://picsum.photos/seed/saree${i + 1}/300/400`,
   }))
 
   return (
@@ -21,21 +22,16 @@ const PremiumPatterns = () => {
               key={product.id}
               className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow group"
             >
-              <div className="relative aspect-[3/4] bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 overflow-hidden flex items-center justify-center">
+              <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
                 <img
                   src={product.image}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   onError={(e) => {
-                    // Hide image and show fallback
+                    // Fallback to placeholder image
                     const target = e.target as HTMLImageElement
-                    target.style.display = 'none'
-                    const parent = target.parentElement
-                    if (parent && !parent.querySelector('.image-fallback')) {
-                      const fallback = document.createElement('div')
-                      fallback.className = 'image-fallback absolute inset-0 flex items-center justify-center text-white text-center p-4'
-                      fallback.innerHTML = `<div><div class="text-2xl font-heading mb-2">${product.name}</div><div class="text-sm opacity-90">Image Coming Soon</div></div>`
-                      parent.appendChild(fallback)
+                    if (target.src !== product.placeholderImage) {
+                      target.src = product.placeholderImage
                     }
                   }}
                 />
