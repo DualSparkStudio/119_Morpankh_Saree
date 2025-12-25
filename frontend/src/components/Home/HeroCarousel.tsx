@@ -17,7 +17,7 @@ const HeroCarousel = () => {
     <section className="relative h-[600px] md:h-[700px] overflow-hidden bg-gradient-to-r from-deep-indigo/80 to-deep-indigo/40">
       <div className="relative h-full">
         {/* Placeholder Images */}
-        {slides.map((slide, index) => (
+        {slides.map((_, index) => (
           <div
             key={index}
             className={`absolute inset-0 transition-opacity duration-500 ${

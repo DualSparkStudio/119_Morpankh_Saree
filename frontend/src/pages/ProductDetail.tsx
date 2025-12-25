@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Heart, ShoppingCart, Share2 } from 'lucide-react'
 
 const ProductDetail = () => {
-  const { id } = useParams()
+  const { id: _id } = useParams()
   const [selectedImage, setSelectedImage] = useState(0)
 
   const images = Array.from({ length: 5 }, (_, i) => ({

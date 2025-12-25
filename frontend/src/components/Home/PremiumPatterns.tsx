@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { Heart, Eye, ShoppingCart } from 'lucide-react'
 
 const PremiumPatterns = () => {
