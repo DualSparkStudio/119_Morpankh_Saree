@@ -81,274 +81,82 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/payments', paymentRoutes);
 
-// Serve Next.js frontend (in all environments)
+// Serve Vite frontend (static files from dist folder)
 {
-  console.log('🔍 Starting Next.js frontend setup...');
+  console.log('🔍 Starting Vite frontend setup...');
   console.log('📂 Current working directory:', process.cwd());
   console.log('📂 __dirname:', __dirname);
   console.log('🌍 NODE_ENV:', process.env.NODE_ENV);
   
-  // Calculate frontend path - handle both local and Render deployment
-  // On Render: __dirname = /opt/render/project/src/backend/dist
-  // So ../../frontend = /opt/render/project/src/frontend
-  // startCommand runs from backend/, so process.cwd() = /opt/render/project/src/backend
-  // So ../frontend = /opt/render/project/src/frontend
-  const possibleFrontendPaths = [
-    path.resolve(process.cwd(), '../frontend'), // From backend/ -> ../frontend (MOST LIKELY ON RENDER)
-    path.resolve(__dirname, '../../frontend'), // From backend/dist -> ../../frontend
-    path.resolve(process.cwd(), 'frontend'), // From root/ -> frontend
-    path.join(process.cwd(), '..', 'frontend'), // Alternative path resolution
-    '/opt/render/project/src/frontend', // Render specific absolute path
-    path.resolve(__dirname, '..', '..', 'frontend'), // Alternative relative from dist
+  // Calculate frontend dist path - handle both local and Render deployment
+  // On Render: startCommand runs from backend/, so process.cwd() = /opt/render/project/src/backend
+  // So ../frontend/dist = /opt/render/project/src/frontend/dist
+  const possibleDistPaths = [
+    path.resolve(process.cwd(), '../frontend/dist'), // From backend/ -> ../frontend/dist (MOST LIKELY ON RENDER)
+    path.resolve(__dirname, '../../frontend/dist'), // From backend/dist -> ../../frontend/dist
+    path.resolve(process.cwd(), 'frontend/dist'), // From root/ -> frontend/dist
+    path.join(process.cwd(), '..', 'frontend', 'dist'), // Alternative path resolution
+    '/opt/render/project/src/frontend/dist', // Render specific absolute path
+    path.resolve(__dirname, '..', '..', 'frontend', 'dist'), // Alternative relative from dist
   ];
   
-  console.log('🔍 Checking frontend paths:');
-  possibleFrontendPaths.forEach(p => {
+  console.log('🔍 Checking frontend dist paths:');
+  possibleDistPaths.forEach(p => {
     const exists = fs.existsSync(p);
     console.log(`   ${exists ? '✅' : '❌'} ${p}`);
   });
   
-  let frontendPath: string | null = null;
-  for (const possiblePath of possibleFrontendPaths) {
+  let distPath: string | null = null;
+  for (const possiblePath of possibleDistPaths) {
     if (fs.existsSync(possiblePath)) {
-      frontendPath = possiblePath;
-      console.log('✅ Found frontend at:', frontendPath);
+      distPath = possiblePath;
+      console.log('✅ Found frontend dist at:', distPath);
       break;
     }
   }
   
-  if (!frontendPath) {
-    console.error('❌ Frontend directory not found! Tried paths:');
-    possibleFrontendPaths.forEach(p => console.error('   -', p));
+  if (!distPath) {
+    console.error('❌ Frontend dist directory not found! Tried paths:');
+    possibleDistPaths.forEach(p => console.error('   -', p));
     console.error('❌ Current working directory:', process.cwd());
     console.error('❌ __dirname:', __dirname);
     console.error('❌ Make sure frontend is built: cd frontend && npm run build');
+  } else {
+    // Serve static files from dist folder
+    app.use(express.static(distPath, { 
+      maxAge: '1y',
+      etag: true
+    }));
+    console.log('✅ Static files path configured:', distPath);
     
-    // Fallback: Try to serve static HTML files if frontend path not found
-    console.warn('⚠️ Attempting fallback static serving...');
-    
-    // Check for HTML files in various possible locations
-    const htmlPaths = [
-      path.join(__dirname, '../../frontend/.next/server/pages'),
-      path.join(__dirname, '../../frontend/out'),
-      path.join(__dirname, '../../frontend/.next/standalone/frontend/.next/server/pages'),
-    ];
-    
-    let htmlBasePath = null;
-    for (const htmlPath of htmlPaths) {
-      if (fs.existsSync(htmlPath)) {
-        htmlBasePath = htmlPath;
-        console.log(`✅ Found HTML files at: ${htmlPath}`);
-        break;
-      }
-    }
-    
-    if (htmlBasePath) {
-      app.use(express.static(htmlBasePath));
-    }
-    
-    // Fallback: serve index.html for all non-API routes
+    // Serve index.html for all non-API routes (SPA routing)
     app.get('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
+      // Skip API routes and health check
+      if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
         return next();
       }
       
-      const possiblePaths = [
-        path.join(__dirname, '../../frontend/.next/server/pages/index.html'),
-        path.join(__dirname, '../../frontend/out/index.html'),
-        path.join(__dirname, '../../frontend/.next/standalone/frontend/.next/server/pages/index.html'),
-      ];
-      
-      for (const indexPath of possiblePaths) {
-        if (fs.existsSync(indexPath)) {
-          return res.sendFile(path.resolve(indexPath));
-        }
+      // Serve index.html for all other routes (React Router will handle routing)
+      const indexPath = path.join(distPath!, 'index.html');
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(path.resolve(indexPath));
+      } else {
+        res.status(404).send(`
+          <html>
+            <head><title>404 - Frontend Not Found</title></head>
+            <body>
+              <h1>404 - Frontend Not Found</h1>
+              <p>The Vite frontend could not be loaded.</p>
+              <p>Please check the deployment logs for more information.</p>
+              <p>Path: ${req.path}</p>
+              <p>Working Directory: ${process.cwd()}</p>
+              <p>__dirname: ${__dirname}</p>
+            </body>
+          </html>
+        `);
       }
-      
-      // If no HTML found, return a helpful error message
-      console.warn(`⚠️ No HTML file found for path: ${req.path}`);
-      res.status(404).send(`
-        <html>
-          <head><title>404 - Frontend Not Found</title></head>
-          <body>
-            <h1>404 - Frontend Not Found</h1>
-            <p>The Next.js frontend could not be loaded.</p>
-            <p>Please check the deployment logs for more information.</p>
-            <p>Path: ${req.path}</p>
-            <p>Working Directory: ${process.cwd()}</p>
-            <p>__dirname: ${__dirname}</p>
-          </body>
-        </html>
-      `);
     });
-  } else {
-    const frontendBuildPath = path.join(frontendPath, '.next');
-    const staticPath = path.join(frontendBuildPath, 'static');
-    
-    // Declare nextHandler in this scope
-    let nextHandler: ((req: express.Request, res: express.Response) => void) | null = null;
-    
-    console.log('📁 Frontend path:', frontendPath);
-    console.log('📁 Frontend exists:', fs.existsSync(frontendPath));
-    console.log('📁 .next exists:', fs.existsSync(frontendBuildPath));
-    
-    // Check if frontend is built - CRITICAL for production
-    if (!fs.existsSync(frontendBuildPath)) {
-      console.error('❌ CRITICAL: Frontend is not built! .next folder not found at:', frontendBuildPath);
-      console.error('❌ Frontend path:', frontendPath);
-      console.error('❌ Next.js handler cannot be created without a build.');
-      console.error('❌ This usually means the frontend build step failed in render.yaml');
-      console.error('❌ Attempting to list frontend directory contents:');
-      try {
-        const frontendContents = fs.readdirSync(frontendPath);
-        console.error('   Contents:', frontendContents.join(', '));
-      } catch (e) {
-        console.error('   Cannot read frontend directory');
-      }
-      // nextHandler is already null - will use fallback handler
-    } else {
-      console.log('✅ Frontend build found at:', frontendBuildPath);
-      
-      // Serve Next.js static assets - MUST be before Next.js handler
-      if (fs.existsSync(staticPath)) {
-        // Log static assets directory structure
-        try {
-          const staticContents = fs.readdirSync(staticPath);
-          console.log('📦 Static assets directory contents:', staticContents.join(', '));
-          
-          // Check for CSS directory
-          const cssPath = path.join(staticPath, 'css');
-          if (fs.existsSync(cssPath)) {
-            const cssFiles = fs.readdirSync(cssPath);
-            console.log('🎨 CSS files found:', cssFiles.slice(0, 5).join(', '), cssFiles.length > 5 ? `... (${cssFiles.length} total)` : '');
-          } else {
-            console.warn('⚠️ CSS directory not found at:', cssPath);
-          }
-        } catch (e) {
-          console.warn('⚠️ Could not read static assets directory:', e);
-        }
-        
-        app.use('/_next/static', express.static(staticPath, { 
-          maxAge: '1y',
-          immutable: true,
-          etag: true
-        }));
-        console.log('✅ Static assets path configured:', staticPath);
-        console.log('✅ Serving static assets at: /_next/static/*');
-      } else {
-        console.warn('⚠️ Static path not found:', staticPath);
-      }
-      
-      // Serve Next.js public assets
-      const publicPath = path.join(frontendPath, 'public');
-      if (fs.existsSync(publicPath)) {
-        app.use('/images', express.static(path.join(publicPath, 'images'), { maxAge: '1y' }));
-        app.use(express.static(publicPath, { maxAge: '1y' }));
-        console.log('✅ Public assets path configured:', publicPath);
-      } else {
-        console.warn('⚠️ Public path not found:', publicPath);
-      }
-      
-      // Use Next.js package to create handler
-      let nextApp: any = null;
-      
-      try {
-        // Try to load next package (now installed in backend)
-        let next: any = null;
-        const nextPaths = [
-          'next', // Try from backend's node_modules first (installed in backend/package.json) - MOST LIKELY
-          path.join(process.cwd(), 'node_modules/next'), // From backend/node_modules (explicit path)
-          path.join(__dirname, '../node_modules/next'), // From backend/dist/../node_modules
-          path.join(frontendPath, 'node_modules/next'), // From frontend/node_modules
-          path.join(__dirname, '../../node_modules/next'), // From root/node_modules
-          path.join(process.cwd(), '..', 'node_modules/next'), // From root/node_modules (alternative)
-        ];
-        
-        console.log('🔍 Attempting to load Next.js package from paths:');
-        for (const nextPath of nextPaths) {
-          try {
-            console.log(`   Trying: ${nextPath}`);
-            next = require(nextPath);
-            console.log('✅ Next.js package loaded from:', nextPath);
-            break;
-          } catch (e) {
-            const errMsg = e instanceof Error ? e.message : String(e);
-            console.log(`   ❌ Failed: ${errMsg}`);
-            // Try next path
-          }
-        }
-        
-        if (!next) {
-          throw new Error('Next.js package not found in any expected location');
-        }
-        
-        // Handle different Next.js export formats (ESM vs CommonJS)
-        const nextFactory = next.default || next;
-        if (typeof nextFactory !== 'function') {
-          throw new Error('Next.js export is not a function. Found: ' + typeof nextFactory);
-        }
-        
-        // Create Next.js app instance
-        nextApp = nextFactory({
-          dev: process.env.NODE_ENV !== 'production',
-          dir: frontendPath,
-        });
-        
-        // Get the request handler (can be called before prepare)
-        nextHandler = nextApp.getRequestHandler();
-        console.log('✅ Next.js handler created successfully');
-        
-        // Prepare Next.js (this is async but we'll handle it)
-        nextApp.prepare().then(() => {
-          console.log('✅ Next.js prepared successfully');
-        }).catch((err: unknown) => {
-          console.error('❌ Next.js preparation failed:', err);
-          // Don't set nextHandler to null - it can still work even if prepare fails
-        });
-      } catch (nextError: unknown) {
-        const errorMsg = nextError instanceof Error ? nextError.message : String(nextError);
-        const errorStack = nextError instanceof Error ? nextError.stack : '';
-        console.error('❌ Failed to create Next.js handler:', errorMsg);
-        if (errorStack) {
-          console.error('❌ Stack:', errorStack);
-        }
-        // Ensure nextHandler is null if creation failed
-        nextHandler = null;
-      }
-    }
-    
-    // Handle all non-API routes with Next.js (outside the .next check)
-    // IMPORTANT: This must be registered AFTER static assets middleware
-    if (nextHandler) {
-      app.all('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        // Log CSS and static asset requests for debugging
-        if (req.path.includes('.css') || req.path.startsWith('/_next/static')) {
-          console.log('🎨 CSS/Static request:', req.path, req.method);
-        }
-        
-        // Skip only API routes and health check - let Next.js handle everything else
-        // Next.js will handle: /_next/*, RSC routes (?_rsc=...), and all page routes
-        if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
-          return next();
-        }
-        // Use Next.js handler for all other routes (pages, /_next/image, RSC, etc.)
-        return nextHandler!(req, res);
-      });
-      console.log('✅ Next.js route handler configured');
-    } else {
-      // Fallback: Add a basic route handler if Next.js is not available
-      console.error('❌ Next.js handler not available - using fallback route handler');
-      console.error('❌ This means Next.js handler creation failed. Check logs above for details.');
-      app.all('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-        if (req.path.startsWith('/api') || req.path.startsWith('/_next') || req.path.startsWith('/health')) {
-          return next();
-        }
-        res.status(404).json({ 
-          error: 'Frontend not available. Please ensure Next.js is properly built and configured.',
-          details: 'Check Render deployment logs for Next.js initialization errors.'
-        });
-      });
-    }
+    console.log('✅ Vite SPA route handler configured');
   }
 }
 
