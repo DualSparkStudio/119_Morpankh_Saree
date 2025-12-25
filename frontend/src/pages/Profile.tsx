@@ -1,4 +1,4 @@
-import { User, Mail, Phone, MapPin } from 'lucide-react'
+import { User } from 'lucide-react'
 
 const Profile = () => {
   return (
