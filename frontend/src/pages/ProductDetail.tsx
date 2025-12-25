@@ -6,16 +6,17 @@ const ProductDetail = () => {
   const { id: _id } = useParams()
   const [selectedImage, setSelectedImage] = useState(0)
 
+  const productId = _id ? parseInt(_id) : 1
   const images = Array.from({ length: 5 }, (_, i) => ({
     id: i,
-    url: `https://via.placeholder.com/400x600?text=Image+${i + 1}`,
+    url: `/images/products/product-${productId}-${i + 1}.jpg`,
   }))
 
   const relatedProducts = Array.from({ length: 4 }, (_, i) => ({
     id: i + 1,
     name: `Related Product ${i + 1}`,
     price: (1999 + i * 500).toLocaleString(),
-    image: 'https://via.placeholder.com/300x400',
+    image: `/images/products/product-${i + 20}.jpg`,
   }))
 
   return (
@@ -40,6 +41,10 @@ const ProductDetail = () => {
                     src={img.url}
                     alt={`Thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement
+                      target.src = `https://via.placeholder.com/150/312e81/ffffff?text=Img+${index + 1}`
+                    }}
                   />
                 </button>
               ))}
@@ -52,6 +57,10 @@ const ProductDetail = () => {
                   src={images[selectedImage].url}
                   alt="Main product"
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement
+                    target.src = `https://via.placeholder.com/600x800/312e81/ffffff?text=Product+Image`
+                  }}
                 />
               </div>
             </div>
@@ -124,6 +133,10 @@ const ProductDetail = () => {
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement
+                        target.src = `https://via.placeholder.com/300x400/312e81/ffffff?text=${encodeURIComponent(product.name)}`
+                      }}
                     />
                   </div>
                   <div className="p-4">

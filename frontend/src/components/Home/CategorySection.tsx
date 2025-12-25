@@ -2,14 +2,14 @@ import { Link } from 'react-router-dom'
 
 const CategorySection = () => {
   const categories = [
-    { id: 1, name: 'Silk', image: 'https://via.placeholder.com/150' },
-    { id: 2, name: 'Cotton', image: 'https://via.placeholder.com/150' },
-    { id: 3, name: 'Designer', image: 'https://via.placeholder.com/150' },
-    { id: 4, name: 'Printed', image: 'https://via.placeholder.com/150' },
-    { id: 5, name: 'Dress', image: 'https://via.placeholder.com/150' },
-    { id: 6, name: 'Traditional', image: 'https://via.placeholder.com/150' },
-    { id: 7, name: 'Modern', image: 'https://via.placeholder.com/150' },
-    { id: 8, name: 'Bridal', image: 'https://via.placeholder.com/150' },
+    { id: 1, name: 'Silk', image: '/images/categories/silk.jpg' },
+    { id: 2, name: 'Cotton', image: '/images/categories/cotton.jpg' },
+    { id: 3, name: 'Designer', image: '/images/categories/designer.jpg' },
+    { id: 4, name: 'Printed', image: '/images/categories/printed.jpg' },
+    { id: 5, name: 'Dress', image: '/images/categories/dress.jpg' },
+    { id: 6, name: 'Traditional', image: '/images/categories/traditional.jpg' },
+    { id: 7, name: 'Modern', image: '/images/categories/modern.jpg' },
+    { id: 8, name: 'Bridal', image: '/images/categories/bridal.jpg' },
   ]
 
   return (
@@ -34,6 +34,11 @@ const CategorySection = () => {
                     src={category.image}
                     alt={category.name}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback to gradient background if image fails
+                      const target = e.target as HTMLImageElement
+                      target.style.display = 'none'
+                    }}
                   />
                 </div>
                 <span className="text-sm font-medium text-gray-700">{category.name}</span>
@@ -47,4 +52,3 @@ const CategorySection = () => {
 }
 
 export default CategorySection
-

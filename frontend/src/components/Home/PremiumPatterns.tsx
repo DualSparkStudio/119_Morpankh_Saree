@@ -5,7 +5,7 @@ const PremiumPatterns = () => {
     id: i + 1,
     name: `Premium Saree ${i + 1}`,
     price: (2999 + i * 500).toLocaleString(),
-    image: 'https://via.placeholder.com/300x400',
+    image: `/images/products/product-${i + 1}.jpg`,
   }))
 
   return (
@@ -26,6 +26,11 @@ const PremiumPatterns = () => {
                   src={product.image}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                  onError={(e) => {
+                    // Fallback to placeholder if image fails
+                    const target = e.target as HTMLImageElement
+                    target.src = `https://via.placeholder.com/300x400/312e81/ffffff?text=${encodeURIComponent(product.name)}`
+                  }}
                 />
                 {/* Hover UI */}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">

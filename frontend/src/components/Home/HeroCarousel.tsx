@@ -3,7 +3,39 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
-  const slides = Array.from({ length: 5 }, (_, i) => i)
+  
+  const slides = [
+    {
+      id: 1,
+      image: '/images/banners/banner-1.jpg',
+      title: 'Premium Indian Sarees',
+      subtitle: 'Discover elegance in every thread'
+    },
+    {
+      id: 2,
+      image: '/images/banners/banner-2.jpg',
+      title: 'Traditional Collection',
+      subtitle: 'Timeless beauty and craftsmanship'
+    },
+    {
+      id: 3,
+      image: '/images/banners/banner-3.jpg',
+      title: 'Designer Sarees',
+      subtitle: 'Modern elegance meets tradition'
+    },
+    {
+      id: 4,
+      image: '/images/banners/banner-4.jpg',
+      title: 'Luxury Fabrics',
+      subtitle: 'Silk, Cotton, and more'
+    },
+    {
+      id: 5,
+      image: '/images/banners/banner-5.jpg',
+      title: 'Special Occasions',
+      subtitle: 'Perfect for every celebration'
+    }
+  ]
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1))
@@ -14,22 +46,40 @@ const HeroCarousel = () => {
   }
 
   return (
-    <section className="relative h-[600px] md:h-[700px] overflow-hidden bg-gradient-to-r from-deep-indigo/80 to-deep-indigo/40">
+    <section className="relative h-[600px] md:h-[700px] overflow-hidden">
       <div className="relative h-full">
-        {/* Placeholder Images */}
-        {slides.map((_, index) => (
+        {/* Banner Images */}
+        {slides.map((slide, index) => (
           <div
-            key={index}
+            key={slide.id}
             className={`absolute inset-0 transition-opacity duration-500 ${
               index === currentSlide ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            <div className="w-full h-full bg-gradient-to-br from-purple-400 via-purple-500 to-purple-600 flex items-center justify-center">
-              <div className="text-white text-center">
-                <h2 className="text-5xl md:text-7xl font-heading font-bold mb-4">
-                  Banner {index + 1}
-                </h2>
-                <p className="text-xl md:text-2xl">Placeholder Image</p>
+            <div className="relative w-full h-full">
+              <img
+                src={slide.image}
+                alt={slide.title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback to gradient if image fails to load
+                  const target = e.target as HTMLImageElement
+                  target.style.display = 'none'
+                  if (target.parentElement) {
+                    target.parentElement.className += ' bg-gradient-to-br from-purple-400 via-purple-500 to-purple-600'
+                  }
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-deep-indigo/80 to-deep-indigo/40" />
+              <div className="absolute inset-0 flex items-center">
+                <div className="container mx-auto px-4">
+                  <div className="text-white max-w-2xl">
+                    <h2 className="text-5xl md:text-7xl font-heading font-bold mb-4">
+                      {slide.title}
+                    </h2>
+                    <p className="text-xl md:text-2xl text-gray-100">{slide.subtitle}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -70,4 +120,3 @@ const HeroCarousel = () => {
 }
 
 export default HeroCarousel
-
