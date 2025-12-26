@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom'
 import { User, Heart, ShoppingBag, ChevronDown, Menu, X } from 'lucide-react'
 import { useState } from 'react'
+import { useApp } from '../context/AppContext'
 
 const Navbar = () => {
   const [categoriesOpen, setCategoriesOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [mobileCategoriesOpen, setMobileCategoriesOpen] = useState(false)
+  const { getCartCount, getWishlistCount } = useApp()
 
   return (
     <nav className="bg-soft-cream border-b border-gray-200 sticky top-0 z-50">
@@ -102,6 +104,11 @@ const Navbar = () => {
               aria-label="Wishlist"
             >
               <Heart className="w-5 h-5" />
+              {getWishlistCount() > 0 && (
+                <span className="absolute top-0 right-0 bg-sale-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  {getWishlistCount()}
+                </span>
+              )}
             </Link>
             <Link 
               to="/cart" 
@@ -109,6 +116,11 @@ const Navbar = () => {
               aria-label="Cart"
             >
               <ShoppingBag className="w-5 h-5" />
+              {getCartCount() > 0 && (
+                <span className="absolute top-0 right-0 bg-sale-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  {getCartCount()}
+                </span>
+              )}
             </Link>
             
             {/* Mobile Menu Button */}

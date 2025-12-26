@@ -4,7 +4,10 @@
 
 :root {
   --color-royal-blue: #1e3a8a;
-  --color-deep-indigo: #312e81;
+  --color-deep-indigo: #1e3a8a;
+  --color-navy-blue: #0f172a;
+  --color-sale-red: #dc2626;
+  --color-sale-red-light: #ef4444;
   --color-off-white: #faf9f6;
   --color-soft-cream: #fffef9;
   --color-gold: #d4af37;

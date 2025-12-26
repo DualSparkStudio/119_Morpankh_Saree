@@ -107,13 +107,13 @@ const HeroCarousel = () => {
                   }
                 }}
               />
-              {/* Elegant gradient overlay - soft pink to deep rose */}
-              <div className="absolute inset-0 bg-gradient-to-br from-rose-900/70 via-pink-800/60 to-purple-900/70" />
+              {/* Elegant gradient overlay - dark blue/navy */}
+              <div className="absolute inset-0 bg-gradient-to-br from-deep-indigo/80 via-navy-blue/70 to-deep-indigo/80" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
               
               {/* Decorative elements */}
-              <div className="absolute top-20 right-10 w-32 h-32 bg-rose-300/10 rounded-full blur-3xl"></div>
-              <div className="absolute bottom-20 left-10 w-40 h-40 bg-pink-300/10 rounded-full blur-3xl"></div>
+              <div className="absolute top-20 right-10 w-32 h-32 bg-deep-indigo/20 rounded-full blur-3xl"></div>
+              <div className="absolute bottom-20 left-10 w-40 h-40 bg-deep-indigo/20 rounded-full blur-3xl"></div>
               
               <div className="absolute inset-0 flex items-center">
                 <div className="container mx-auto px-4 md:px-6 lg:px-8">
@@ -121,8 +121,8 @@ const HeroCarousel = () => {
                     {/* Accent text */}
                     {slide.accent && (
                       <div className="flex items-center gap-2 mb-4 opacity-90">
-                        <Star className="w-5 h-5 text-rose-200 animate-pulse fill-rose-200" />
-                        <span className="font-script text-xl md:text-2xl text-rose-100 tracking-wide">
+                        <Star className="w-5 h-5 text-white animate-pulse fill-white" />
+                        <span className="font-script text-xl md:text-2xl text-white tracking-wide">
                           {slide.accent}
                         </span>
                       </div>
@@ -133,13 +133,13 @@ const HeroCarousel = () => {
                       <span className="block text-white drop-shadow-2xl">
                         {slide.title.split(' ').slice(0, -1).join(' ')}
                       </span>
-                      <span className="block text-rose-100 font-medium italic mt-2">
+                      <span className="block text-white font-medium italic mt-2">
                         {slide.title.split(' ').slice(-1)[0]}
                       </span>
                     </h2>
                     
                     {/* Subtitle */}
-                    <p className="text-lg md:text-2xl lg:text-3xl text-rose-50 mb-8 font-light tracking-wide max-w-xl leading-relaxed">
+                    <p className="text-lg md:text-2xl lg:text-3xl text-white/90 mb-8 font-light tracking-wide max-w-xl leading-relaxed">
                       {slide.subtitle}
                     </p>
                     
@@ -147,7 +147,7 @@ const HeroCarousel = () => {
                     <div className="flex flex-col sm:flex-row gap-4 mt-10">
                       <Link
                         to="/products"
-                        className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white px-8 py-4 rounded-full font-medium text-lg transition-all duration-300 shadow-2xl hover:shadow-rose-500/50 hover:scale-105 transform"
+                        className="group inline-flex items-center justify-center gap-3 bg-sale-red hover:bg-sale-red-light text-white px-8 py-4 rounded-full font-medium text-lg transition-all duration-300 shadow-2xl hover:shadow-sale-red/50 hover:scale-105 transform"
                       >
                         <span>Shop Collection</span>
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -196,7 +196,7 @@ const HeroCarousel = () => {
               onClick={() => handleSlideChange(index)}
               className={`rounded-full transition-all duration-300 ${
                 index === currentSlide 
-                  ? 'bg-white w-10 h-3 shadow-lg shadow-rose-500/50' 
+                  ? 'bg-white w-10 h-3 shadow-lg shadow-sale-red/50' 
                   : 'bg-white/40 hover:bg-white/60 w-3 h-3'
               }`}
               aria-label={`Go to slide ${index + 1}`}

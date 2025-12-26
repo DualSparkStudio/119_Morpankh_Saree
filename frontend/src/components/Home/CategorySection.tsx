@@ -64,7 +64,7 @@ const CategorySection = () => {
           </div>
           <Link 
             to="/products" 
-            className="hidden md:flex items-center gap-2 text-rose-600 hover:text-rose-700 font-medium text-lg transition-colors group"
+            className="hidden md:flex items-center gap-2 text-deep-indigo hover:text-navy-blue font-medium text-lg transition-colors group"
           >
             <span>See more</span>
             <span className="group-hover:translate-x-1 transition-transform">→</span>
@@ -79,8 +79,8 @@ const CategorySection = () => {
                 to={`/products?category=${category.name.toLowerCase()}`}
                 className="group flex flex-col items-center gap-4 min-w-[140px] md:min-w-[160px] cursor-pointer"
               >
-                <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-xl group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:border-rose-200">
-                  <div className="absolute inset-0 bg-gradient-to-br from-rose-100/20 to-pink-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
+                <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-xl group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:border-deep-indigo">
+                  <div className="absolute inset-0 bg-gradient-to-br from-deep-indigo/20 to-navy-blue/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
                   <img
                     src={category.image}
                     alt={category.name}
@@ -94,9 +94,9 @@ const CategorySection = () => {
                     }}
                   />
                   {/* Decorative ring on hover */}
-                  <div className="absolute inset-0 rounded-full ring-2 ring-rose-300/0 group-hover:ring-rose-300/50 transition-all duration-300"></div>
+                  <div className="absolute inset-0 rounded-full ring-2 ring-deep-indigo/0 group-hover:ring-deep-indigo/50 transition-all duration-300"></div>
                 </div>
-                <span className="text-base md:text-lg font-medium text-gray-700 group-hover:text-rose-600 transition-colors duration-300">
+                <span className="text-base md:text-lg font-medium text-gray-700 group-hover:text-deep-indigo transition-colors duration-300">
                   {category.name}
                 </span>
               </Link>
@@ -108,7 +108,7 @@ const CategorySection = () => {
         <div className="mt-8 md:hidden text-center">
           <Link 
             to="/products" 
-            className="inline-flex items-center gap-2 text-rose-600 hover:text-rose-700 font-medium text-lg transition-colors"
+            className="inline-flex items-center gap-2 text-deep-indigo hover:text-navy-blue font-medium text-lg transition-colors"
           >
             <span>See more</span>
             <span>→</span>
