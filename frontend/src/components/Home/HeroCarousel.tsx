@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight, ArrowRight, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
   
   const slides = [
     {
@@ -48,16 +50,41 @@ const HeroCarousel = () => {
     }
   ]
 
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1))
-  }
+  // Auto-play functionality
+  useEffect(() => {
+    if (!isPaused) {
+      intervalRef.current = setInterval(() => {
+        setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1))
+      }, 2000) // Change slide every 2 seconds
+    }
 
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1))
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+      }
+    }
+  }, [isPaused, slides.length])
+
+  // Reset interval when slide changes manually
+  const handleSlideChange = (newSlide: number) => {
+    setCurrentSlide(newSlide)
+    // Reset the interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+    }
+    if (!isPaused) {
+      intervalRef.current = setInterval(() => {
+        setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1))
+      }, 2000)
+    }
   }
 
   return (
-    <section className="relative h-[650px] md:h-[800px] lg:h-[900px] overflow-hidden">
+    <section 
+      className="relative h-[650px] md:h-[800px] lg:h-[900px] overflow-hidden"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
       <div className="relative h-full">
         {/* Banner Images */}
         {slides.map((slide, index) => (
@@ -141,14 +168,20 @@ const HeroCarousel = () => {
 
         {/* Elegant Navigation Arrows */}
         <button
-          onClick={prevSlide}
+          onClick={() => {
+            const newSlide = currentSlide === 0 ? slides.length - 1 : currentSlide - 1
+            handleSlideChange(newSlide)
+          }}
           className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 border border-white/30 hover:border-white/50 text-white p-4 rounded-full shadow-xl transition-all duration-300 z-10 hover:scale-110 group"
           aria-label="Previous slide"
         >
           <ChevronLeft className="w-6 h-6 md:w-7 md:h-7 group-hover:-translate-x-1 transition-transform" />
         </button>
         <button
-          onClick={nextSlide}
+          onClick={() => {
+            const newSlide = currentSlide === slides.length - 1 ? 0 : currentSlide + 1
+            handleSlideChange(newSlide)
+          }}
           className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-md hover:bg-white/30 border border-white/30 hover:border-white/50 text-white p-4 rounded-full shadow-xl transition-all duration-300 z-10 hover:scale-110 group"
           aria-label="Next slide"
         >
@@ -160,7 +193,7 @@ const HeroCarousel = () => {
           {slides.map((_, index) => (
             <button
               key={index}
-              onClick={() => setCurrentSlide(index)}
+              onClick={() => handleSlideChange(index)}
               className={`rounded-full transition-all duration-300 ${
                 index === currentSlide 
                   ? 'bg-white w-10 h-3 shadow-lg shadow-rose-500/50' 
