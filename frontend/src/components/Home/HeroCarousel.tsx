@@ -55,7 +55,7 @@ const HeroCarousel = () => {
     if (!isPaused) {
       intervalRef.current = setInterval(() => {
         setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1))
-      }, 2000) // Change slide every 2 seconds
+      }, 2500) // Change slide every 2.5 seconds
     }
 
     return () => {
@@ -75,7 +75,7 @@ const HeroCarousel = () => {
     if (!isPaused) {
       intervalRef.current = setInterval(() => {
         setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1))
-      }, 2000)
+      }, 2500)
     }
   }
 
