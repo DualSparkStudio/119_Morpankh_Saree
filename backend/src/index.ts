@@ -29,12 +29,10 @@ import paymentRoutes from './routes/payment';
 
 dotenv.config();
 
-// Check for required environment variables
+// Warn if DATABASE_URL is not set, but don't exit (for testing without DB)
 if (!process.env.DATABASE_URL) {
-  console.error('❌ ERROR: DATABASE_URL is not set in environment variables!');
-  console.error('Please set DATABASE_URL in your .env file or environment variables.');
-  console.error('Example: DATABASE_URL="postgresql://user:password@localhost:5432/dbname"');
-  process.exit(1);
+  console.warn('⚠️  WARNING: DATABASE_URL is not set. Backend will run in test mode without database.');
+  console.warn('API endpoints that require database will return appropriate responses.');
 }
 
 const app = express();
