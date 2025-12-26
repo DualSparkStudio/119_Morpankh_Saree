@@ -1,4 +1,4 @@
-import { Heart, Eye, ShoppingCart } from 'lucide-react'
+import { Heart, Eye, ShoppingCart, Star, Percent } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useApp } from '../../context/AppContext'
 
@@ -18,10 +18,17 @@ const PremiumPatterns = () => {
 
   const products = Array.from({ length: 8 }, (_, i) => {
     const name = `Premium Saree ${i + 1}`
+    const currentPrice = 2999 + i * 500
+    const originalPrice = Math.round(currentPrice * 1.5)
+    const discount = Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
     return {
       id: i + 1,
       name,
-      price: (2999 + i * 500).toLocaleString(),
+      price: currentPrice.toLocaleString(),
+      originalPrice: originalPrice.toLocaleString(),
+      discount,
+      rating: 4.5 + (i % 3) * 0.2,
+      reviews: Math.floor(Math.random() * 500) + 100,
       image: images[i] || `/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg`,
       placeholderImage: `https://via.placeholder.com/300x400/312e81/ffffff?text=${encodeURIComponent(name)}`,
     }
@@ -55,20 +62,21 @@ const PremiumPatterns = () => {
           <p className="text-gray-600 text-lg font-light">Exquisite designs for the modern woman</p>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6 lg:gap-8">
           {products.map((product) => {
             const inWishlist = isInWishlist(product.id)
             return (
               <div
                 key={product.id}
-                className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 group border border-gray-100 hover:border-deep-indigo"
+                className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-deep-indigo/30 relative"
               >
-                <Link to={`/product/${product.id}`} className="block">
-                  <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
+                {/* Image Container */}
+                <Link to={`/product/${product.id}`} className="block relative">
+                  <div className="relative aspect-[3/4] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement
                         if (target.src !== product.placeholderImage) {
@@ -76,50 +84,94 @@ const PremiumPatterns = () => {
                         }
                       }}
                     />
-                    {/* Sale badge */}
-                    <div className="absolute top-2 right-2 bg-sale-red text-white px-2 py-1 rounded text-xs font-bold">
-                      BUY 2 GET 1 FREE
+                    
+                    {/* Discount Badge - Top Left */}
+                    <div className="absolute top-3 left-3 bg-sale-red text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg flex items-center gap-1 z-10">
+                      <Percent className="w-3 h-3" />
+                      <span>{product.discount}% OFF</span>
                     </div>
-                    {/* Elegant overlay on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    {/* Hover UI */}
-                    <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                      <button
-                        onClick={(e) => handleWishlistToggle(e, product.id)}
-                        className={`bg-white/90 backdrop-blur-sm p-3 rounded-full hover:bg-white hover:scale-110 transition-all shadow-lg ${
-                          inWishlist ? 'text-sale-red' : 'text-gray-700'
-                        }`}
-                        aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-                      >
-                        <Heart className={`w-5 h-5 ${inWishlist ? 'fill-current' : ''}`} />
-                      </button>
+                    
+                    {/* Wishlist Button - Top Right */}
+                    <button
+                      onClick={(e) => handleWishlistToggle(e, product.id)}
+                      className={`absolute top-3 right-3 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 shadow-lg ${
+                        inWishlist 
+                          ? 'bg-sale-red text-white' 
+                          : 'bg-white/90 text-gray-700 hover:bg-white'
+                      }`}
+                      aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                    >
+                      <Heart className={`w-4 h-4 ${inWishlist ? 'fill-current' : ''}`} />
+                    </button>
+                    
+                    {/* Buy 2 Get 1 Badge - Bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                      <div className="bg-sale-red text-white px-3 py-1.5 rounded-lg text-xs font-bold text-center">
+                        BUY 2 GET 1 FREE
+                      </div>
+                    </div>
+                    
+                    {/* Quick Actions on Hover */}
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
                       <Link
                         to={`/product/${product.id}`}
-                        className="bg-white/90 backdrop-blur-sm p-3 rounded-full hover:bg-white hover:scale-110 transition-all shadow-lg text-gray-700"
-                        aria-label="View product"
+                        className="bg-white text-deep-indigo px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-deep-indigo hover:text-white transition-all transform hover:scale-105 shadow-xl flex items-center gap-2"
                       >
-                        <Eye className="w-5 h-5" />
+                        <Eye className="w-4 h-4" />
+                        <span>Quick View</span>
                       </Link>
                       <button
                         onClick={(e) => handleAddToCart(e, product)}
-                        className="bg-deep-indigo hover:bg-navy-blue p-3 rounded-full hover:scale-110 transition-all shadow-lg text-white"
-                        aria-label="Add to cart"
+                        className="bg-sale-red text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-sale-red-light transition-all transform hover:scale-105 shadow-xl flex items-center gap-2"
                       >
-                        <ShoppingCart className="w-5 h-5" />
+                        <ShoppingCart className="w-4 h-4" />
+                        <span>Add to Cart</span>
                       </button>
                     </div>
                   </div>
                 </Link>
-                <div className="p-4 md:p-5">
+                
+                {/* Product Info */}
+                <div className="p-4 md:p-5 bg-white">
                   <Link to={`/product/${product.id}`}>
-                    <h3 className="font-heading font-medium text-gray-800 mb-2 line-clamp-2 group-hover:text-deep-indigo transition-colors text-base md:text-lg">
+                    <h3 className="font-heading font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-deep-indigo transition-colors text-base md:text-lg leading-tight min-h-[3rem]">
                       {product.name}
                     </h3>
                   </Link>
-                  <div className="flex items-center gap-2">
-                    <p className="text-lg md:text-xl font-bold text-sale-red">₹{product.price}</p>
-                    <p className="text-sm text-gray-400 line-through">₹{(parseInt(product.price.replace(/,/g, '')) * 1.5).toLocaleString()}</p>
+                  
+                  {/* Rating */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-3.5 h-3.5 ${
+                            i < Math.floor(product.rating)
+                              ? 'text-yellow-400 fill-yellow-400'
+                              : i < product.rating
+                              ? 'text-yellow-400 fill-yellow-400/50'
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs text-gray-600">({product.reviews})</span>
                   </div>
+                  
+                  {/* Price */}
+                  <div className="flex items-baseline gap-2 mb-3">
+                    <span className="text-xl md:text-2xl font-bold text-sale-red">₹{product.price}</span>
+                    <span className="text-sm text-gray-400 line-through">₹{product.originalPrice}</span>
+                  </div>
+                  
+                  {/* Add to Cart Button - Always Visible */}
+                  <button
+                    onClick={(e) => handleAddToCart(e, product)}
+                    className="w-full bg-deep-indigo hover:bg-navy-blue text-white py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                  >
+                    <ShoppingCart className="w-4 h-4" />
+                    <span>Add to Cart</span>
+                  </button>
                 </div>
               </div>
             )
