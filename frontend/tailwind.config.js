@@ -15,8 +15,9 @@ export default {
         'gold-light': '#f4e4bc',
       },
       fontFamily: {
-        heading: ['Playfair Display', 'serif'],
-        body: ['Inter', 'sans-serif'],
+        heading: ['Cormorant Garamond', 'serif'],
+        script: ['Dancing Script', 'cursive'],
+        body: ['Poppins', 'sans-serif'],
       },
     },
   },
