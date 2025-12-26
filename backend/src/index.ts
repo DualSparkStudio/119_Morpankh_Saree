@@ -7,6 +7,7 @@ import path from 'path';
 import fs from 'fs';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
+import { prisma } from './config/database';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -27,6 +28,12 @@ import inventoryRoutes from './routes/inventory';
 import paymentRoutes from './routes/payment';
 
 dotenv.config();
+
+// Warn if DATABASE_URL is not set, but don't exit (for testing without DB)
+if (!process.env.DATABASE_URL) {
+  console.warn('⚠️  WARNING: DATABASE_URL is not set. Backend will run in test mode without database.');
+  console.warn('API endpoints that require database will return appropriate responses.');
+}
 
 const app = express();
 // Render provides PORT via environment variable - use it directly
@@ -61,6 +68,32 @@ app.use('/api/', rateLimiter);
 // Health check
 app.get('/health', (req: express.Request, res: express.Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Database health check
+app.get('/health/db', async (req: express.Request, res: express.Response) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ 
+      status: 'ok', 
+      database: 'connected',
+      timestamp: new Date().toISOString() 
+    });
+  } catch (error: any) {
+    console.error('Database connection error:', error);
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    res.status(500).json({ 
+      status: 'error', 
+      database: 'disconnected',
+      error: error.message || 'Unknown database error',
+      code: error.code,
+      ...(isDevelopment && { 
+        stack: error.stack,
+        meta: error.meta 
+      }),
+      timestamp: new Date().toISOString() 
+    });
+  }
 });
 
 // API Routes
