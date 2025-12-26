@@ -99,13 +99,6 @@ const TrendingPatterns = () => {
                       <Heart className={`w-4 h-4 ${inWishlist ? 'fill-current' : ''}`} />
                     </button>
                     
-                    {/* Buy 2 Get 1 Badge - Bottom */}
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
-                      <div className="bg-sale-red text-white px-3 py-1.5 rounded-lg text-xs font-bold text-center">
-                        BUY 2 GET 1 FREE
-                      </div>
-                    </div>
-                    
                     {/* Quick Actions on Hover */}
                     <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
                       <Link
