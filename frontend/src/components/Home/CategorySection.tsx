@@ -2,38 +2,89 @@ import { Link } from 'react-router-dom'
 
 const CategorySection = () => {
   const categories = [
-    { id: 1, name: 'Silk', image: '/images/categories/silk.jpg',       placeholderImage: 'https://images.unsplash.com/photo-1570000000001?w=150&h=150&fit=crop&q=80' },
-    { id: 2, name: 'Cotton', image: '/images/categories/cotton.jpg', placeholderImage: 'https://images.unsplash.com/photo-1570000000002?w=150&h=150&fit=crop&q=80' },
-    { id: 3, name: 'Designer', image: '/images/categories/designer.jpg', placeholderImage: 'https://images.unsplash.com/photo-1570000000003?w=150&h=150&fit=crop&q=80' },
-    { id: 4, name: 'Printed', image: '/images/categories/printed.jpg', placeholderImage: 'https://images.unsplash.com/photo-1570000000004?w=150&h=150&fit=crop&q=80' },
-    { id: 5, name: 'Dress', image: '/images/categories/dress.jpg', placeholderImage: 'https://images.unsplash.com/photo-1570000000005?w=150&h=150&fit=crop&q=80' },
-    { id: 6, name: 'Traditional', image: '/images/categories/traditional.jpg', placeholderImage: 'https://images.unsplash.com/photo-1570000000006?w=150&h=150&fit=crop&q=80' },
-    { id: 7, name: 'Modern', image: '/images/categories/modern.jpg', placeholderImage: 'https://images.unsplash.com/photo-1570000000007?w=150&h=150&fit=crop&q=80' },
-    { id: 8, name: 'Bridal', image: '/images/categories/bridal.jpg', placeholderImage: 'https://images.unsplash.com/photo-1570000000008?w=150&h=150&fit=crop&q=80' },
+    { 
+      id: 1, 
+      name: 'Silk', 
+      image: '/images/kathpathar-saree.png', 
+      placeholderImage: 'https://images.unsplash.com/photo-1570000000001?w=200&h=200&fit=crop&q=80' 
+    },
+    { 
+      id: 2, 
+      name: 'Cotton', 
+      image: '/images/cotton-saree.png', 
+      placeholderImage: 'https://images.unsplash.com/photo-1570000000002?w=200&h=200&fit=crop&q=80' 
+    },
+    { 
+      id: 3, 
+      name: 'Designer', 
+      image: '/images/designer-saree.png', 
+      placeholderImage: 'https://images.unsplash.com/photo-1570000000003?w=200&h=200&fit=crop&q=80' 
+    },
+    { 
+      id: 4, 
+      name: 'Printed', 
+      image: '/images/printed-saree.png', 
+      placeholderImage: 'https://images.unsplash.com/photo-1570000000004?w=200&h=200&fit=crop&q=80' 
+    },
+    { 
+      id: 5, 
+      name: 'Dress', 
+      image: '/images/dress.png', 
+      placeholderImage: 'https://images.unsplash.com/photo-1570000000005?w=200&h=200&fit=crop&q=80' 
+    },
+    { 
+      id: 6, 
+      name: 'Traditional', 
+      image: '/images/kathpathar-saree.png', 
+      placeholderImage: 'https://images.unsplash.com/photo-1570000000006?w=200&h=200&fit=crop&q=80' 
+    },
+    { 
+      id: 7, 
+      name: 'Modern', 
+      image: '/images/designer-saree.png', 
+      placeholderImage: 'https://images.unsplash.com/photo-1570000000007?w=200&h=200&fit=crop&q=80' 
+    },
+    { 
+      id: 8, 
+      name: 'Bridal', 
+      image: '/images/kathpathar-saree.png', 
+      placeholderImage: 'https://images.unsplash.com/photo-1570000000008?w=200&h=200&fit=crop&q=80' 
+    },
   ]
 
   return (
-    <section className="py-12 bg-white">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl md:text-4xl font-heading text-deep-indigo">Categories</h2>
-          <Link to="/products" className="text-royal-blue hover:text-deep-indigo font-medium">
-            See more →
+    <section className="py-16 md:py-20 bg-gradient-to-b from-soft-cream to-white">
+      <div className="container mx-auto px-4 md:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-12">
+          <div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading text-deep-indigo mb-2">
+              Categories
+            </h2>
+            <p className="text-gray-600 text-lg font-light">Explore our exquisite collection</p>
+          </div>
+          <Link 
+            to="/products" 
+            className="hidden md:flex items-center gap-2 text-rose-600 hover:text-rose-700 font-medium text-lg transition-colors group"
+          >
+            <span>See more</span>
+            <span className="group-hover:translate-x-1 transition-transform">→</span>
           </Link>
         </div>
         
-        <div className="overflow-x-auto pb-4">
-          <div className="flex gap-6 min-w-max">
+        <div className="overflow-x-auto pb-4 -mx-4 px-4">
+          <div className="flex gap-6 md:gap-8 min-w-max">
             {categories.map((category) => (
-              <div
+              <Link
                 key={category.id}
-                className="flex flex-col items-center gap-3 min-w-[120px]"
+                to={`/products?category=${category.name.toLowerCase()}`}
+                className="group flex flex-col items-center gap-4 min-w-[140px] md:min-w-[160px] cursor-pointer"
               >
-                <div className="w-24 h-24 rounded-full bg-gray-100 overflow-hidden border-4 border-white shadow-lg">
+                <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-xl group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:border-rose-200">
+                  <div className="absolute inset-0 bg-gradient-to-br from-rose-100/20 to-pink-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
                   <img
                     src={category.image}
                     alt={category.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                     onError={(e) => {
                       // Fallback to placeholder image
                       const target = e.target as HTMLImageElement
@@ -42,11 +93,26 @@ const CategorySection = () => {
                       }
                     }}
                   />
+                  {/* Decorative ring on hover */}
+                  <div className="absolute inset-0 rounded-full ring-2 ring-rose-300/0 group-hover:ring-rose-300/50 transition-all duration-300"></div>
                 </div>
-                <span className="text-sm font-medium text-gray-700">{category.name}</span>
-              </div>
+                <span className="text-base md:text-lg font-medium text-gray-700 group-hover:text-rose-600 transition-colors duration-300">
+                  {category.name}
+                </span>
+              </Link>
             ))}
           </div>
+        </div>
+        
+        {/* Mobile See More Link */}
+        <div className="mt-8 md:hidden text-center">
+          <Link 
+            to="/products" 
+            className="inline-flex items-center gap-2 text-rose-600 hover:text-rose-700 font-medium text-lg transition-colors"
+          >
+            <span>See more</span>
+            <span>→</span>
+          </Link>
         </div>
       </div>
     </section>
