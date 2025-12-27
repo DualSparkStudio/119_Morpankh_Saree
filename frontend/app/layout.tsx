@@ -36,6 +36,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Server component - log on server
+  console.log('🟣 RootLayout rendering (server component)');
+  
   return (
     <html lang="en" className="scroll-smooth">
       <body

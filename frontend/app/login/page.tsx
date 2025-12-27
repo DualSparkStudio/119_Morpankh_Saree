@@ -7,6 +7,8 @@ import { authApi } from '@/lib/api/auth';
 import { useStore } from '@/lib/store';
 
 function LoginForm() {
+  console.log('🔵 LoginForm component rendering...');
+  
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setUser, setToken } = useStore();
@@ -17,12 +19,22 @@ function LoginForm() {
   const [error, setError] = useState('');
 
   const redirect = searchParams.get('redirect') || '/';
+  
+  console.log('🔵 LoginForm - redirect:', redirect);
+  console.log('🔵 LoginForm - searchParams available:', !!searchParams);
 
   useEffect(() => {
+    console.log('🔵 LoginForm useEffect running...');
+    console.log('🔵 LoginForm - window available:', typeof window !== 'undefined');
+    
     // Check if already logged in
-    const token = localStorage.getItem('token');
-    if (token) {
-      router.push(redirect);
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('token');
+      console.log('🔵 LoginForm - token exists:', !!token);
+      if (token) {
+        console.log('🔵 LoginForm - redirecting to:', redirect);
+        router.push(redirect);
+      }
     }
   }, [router, redirect]);
 
@@ -53,9 +65,14 @@ function LoginForm() {
     }
   };
 
+  console.log('🔵 LoginForm - rendering JSX, email:', email, 'loading:', loading);
+  
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="max-w-md mx-auto">
+        <div style={{ background: '#f0f0f0', padding: '10px', marginBottom: '10px', fontSize: '12px' }}>
+          DEBUG: LoginForm rendered | Email: {email || 'empty'} | Loading: {loading ? 'yes' : 'no'}
+        </div>
         <h1 className="text-4xl font-heading font-bold mb-2 text-[#312e81]">Login</h1>
         <p className="text-gray-600 mb-8">Sign in to your account</p>
 
@@ -119,15 +136,33 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  console.log('🟢 LoginPage component rendering (root)...');
+  
+  if (typeof window !== 'undefined') {
+    console.log('🟢 LoginPage - window available, client-side rendering');
+  } else {
+    console.log('🟢 LoginPage - server-side rendering');
+  }
+  
   return (
-    <Suspense fallback={
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-md mx-auto">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#312e81] mx-auto"></div>
-        </div>
+    <>
+      <div style={{ background: '#e0f0ff', padding: '10px', margin: '10px', fontSize: '12px', border: '2px solid blue' }}>
+        DEBUG: LoginPage root component rendered
       </div>
-    }>
-      <LoginForm />
-    </Suspense>
+      <Suspense 
+        fallback={
+          <div className="container mx-auto px-4 py-16">
+            <div className="max-w-md mx-auto">
+              <div style={{ background: '#fff0e0', padding: '10px', marginBottom: '10px' }}>
+                DEBUG: Suspense fallback showing (waiting for searchParams)
+              </div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#312e81] mx-auto"></div>
+            </div>
+          </div>
+        }
+      >
+        <LoginForm />
+      </Suspense>
+    </>
   );
 }
