@@ -18,7 +18,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const redirect = searchParams.get('redirect') || '/';
+  const redirect = searchParams?.get('redirect') || '/';
   
   console.log('🔵 LoginForm - redirect:', redirect);
   console.log('🔵 LoginForm - searchParams available:', !!searchParams);
