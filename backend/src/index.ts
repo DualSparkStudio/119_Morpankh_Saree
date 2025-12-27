@@ -122,83 +122,39 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/payments', paymentRoutes);
 
-// Serve Vite frontend (static files from dist folder)
+// Serve Next.js frontend
 {
-  console.log('🔍 Starting Vite frontend setup...');
-  console.log('📂 Current working directory:', process.cwd());
-  console.log('📂 __dirname:', __dirname);
-  console.log('🌍 NODE_ENV:', process.env.NODE_ENV);
+  console.log('🔍 Starting Next.js frontend setup...');
   
-  // Calculate frontend dist path - handle both local and Render deployment
-  // On Render: startCommand runs from backend/, so process.cwd() = /opt/render/project/src/backend
-  // So ../frontend/dist = /opt/render/project/src/frontend/dist
-  const possibleDistPaths = [
-    path.resolve(process.cwd(), '../frontend/dist'), // From backend/ -> ../frontend/dist (MOST LIKELY ON RENDER)
-    path.resolve(__dirname, '../../frontend/dist'), // From backend/dist -> ../../frontend/dist
-    path.resolve(process.cwd(), 'frontend/dist'), // From root/ -> frontend/dist
-    path.join(process.cwd(), '..', 'frontend', 'dist'), // Alternative path resolution
-    '/opt/render/project/src/frontend/dist', // Render specific absolute path
-    path.resolve(__dirname, '..', '..', 'frontend', 'dist'), // Alternative relative from dist
-  ];
+  const frontendPath = path.resolve(process.cwd(), '../frontend');
+  const nextStaticPath = path.resolve(frontendPath, '.next/static');
+  const nextPublicPath = path.resolve(frontendPath, 'public');
   
-  console.log('🔍 Checking frontend dist paths:');
-  possibleDistPaths.forEach(p => {
-    const exists = fs.existsSync(p);
-    console.log(`   ${exists ? '✅' : '❌'} ${p}`);
+  // Serve Next.js static files
+  if (fs.existsSync(nextStaticPath)) {
+    app.use('/_next/static', express.static(path.join(nextStaticPath, 'static'), { maxAge: '1y' }));
+    console.log('✅ Next.js static files configured');
+  }
+  
+  // Serve public files
+  if (fs.existsSync(nextPublicPath)) {
+    app.use(express.static(nextPublicPath, { maxAge: '1y' }));
+    console.log('✅ Next.js public files configured');
+  }
+  
+  // Handle Next.js routes - will be handled by Next.js server in standalone mode
+  // For now, serve a simple message for non-API routes
+  app.get('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    // Skip API routes and health check
+    if (req.path.startsWith('/api') || req.path.startsWith('/health') || req.path.startsWith('/_next')) {
+      return next();
+    }
+    
+    // Next.js will handle these routes in production (standalone server)
+    res.status(404).send('Next.js frontend not loaded. Make sure Next.js standalone server is running.');
   });
   
-  let distPath: string | null = null;
-  for (const possiblePath of possibleDistPaths) {
-    if (fs.existsSync(possiblePath)) {
-      distPath = possiblePath;
-      console.log('✅ Found frontend dist at:', distPath);
-      break;
-    }
-  }
-  
-  if (!distPath) {
-    console.error('❌ Frontend dist directory not found! Tried paths:');
-    possibleDistPaths.forEach(p => console.error('   -', p));
-    console.error('❌ Current working directory:', process.cwd());
-    console.error('❌ __dirname:', __dirname);
-    console.error('❌ Make sure frontend is built: cd frontend && npm run build');
-  } else {
-    // Serve static files from dist folder
-    app.use(express.static(distPath, { 
-      maxAge: '1y',
-      etag: true
-    }));
-    console.log('✅ Static files path configured:', distPath);
-    
-    // Serve index.html for all non-API routes (SPA routing)
-    app.get('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-      // Skip API routes and health check
-      if (req.path.startsWith('/api') || req.path.startsWith('/health')) {
-        return next();
-      }
-      
-      // Serve index.html for all other routes (React Router will handle routing)
-      const indexPath = path.join(distPath!, 'index.html');
-      if (fs.existsSync(indexPath)) {
-        res.sendFile(path.resolve(indexPath));
-      } else {
-        res.status(404).send(`
-          <html>
-            <head><title>404 - Frontend Not Found</title></head>
-            <body>
-              <h1>404 - Frontend Not Found</h1>
-              <p>The Vite frontend could not be loaded.</p>
-              <p>Please check the deployment logs for more information.</p>
-              <p>Path: ${req.path}</p>
-              <p>Working Directory: ${process.cwd()}</p>
-              <p>__dirname: ${__dirname}</p>
-            </body>
-          </html>
-        `);
-      }
-    });
-    console.log('✅ Vite SPA route handler configured');
-  }
+  console.log('✅ Next.js frontend configuration ready');
 }
 
 // Error handling
