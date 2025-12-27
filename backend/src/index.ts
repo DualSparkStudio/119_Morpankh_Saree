@@ -20,6 +20,7 @@ import adminRoutes from './routes/admin';
 import adminProductsRoutes from './routes/admin/products';
 import adminOrdersRoutes from './routes/admin/orders';
 import adminDashboardRoutes from './routes/admin/dashboard';
+import adminBannersRoutes from './routes/admin/banners';
 import bannerRoutes from './routes/banners';
 import couponRoutes from './routes/coupons';
 import reviewRoutes from './routes/reviews';
@@ -53,6 +54,12 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Serve uploaded files
+const uploadsPath = path.join(process.cwd(), 'uploads');
+if (fs.existsSync(uploadsPath)) {
+  app.use('/uploads', express.static(uploadsPath));
+}
 
 // Log all requests for debugging (can be removed in production)
 app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -107,6 +114,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/admin/products', adminProductsRoutes);
 app.use('/api/admin/orders', adminOrdersRoutes);
 app.use('/api/admin/dashboard', adminDashboardRoutes);
+app.use('/api/admin/banners', adminBannersRoutes);
 app.use('/api/banners', bannerRoutes);
 app.use('/api/coupons', couponRoutes);
 app.use('/api/reviews', reviewRoutes);

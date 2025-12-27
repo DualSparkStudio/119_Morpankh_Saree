@@ -1,11 +1,8 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Poppins, Dancing_Script } from "next/font/google";
 import "./globals.css";
-import SmoothScroll from "@/components/SmoothScroll";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import LayoutWrapper from "@/components/LayoutWrapper";
 import Providers from "@/components/Providers";
-import WhatsAppButton from "@/components/WhatsAppButton";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -45,14 +42,7 @@ export default function RootLayout({
         className={`${cormorant.variable} ${poppins.variable} ${dancingScript.variable} font-sans antialiased`}
       >
         <Providers>
-          <SmoothScroll>
-            <Header />
-            <main className="min-h-screen">
-              {children}
-            </main>
-            <Footer />
-            <WhatsAppButton />
-          </SmoothScroll>
+          <LayoutWrapper>{children}</LayoutWrapper>
         </Providers>
       </body>
     </html>
