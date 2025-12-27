@@ -10,7 +10,7 @@ import { productsApi, Product } from '@/lib/api/products';
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const slug = params.slug as string;
+  const slug = (params?.slug as string) || '';
   
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
