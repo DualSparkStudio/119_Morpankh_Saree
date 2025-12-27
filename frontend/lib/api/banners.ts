@@ -22,6 +22,10 @@ export const bannersApi = {
     const { data } = await api.get('/banners', { params: position ? { position } : {} });
     return data;
   },
+  // Alias for compatibility
+  getAll: async (position?: string): Promise<Banner[]> => {
+    return bannersApi.getBanners(position);
+  },
 
   // Admin API - get all banners
   getAdminBanners: async (): Promise<Banner[]> => {
