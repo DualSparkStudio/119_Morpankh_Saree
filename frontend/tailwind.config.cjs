@@ -1,16 +1,17 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {
       colors: {
         'royal-blue': '#1e3a8a',
-        'deep-indigo': '#1e3a8a', // Dark blue/navy matching the image
-        'navy-blue': '#0f172a', // Darker navy for headers
-        'sale-red': '#dc2626', // Red for sale badges
+        'deep-indigo': '#1e3a8a',
+        'navy-blue': '#0f172a',
+        'sale-red': '#dc2626',
         'sale-red-light': '#ef4444',
         'off-white': '#faf9f6',
         'soft-cream': '#fffef9',
@@ -25,5 +26,5 @@ export default {
     },
   },
   plugins: [],
-}
+};
 
