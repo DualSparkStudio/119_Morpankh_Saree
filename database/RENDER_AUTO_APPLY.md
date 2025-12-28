@@ -121,3 +121,4 @@ You can also check the database directly (see `CHECK_CURRENT_SCHEMA.md`).
 **Next Step**: Just trigger a deployment and the schema will be applied automatically!
 
 
+

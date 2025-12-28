@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Old Vite files (using Next.js now)
+src/
+index.html
+vite.config.ts
