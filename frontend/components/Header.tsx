@@ -110,7 +110,7 @@ export default function Header() {
               )}
             </Link>
             <Link
-              href={user ? "/account" : "/login"}
+              href={user ? "/profile" : "/login"}
               className="p-2 text-gray-700 hover:text-[#1e3a8a] transition-colors"
             >
               <User className="w-5 h-5" />

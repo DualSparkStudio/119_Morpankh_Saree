@@ -24,6 +24,7 @@ interface AppState {
   token: string | null;
   cart: CartItem[];
   wishlist: string[];
+  _hasHydrated?: boolean;
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   addToCart: (item: CartItem) => void;
@@ -42,6 +43,7 @@ export const useStore = create<AppState>()(
       token: null,
       cart: [],
       wishlist: [],
+      _hasHydrated: false,
       
       setUser: (user) => set({ user }),
       setToken: (token) => {
@@ -98,13 +100,20 @@ export const useStore = create<AppState>()(
           wishlist: state.wishlist.filter((id) => id !== productId),
         })),
       
-      logout: () =>
+      logout: () => {
+        // Clear localStorage on logout to prevent stale auth state
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('refreshToken');
+          localStorage.removeItem('morpankh-store');
+        }
         set({
           user: null,
           token: null,
           cart: [],
           wishlist: [],
-        }),
+        });
+      },
     }),
     {
       name: 'morpankh-store',
@@ -114,7 +123,18 @@ export const useStore = create<AppState>()(
         cart: state.cart,
         wishlist: state.wishlist,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state._hasHydrated = true;
+        }
+      },
     }
   )
 );
+
+// Helper hook to check if store has hydrated
+export const useHasHydrated = () => {
+  const store = useStore();
+  return store._hasHydrated !== undefined ? store._hasHydrated : false;
+};
 

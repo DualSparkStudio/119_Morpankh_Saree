@@ -200,7 +200,7 @@ export default function CheckoutPage() {
                     </label>
                   ))}
                   <button
-                    onClick={() => router.push('/account/addresses?new=true')}
+                    onClick={() => router.push('/profile?newAddress=true')}
                     className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-deep-indigo hover:border-deep-indigo hover:bg-gray-50 transition-colors"
                   >
                     + Add New Address

@@ -15,26 +15,37 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   const redirect = searchParams?.get('redirect') || '/';
 
+  // Wait for component to mount (client-side only)
   useEffect(() => {
-    // Wait a bit for Zustand store to hydrate from localStorage
+    setMounted(true);
+  }, []);
+
+  // Only check auth after component is mounted and we've waited for hydration
+  useEffect(() => {
+    if (!mounted) return;
+    
+    // Wait for Zustand persist to fully hydrate from localStorage
+    // This prevents redirecting with stale/incomplete data
     const timer = setTimeout(() => {
-      setCheckingAuth(false);
-      // Only redirect if user is actually set in store (not just localStorage token)
-      // This prevents redirecting with stale/invalid tokens
-      if (user && token && user.id) {
+      // Only redirect if we have COMPLETE user data in store
+      // Must have: user object, token, user.id, and user.role
+      // This ensures we don't redirect with just a token but no user data
+      const hasCompleteAuth = user && token && user.id && user.role;
+      
+      if (hasCompleteAuth) {
         router.push(redirect);
       }
-    }, 100);
+    }, 500); // Wait 500ms to ensure Zustand hydration completes
 
     return () => clearTimeout(timer);
-  }, [user, token, router, redirect]);
+  }, [mounted, user, token, router, redirect]);
 
-  // Show loading state while checking auth
-  if (checkingAuth) {
+  // Show loading state while mounting
+  if (!mounted) {
     return (
       <div className="min-h-screen bg-soft-cream py-16">
         <div className="container mx-auto px-4">
