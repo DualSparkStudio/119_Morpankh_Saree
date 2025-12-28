@@ -154,23 +154,25 @@ export default function CheckoutPage() {
         src="https://checkout.razorpay.com/v1/checkout.js"
         onLoad={() => setRazorpayLoaded(true)}
       />
-      <div className="min-h-screen bg-[#fffef9] py-8">
+      <div className="min-h-screen bg-soft-cream py-8">
         <div className="container mx-auto px-4">
-          <h1 className="font-heading text-4xl text-[#312e81] mb-8">Checkout</h1>
+          <h1 className="text-3xl md:text-4xl font-heading text-deep-indigo mb-8">Checkout</h1>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Checkout Form */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Shipping Address */}
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h2 className="font-heading text-2xl text-[#312e81] mb-4">Shipping Address</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left - Billing Form */}
+            <div className="bg-white rounded-lg p-6 shadow-md">
+              <h2 className="text-2xl font-heading text-deep-indigo mb-6">Billing Details</h2>
+              <div className="space-y-4">
+                {/* Shipping Address */}
+                <div>
+                  <h3 className="text-xl font-heading text-deep-indigo mb-4">Shipping Address</h3>
                 <div className="space-y-4">
                   {addresses.map((address) => (
                     <label
                       key={address.id}
                       className={`block p-4 border-2 rounded-lg cursor-pointer transition-all ${
                         selectedAddress === address.id
-                          ? 'border-[#312e81] bg-[#312e81]/5'
+                          ? 'border-deep-indigo bg-deep-indigo/5'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
@@ -199,7 +201,7 @@ export default function CheckoutPage() {
                   ))}
                   <button
                     onClick={() => router.push('/account/addresses?new=true')}
-                    className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-[#1e3a8a] hover:border-[#312e81] hover:bg-gray-50 transition-colors"
+                    className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-deep-indigo hover:border-deep-indigo hover:bg-gray-50 transition-colors"
                   >
                     + Add New Address
                   </button>
@@ -207,11 +209,11 @@ export default function CheckoutPage() {
               </div>
 
               {/* Payment Method */}
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h2 className="font-heading text-2xl text-[#312e81] mb-4">Payment Method</h2>
-                <div className="border-2 border-[#312e81] bg-[#312e81]/5 rounded-lg p-4">
+              <div className="mt-6">
+                <h2 className="text-xl font-heading text-deep-indigo mb-4">Payment Method</h2>
+                <div className="border-2 border-deep-indigo bg-deep-indigo/5 rounded-lg p-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-[#312e81] rounded-lg flex items-center justify-center text-white font-bold">
+                    <div className="w-12 h-12 bg-deep-indigo rounded-lg flex items-center justify-center text-white font-bold">
                       R
                     </div>
                     <div>
@@ -225,39 +227,43 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {/* Order Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg p-6 shadow-sm sticky top-24">
-                <h2 className="font-heading text-2xl text-[#312e81] mb-6">Order Summary</h2>
+            {/* Right - Order Summary */}
+            <div className="bg-white rounded-lg p-6 shadow-md h-fit">
+              <h2 className="text-2xl font-heading text-deep-indigo mb-6">Order Summary</h2>
                 
-                <div className="space-y-3 mb-6">
-                  <div className="flex justify-between text-gray-600">
-                    <span>Subtotal ({cart.length} items)</span>
-                    <span>₹{subtotal.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>Shipping</span>
-                    <span>{shipping === 0 ? 'Free' : `₹${shipping}`}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>Tax (GST)</span>
-                    <span>₹{tax.toFixed(2)}</span>
-                  </div>
+                <div className="space-y-4 mb-6">
+                  {cart.map((item) => (
+                    <div key={item.id} className="flex justify-between items-center pb-4 border-b border-gray-200">
+                      <div>
+                        <p className="font-medium text-gray-800">{item.name || 'Product'}</p>
+                        <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                      </div>
+                      <p className="font-semibold text-deep-indigo">₹{(item.price * item.quantity).toLocaleString()}</p>
+                    </div>
+                  ))}
                 </div>
 
-                <div className="border-t border-gray-200 pt-4 mb-6">
-                  <div className="flex justify-between text-xl font-bold text-[#312e81]">
+                <div className="space-y-2 mb-6">
+                  <div className="flex justify-between text-gray-700">
+                    <span>Subtotal</span>
+                    <span>₹{subtotal.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-700">
+                    <span>Shipping</span>
+                    <span>₹{shipping.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-xl font-bold text-deep-indigo pt-4 border-t border-gray-200">
                     <span>Total</span>
-                    <span>₹{total.toFixed(2)}</span>
+                    <span>₹{total.toLocaleString()}</span>
                   </div>
                 </div>
 
                 <button
                   onClick={handlePayment}
                   disabled={loading || !selectedAddress}
-                  className="w-full bg-[#312e81] hover:bg-[#1e3a8a] text-white px-6 py-4 rounded-lg font-semibold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-royal-blue hover:bg-deep-indigo text-white px-6 py-4 rounded-lg font-semibold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Processing...' : `Pay ₹${total.toFixed(2)}`}
+                  Place Order
                 </button>
 
                 <p className="text-xs text-gray-500 text-center mt-4">

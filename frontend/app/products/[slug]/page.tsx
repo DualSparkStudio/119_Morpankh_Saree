@@ -98,7 +98,7 @@ export default function ProductDetailPage() {
   const inStock = availableQuantity > 0;
 
   return (
-    <div className="min-h-screen bg-[#fffef9] py-8">
+    <div className="min-h-screen bg-soft-cream py-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Image Gallery */}

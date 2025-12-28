@@ -102,11 +102,11 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fffef9] py-8">
+    <div className="min-h-screen bg-soft-cream py-8">
       <div className="container mx-auto px-4">
-        {/* Header */}
+          {/* Header */}
         <div className="mb-8">
-          <h1 className="font-heading text-4xl md:text-5xl text-[#312e81] mb-2">
+          <h1 className="font-heading text-4xl md:text-5xl text-deep-indigo mb-2">
             All Products
           </h1>
           <p className="text-gray-600">
@@ -119,7 +119,7 @@ export default function ProductsPage() {
           <aside className={`lg:w-64 ${showFilters ? 'block' : 'hidden'} lg:block`}>
             <div className="bg-white rounded-lg p-6 sticky top-24">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="font-heading text-xl text-[#312e81]">Filters</h2>
+                <h2 className="font-heading text-lg font-semibold text-deep-indigo">Price Range</h2>
                 <button
                   onClick={() => setShowFilters(false)}
                   className="lg:hidden text-gray-500 hover:text-gray-700"
@@ -224,13 +224,13 @@ export default function ProductsPage() {
                 <div className="flex items-center gap-2 border border-gray-300 rounded-lg overflow-hidden">
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-2 ${viewMode === 'grid' ? 'bg-[#312e81] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+                    className={`p-2 ${viewMode === 'grid' ? 'bg-deep-indigo text-white' : 'text-gray-600 hover:bg-gray-50'}`}
                   >
                     <Grid className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-2 ${viewMode === 'list' ? 'bg-[#312e81] text-white' : 'text-gray-600 hover:bg-gray-50'}`}
+                    className={`p-2 ${viewMode === 'list' ? 'bg-deep-indigo text-white' : 'text-gray-600 hover:bg-gray-50'}`}
                   >
                     <List className="w-5 h-5" />
                   </button>
@@ -346,7 +346,7 @@ export default function ProductsPage() {
                         onClick={() => setPagination({ ...pagination, page })}
                         className={`px-4 py-2 border rounded-lg ${
                           pagination.page === page
-                            ? 'bg-[#312e81] text-white border-[#312e81]'
+                            ? 'bg-deep-indigo text-white border-deep-indigo'
                             : 'border-gray-300 hover:bg-gray-50'
                         }`}
                       >
