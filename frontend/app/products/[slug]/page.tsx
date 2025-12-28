@@ -1,294 +1,170 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { Heart, ShoppingCart, Minus, Plus, Star, Check } from 'lucide-react';
-import { useStore } from '@/lib/store';
-import { productsApi, Product } from '@/lib/api/products';
+import { Heart, ShoppingCart, Share2 } from 'lucide-react';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const slug = (params?.slug as string) || '';
-  
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [quantity, setQuantity] = useState(1);
-  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState(0);
 
-  const { wishlist, addToWishlist, removeFromWishlist, addToCart } = useStore();
+  const productId = slug ? parseInt(slug) : 1;
+  const images = Array.from({ length: 5 }, (_, i) => ({
+    id: i,
+    url: `/images/products/product-${productId}-${i + 1}.jpg`,
+    placeholderUrl: `https://images.unsplash.com/photo-${1570000000000 + (productId * 10 + i + 1) * 100000}?w=400&h=600&fit=crop&q=80`,
+  }));
 
-  useEffect(() => {
-    loadProduct();
-  }, [slug]);
-
-  const loadProduct = async () => {
-    try {
-      setLoading(true);
-      const data = await productsApi.getBySlug(slug);
-      setProduct(data);
-      if (data.variants && data.variants.length > 0) {
-        setSelectedVariant(data.variants[0].id);
-      }
-    } catch (error) {
-      console.error('Error loading product:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const toggleWishlist = () => {
-    if (!product) return;
-    if (wishlist.includes(product.id)) {
-      removeFromWishlist(product.id);
-    } else {
-      addToWishlist(product.id);
-    }
-  };
-
-  const handleAddToCart = () => {
-    if (!product) return;
-    addToCart({
-      id: `${product.id}-${selectedVariant || 'default'}`,
-      productId: product.id,
-      variantId: selectedVariant || undefined,
-      quantity,
-      price: product.basePrice,
-    });
-  };
-
-  const incrementQuantity = () => {
-    const maxQuantity = product?.inventory?.reduce((sum, inv) => sum + inv.quantity, 0) || 10;
-    if (quantity < maxQuantity) {
-      setQuantity(quantity + 1);
-    }
-  };
-
-  const decrementQuantity = () => {
-    if (quantity > 1) {
-      setQuantity(quantity - 1);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#312e81]"></div>
-          <p className="mt-4 text-gray-600">Loading product...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Product not found</h1>
-          <p className="text-gray-600">The product you're looking for doesn't exist.</p>
-        </div>
-      </div>
-    );
-  }
-
-  const availableQuantity = product.inventory?.reduce((sum, inv) => sum + inv.quantity, 0) || 0;
-  const inStock = availableQuantity > 0;
+  const relatedProducts = Array.from({ length: 4 }, (_, i) => ({
+    id: i + 1,
+    name: `Related Product ${i + 1}`,
+    price: (1999 + i * 500).toLocaleString(),
+    image: `/images/products/product-${i + 20}.jpg`,
+    placeholderImage: `https://images.unsplash.com/photo-${1570000000000 + (i + 20) * 100000}?w=300&h=400&fit=crop&q=80`,
+  }));
 
   return (
     <div className="min-h-screen bg-soft-cream py-8">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Image Gallery */}
-          <div>
-            <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 mb-4">
-              <Image
-                src={product.images[selectedImageIndex] || product.images[0] || '/images/placeholder.jpg'}
-                alt={product.name}
-                fill
-                className="object-cover"
-                priority
-              />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          {/* Left - Image Gallery */}
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Thumbnails */}
+            <div className="flex lg:flex-col gap-2 order-2 lg:order-1">
+              {images.map((img, index) => (
+                <button
+                  key={img.id}
+                  onClick={() => setSelectedImage(index)}
+                  className={`w-20 h-20 lg:w-24 lg:h-24 rounded-lg overflow-hidden border-2 transition-all ${
+                    selectedImage === index
+                      ? 'border-royal-blue'
+                      : 'border-transparent hover:border-gray-300'
+                  }`}
+                >
+                  <img
+                    src={img.url}
+                    alt={`Thumbnail ${index + 1}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      if (target.src !== img.placeholderUrl) {
+                        target.src = img.placeholderUrl;
+                      }
+                    }}
+                  />
+                </button>
+              ))}
             </div>
-            {product.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-4">
-                {product.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImageIndex(index)}
-                    className={`relative aspect-square overflow-hidden rounded-lg border-2 transition-all ${
-                      selectedImageIndex === index
-                        ? 'border-[#312e81]'
-                        : 'border-transparent hover:border-gray-300'
-                    }`}
-                  >
-                    <Image
-                      src={image}
-                      alt={`${product.name} - Image ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </button>
-                ))}
+
+            {/* Main Image */}
+            <div className="flex-1 order-1 lg:order-2">
+              <div className="aspect-[3/4] bg-white rounded-lg overflow-hidden shadow-lg">
+                <img
+                  src={images[selectedImage].url}
+                  alt="Main product"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    const placeholder = images[selectedImage].placeholderUrl;
+                    if (target.src !== placeholder) {
+                      target.src = placeholder;
+                    }
+                  }}
+                />
               </div>
-            )}
+            </div>
           </div>
 
-          {/* Product Info */}
-          <div>
-            {product.category && (
-              <p className="text-sm text-[#1e3a8a] mb-2">{product.category.name}</p>
-            )}
-            <h1 className="font-heading text-4xl md:text-5xl text-[#312e81] mb-4">
-              {product.name}
-            </h1>
-
-            {/* Price */}
-            <div className="flex items-center gap-4 mb-6">
-              <span className="text-3xl font-bold text-[#312e81]">
-                ₹{product.basePrice.toLocaleString()}
-              </span>
-              {product.compareAtPrice && (
-                <>
-                  <span className="text-xl text-gray-400 line-through">
-                    ₹{product.compareAtPrice.toLocaleString()}
-                  </span>
-                  <span className="bg-red-500 text-white px-3 py-1 rounded text-sm font-semibold">
-                    {Math.round(((product.compareAtPrice - product.basePrice) / product.compareAtPrice) * 100)}% OFF
-                  </span>
-                </>
-              )}
+          {/* Right - Product Info */}
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl md:text-4xl font-heading text-deep-indigo mb-4">
+                Premium Designer Saree
+              </h1>
+              <p className="text-2xl md:text-3xl font-bold text-royal-blue mb-6">
+                ₹4,999
+              </p>
             </div>
 
-            {/* Stock Status */}
-            <div className="mb-6">
-              {inStock ? (
-                <div className="flex items-center gap-2 text-green-600">
-                  <Check className="w-5 h-5" />
-                  <span className="font-medium">In Stock ({availableQuantity} available)</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 text-red-600">
-                  <span className="font-medium">Out of Stock</span>
-                </div>
-              )}
-            </div>
-
-            {/* Variants */}
-            {product.variants && product.variants.length > 0 && (
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Variant
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {product.variants.map((variant) => (
-                    <button
-                      key={variant.id}
-                      onClick={() => setSelectedVariant(variant.id)}
-                      className={`px-4 py-2 border-2 rounded-lg transition-all ${
-                        selectedVariant === variant.id
-                          ? 'border-[#312e81] bg-[#312e81] text-white'
-                          : 'border-gray-300 hover:border-[#1e3a8a]'
-                      }`}
-                    >
-                      {variant.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Quantity Selector */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Quantity
-              </label>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
-                  <button
-                    onClick={decrementQuantity}
-                    disabled={quantity <= 1}
-                    className="p-2 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="px-4 py-2 min-w-[60px] text-center font-medium">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={incrementQuantity}
-                    disabled={quantity >= availableQuantity}
-                    className="p-2 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-                <span className="text-sm text-gray-600">
-                  {availableQuantity} available
-                </span>
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-4 mb-8">
-              <button
-                onClick={handleAddToCart}
-                disabled={!inStock}
-                className="flex-1 flex items-center justify-center gap-2 bg-[#312e81] hover:bg-[#1e3a8a] text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+            <div className="flex flex-wrap gap-3">
+              <button className="flex-1 bg-royal-blue hover:bg-deep-indigo text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
                 <ShoppingCart className="w-5 h-5" />
                 Add to Cart
               </button>
-              <button
-                onClick={toggleWishlist}
-                className={`p-4 border-2 rounded-lg transition-colors ${
-                  wishlist.includes(product.id)
-                    ? 'border-red-500 text-red-500 bg-red-50'
-                    : 'border-gray-300 hover:border-[#312e81] hover:text-[#312e81]'
-                }`}
-              >
-                <Heart
-                  className={`w-6 h-6 ${wishlist.includes(product.id) ? 'fill-current' : ''}`}
-                />
+              <button className="flex-1 bg-gold hover:bg-gold-light text-white px-6 py-3 rounded-lg font-semibold transition-colors">
+                Buy Now
               </button>
             </div>
 
-            {/* Description */}
-            {product.description && (
-              <div className="mb-8">
-                <h2 className="font-heading text-2xl text-[#312e81] mb-4">Description</h2>
-                <div
-                  className="text-gray-700 prose max-w-none"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
-                />
-              </div>
-            )}
+            <div className="flex gap-3">
+              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <Heart className="w-5 h-5 text-gray-700" />
+                <span>Wishlist</span>
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <Share2 className="w-5 h-5 text-gray-700" />
+                <span>Share</span>
+              </button>
+            </div>
 
-            {/* Reviews Summary */}
-            {product._count && product._count.reviews > 0 && (
-              <div className="border-t border-gray-200 pt-6">
-                <h2 className="font-heading text-2xl text-[#312e81] mb-4">Reviews</h2>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        className="w-5 h-5 fill-[#d4af37] text-[#d4af37]"
-                      />
-                    ))}
-                  </div>
-                  <span className="text-gray-600">
-                    ({product._count.reviews} review{product._count.reviews !== 1 ? 's' : ''})
-                  </span>
-                </div>
+            {/* Product Description */}
+            <div className="bg-white rounded-lg p-6">
+              <h2 className="text-xl font-heading text-deep-indigo mb-4">Description</h2>
+              <p className="text-gray-700 leading-relaxed">
+                This premium designer saree features exquisite craftsmanship and elegant design.
+                Made with high-quality materials, it's perfect for special occasions. The intricate
+                patterns and beautiful color combinations make it a standout piece in any collection.
+              </p>
+              <div className="mt-4 space-y-2">
+                <p className="text-gray-600"><strong>Material:</strong> Pure Silk</p>
+                <p className="text-gray-600"><strong>Care:</strong> Dry Clean Only</p>
+                <p className="text-gray-600"><strong>Color:</strong> Royal Blue with Gold</p>
               </div>
-            )}
+            </div>
+          </div>
+        </div>
+
+        {/* Related Products */}
+        <div className="mt-12">
+          <h2 className="text-2xl md:text-3xl font-heading text-deep-indigo mb-6">
+            Related Products
+          </h2>
+          <div className="overflow-x-auto pb-4">
+            <div className="flex gap-6 min-w-max">
+              {relatedProducts.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/products/${product.id}`}
+                  className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow min-w-[250px]"
+                >
+                  <div className="aspect-[3/4] bg-gray-100 overflow-hidden">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (target.src !== product.placeholderImage) {
+                          target.src = product.placeholderImage;
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2">
+                      {product.name}
+                    </h3>
+                    <p className="text-lg font-bold text-deep-indigo">₹{product.price}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
