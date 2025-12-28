@@ -122,9 +122,12 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/payments', paymentRoutes);
 
-// Serve Next.js frontend
-{
-  console.log('🔍 Starting Next.js frontend setup...');
+// Only serve Next.js static files if running standalone (not when imported as module)
+// When imported, the custom Next.js server will handle frontend serving
+const isStandalone = require.main === module || (typeof require !== 'undefined' && require.main?.filename?.endsWith('index.js'));
+
+if (isStandalone) {
+  console.log('🔍 Backend running standalone mode...');
   
   const frontendPath = path.resolve(process.cwd(), '../frontend');
   const nextStaticPath = path.resolve(frontendPath, '.next/static');
@@ -143,7 +146,6 @@ app.use('/api/payments', paymentRoutes);
   }
   
   // Handle Next.js routes - will be handled by Next.js server in standalone mode
-  // For now, serve a simple message for non-API routes
   app.get('*', (req: express.Request, res: express.Response, next: express.NextFunction) => {
     // Skip API routes and health check
     if (req.path.startsWith('/api') || req.path.startsWith('/health') || req.path.startsWith('/_next')) {
@@ -154,27 +156,31 @@ app.use('/api/payments', paymentRoutes);
     res.status(404).send('Next.js frontend not loaded. Make sure Next.js standalone server is running.');
   });
   
-  console.log('✅ Next.js frontend configuration ready');
+  console.log('✅ Backend standalone configuration ready');
 }
 
 // Error handling
 app.use(errorHandler);
 
-// 404 handler (only for API routes if frontend not served)
-if (process.env.NODE_ENV !== 'production') {
+// 404 handler (only for API routes if frontalone and in development)
+if (isStandalone && process.env.NODE_ENV !== 'production') {
   app.use((req: express.Request, res: express.Response) => {
-    res.status(404).json({ error: 'Route not found' });
+    // Only return 404 for API routes
+    if (req.path.startsWith('/api')) {
+      res.status(404).json({ error: 'Route not found' });
+    } else {
+      res.status(404).send('Route not found');
+    }
   });
 }
 
-// Start server - Render will provide PORT via environment variable
-// Guard against double-start
-let serverStarted = false;
+// Start server only if running directly (not when imported as module)
+// Check if this file is being run directly (not imported)
+const isMainModule = typeof require !== 'undefined' && require.main === module;
 
-if (!serverStarted) {
-  serverStarted = true;
+if (isMainModule) {
   const server = app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🚀 Backend server running on port ${PORT}`);
   });
   
   server.on('error', (error: NodeJS.ErrnoException) => {
