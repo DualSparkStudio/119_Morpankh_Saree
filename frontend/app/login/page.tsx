@@ -9,24 +9,42 @@ import { useStore } from '@/lib/store';
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setUser, setToken } = useStore();
+  const { setUser, setToken, user, token } = useStore();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   const redirect = searchParams?.get('redirect') || '/';
 
   useEffect(() => {
-    // Check if already logged in
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
-      if (token) {
+    // Wait a bit for Zustand store to hydrate from localStorage
+    const timer = setTimeout(() => {
+      setCheckingAuth(false);
+      // Only redirect if user is actually set in store (not just localStorage token)
+      // This prevents redirecting with stale/invalid tokens
+      if (user && token && user.id) {
         router.push(redirect);
       }
-    }
-  }, [router, redirect]);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [user, token, router, redirect]);
+
+  // Show loading state while checking auth
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-soft-cream py-16">
+        <div className="container mx-auto px-4">
+          <div className="max-w-md mx-auto">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-deep-indigo mx-auto"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,8 +129,8 @@ function LoginForm() {
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Don't have an account?{' '}
-              <Link href="/register" className="text-deep-indigo hover:underline font-medium">
-                Register here
+              <Link href="/contact" className="text-deep-indigo hover:underline font-medium">
+                Contact us to create an account
               </Link>
             </p>
           </div>
