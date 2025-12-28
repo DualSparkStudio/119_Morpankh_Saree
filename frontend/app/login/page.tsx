@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { authApi } from '@/lib/api/auth';
@@ -10,6 +10,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setUser, setToken, user, token } = useStore();
+  const hasCheckedAuth = useRef(false);
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,25 +25,34 @@ function LoginForm() {
     setMounted(true);
   }, []);
 
-  // Only check auth after component is mounted and we've waited for hydration
+  // Only check auth ONCE after component is mounted and hydrated
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || hasCheckedAuth.current) return;
     
     // Wait for Zustand persist to fully hydrate from localStorage
     // This prevents redirecting with stale/incomplete data
     const timer = setTimeout(() => {
+      hasCheckedAuth.current = true;
+      
+      // Read current values from the store hook
+      // These will be the hydrated values after Zustand loads from localStorage
+      const currentUser = user;
+      const currentToken = token;
+      
       // Only redirect if we have COMPLETE user data in store
       // Must have: user object, token, user.id, and user.role
       // This ensures we don't redirect with just a token but no user data
-      const hasCompleteAuth = user && token && user.id && user.role;
+      const hasCompleteAuth = currentUser && currentToken && currentUser.id && currentUser.role;
       
       if (hasCompleteAuth) {
         router.push(redirect);
       }
-    }, 500); // Wait 500ms to ensure Zustand hydration completes
+    }, 1000); // Wait 1 second to ensure Zustand hydration completes
 
     return () => clearTimeout(timer);
-  }, [mounted, user, token, router, redirect]);
+    // Only run once after mount - don't re-run when user/token change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted, router, redirect]);
 
   // Show loading state while mounting
   if (!mounted) {
