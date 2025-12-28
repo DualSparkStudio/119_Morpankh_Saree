@@ -70,7 +70,7 @@ export default function CartPage() {
                 <div className="flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex-1">
                     <Link href={`/products/${item.productId}`}>
-                      <h3 className="font-semibold text-gray-800 mb-2 hover:text-royal-blue">{item.name || 'Product Name'}</h3>
+                      <h3 className="font-semibold text-gray-800 mb-2 hover:text-royal-blue">{item.productName || 'Product Name'}</h3>
                     </Link>
                     <p className="text-lg font-bold text-deep-indigo">₹{(item.price * item.quantity).toLocaleString()}</p>
                   </div>
