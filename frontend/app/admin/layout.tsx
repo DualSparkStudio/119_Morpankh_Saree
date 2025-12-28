@@ -8,11 +8,7 @@ import {
   LayoutDashboard,
   Package,
   ShoppingCart,
-  Users,
-  BarChart3,
-  Settings,
   PackageSearch,
-  Ticket,
   Image as ImageIcon,
   LogOut,
 } from 'lucide-react';
@@ -65,11 +61,7 @@ export default function AdminLayout({
     { href: '/admin/products', icon: Package, label: 'Products' },
     { href: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
     { href: '/admin/inventory', icon: PackageSearch, label: 'Inventory' },
-    { href: '/admin/customers', icon: Users, label: 'Customers' },
-    { href: '/admin/coupons', icon: Ticket, label: 'Coupons' },
     { href: '/admin/banners', icon: ImageIcon, label: 'Banners' },
-    { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
-    { href: '/admin/settings', icon: Settings, label: 'Settings' },
   ];
 
   return (

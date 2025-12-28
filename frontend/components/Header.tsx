@@ -1,16 +1,44 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingBag, Heart, User, Menu } from 'lucide-react';
+import { ShoppingBag, Heart, User, Menu, ChevronDown } from 'lucide-react';
 import { useStore } from '@/lib/store';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 export default function Header() {
   const { cart, wishlist, user } = useStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const wishlistCount = wishlist.length;
+
+  const categories = [
+    { name: 'Silk', slug: 'silk' },
+    { name: 'Cotton', slug: 'cotton' },
+    { name: 'Designer', slug: 'designer' },
+    { name: 'Printed', slug: 'printed' },
+    { name: 'Dress', slug: 'dress' },
+    { name: 'Handloom', slug: 'handloom' },
+  ];
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setCategoriesDropdownOpen(false);
+      }
+    };
+
+    if (categoriesDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [categoriesDropdownOpen]);
 
   return (
     <header className="bg-[#fffef9] border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-opacity-95">
@@ -26,9 +54,29 @@ export default function Header() {
             <Link href="/products" className="text-gray-700 hover:text-[#1e3a8a] transition-colors">
               Products
             </Link>
-            <Link href="/categories" className="text-gray-700 hover:text-[#1e3a8a] transition-colors">
-              Categories
-            </Link>
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setCategoriesDropdownOpen(!categoriesDropdownOpen)}
+                className="flex items-center gap-1 text-gray-700 hover:text-[#1e3a8a] transition-colors"
+              >
+                Categories
+                <ChevronDown className={`w-4 h-4 transition-transform ${categoriesDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {categoriesDropdownOpen && (
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  {categories.map((category) => (
+                    <Link
+                      key={category.slug}
+                      href={`/products?category=${category.slug}`}
+                      className="block px-4 py-2 text-gray-700 hover:bg-[#1e3a8a] hover:text-white transition-colors"
+                      onClick={() => setCategoriesDropdownOpen(false)}
+                    >
+                      {category.name}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
             <Link href="/about" className="text-gray-700 hover:text-[#1e3a8a] transition-colors">
               About
             </Link>
@@ -80,18 +128,41 @@ export default function Header() {
         {mobileMenuOpen && (
           <nav className="md:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-4">
-            <Link href="/products" className="text-gray-700 hover:text-[#1e3a8a]">
-              Products
-            </Link>
-            <Link href="/categories" className="text-gray-700 hover:text-[#1e3a8a]">
-              Categories
-            </Link>
-            <Link href="/about" className="text-gray-700 hover:text-[#1e3a8a]">
-              About
-            </Link>
-            <Link href="/contact" className="text-gray-700 hover:text-[#1e3a8a]">
-              Contact
-            </Link>
+              <Link href="/products" className="text-gray-700 hover:text-[#1e3a8a]">
+                Products
+              </Link>
+              <div>
+                <button
+                  onClick={() => setCategoriesDropdownOpen(!categoriesDropdownOpen)}
+                  className="flex items-center justify-between w-full text-gray-700 hover:text-[#1e3a8a]"
+                >
+                  Categories
+                  <ChevronDown className={`w-4 h-4 transition-transform ${categoriesDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {categoriesDropdownOpen && (
+                  <div className="ml-4 mt-2 space-y-2">
+                    {categories.map((category) => (
+                      <Link
+                        key={category.slug}
+                        href={`/products?category=${category.slug}`}
+                        className="block text-gray-600 hover:text-[#1e3a8a]"
+                        onClick={() => {
+                          setCategoriesDropdownOpen(false);
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        {category.name}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <Link href="/about" className="text-gray-700 hover:text-[#1e3a8a]">
+                About
+              </Link>
+              <Link href="/contact" className="text-gray-700 hover:text-[#1e3a8a]">
+                Contact
+              </Link>
             </div>
           </nav>
         )}

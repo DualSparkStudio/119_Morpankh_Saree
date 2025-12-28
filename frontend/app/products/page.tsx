@@ -1,17 +1,31 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import { Heart, Eye, ShoppingCart } from 'lucide-react';
 
-export default function ProductsPage() {
+const categories = ['Silk', 'Cotton', 'Designer', 'Printed', 'Dress', 'Handloom'];
+
+function ProductsPageContent() {
+  const searchParams = useSearchParams();
   const [priceRange, setPriceRange] = useState({ min: 0, max: 50000 });
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState('all');
 
-  const categories = ['Silk', 'Cotton', 'Designer', 'Printed', 'Dress'];
   const highlights = ['All', 'Best Seller', 'New Arrivals', 'Sale'];
+
+  // Initialize category filter from URL query parameter
+  useEffect(() => {
+    const categoryParam = searchParams?.get('category');
+    if (categoryParam) {
+      const categoryName = categoryParam.charAt(0).toUpperCase() + categoryParam.slice(1);
+      if (categories.includes(categoryName)) {
+        setSelectedCategories([categoryName]);
+      }
+    }
+  }, [searchParams]);
 
   // This would come from API in real implementation
   const products = Array.from({ length: 12 }, (_, i) => {
@@ -193,5 +207,13 @@ export default function ProductsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-soft-cream py-8"><div className="container mx-auto px-4">Loading...</div></div>}>
+      <ProductsPageContent />
+    </Suspense>
   );
 }
