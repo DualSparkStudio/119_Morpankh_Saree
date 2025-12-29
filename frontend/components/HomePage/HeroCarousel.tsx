@@ -159,10 +159,10 @@ const HeroCarousel = () => {
               index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             }`}
           >
-            <div className="relative w-full h-full">
+            <div className="relative w-full h-full bg-transparent">
               {/* Content */}
-              <div className="relative h-full flex items-center z-10">
-                <div className="container mx-auto px-4 md:px-6 lg:px-8 w-full">
+              <div className="relative h-full flex items-center z-10 bg-transparent">
+                <div className="container mx-auto px-4 md:px-6 lg:px-8 w-full bg-transparent">
                   <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
                     {/* Left Side - Text Content */}
                     <div className="text-white space-y-4 md:space-y-6 z-20">
@@ -193,16 +193,23 @@ const HeroCarousel = () => {
                     </div>
                     
                     {/* Right Side - Model Image (No Background) */}
-                    <div className="hidden md:block relative z-20">
-                      <div className="relative w-full max-w-lg mx-auto flex items-center justify-center">
+                    <div className="hidden md:block relative z-20 bg-transparent">
+                      <div className="relative w-full max-w-lg mx-auto flex items-center justify-center bg-transparent" style={{ backgroundColor: 'transparent', background: 'none' }}>
                         <img
                           src={slide.image}
                           alt={slide.title}
                           className="w-full h-auto object-contain max-h-[600px] md:max-h-[700px]"
-                          style={{ mixBlendMode: 'normal' }}
+                          style={{ 
+                            mixBlendMode: 'normal',
+                            backgroundColor: 'transparent',
+                            background: 'none',
+                            display: 'block'
+                          }}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.src = '/images2/img bg removed.png';
+                            target.style.backgroundColor = 'transparent';
+                            target.style.background = 'none';
                           }}
                         />
                       </div>
