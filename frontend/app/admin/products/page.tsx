@@ -71,6 +71,10 @@ export default function AdminProductsPage() {
         return image;
       }
     }
+    // Old hardcoded paths like /images/products/... don't exist - use placeholder
+    if (image.startsWith('/images/products/')) {
+      return '/images/placeholder.jpg';
+    }
     // If it starts with /, it might be a frontend public image
     if (image.startsWith('/')) {
       return image;
@@ -155,15 +159,24 @@ export default function AdminProductsPage() {
                         <div className="relative w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden mr-4">
                           {(() => {
                             const imageUrl = getImageUrl(product.images?.[0]);
-                            const isBackendImage = product.images?.[0]?.startsWith('/uploads') || product.images?.[0]?.startsWith('http');
-                            return isBackendImage ? (
+                            const originalImage = product.images?.[0];
+                            // Use regular img tag for backend images or old hardcoded paths to avoid Next.js Image optimization errors
+                            const shouldUseRegularImg = !originalImage || 
+                              originalImage.startsWith('/uploads') || 
+                              originalImage.startsWith('http') ||
+                              originalImage.startsWith('/images/products/');
+                            
+                            return shouldUseRegularImg ? (
                               <img
                                 src={imageUrl}
                                 alt={product.name}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
-                                  target.src = '/images/placeholder.jpg';
+                                  // Prevent infinite retry loop
+                                  if (target.src !== '/images/placeholder.jpg' && !target.src.includes('placeholder')) {
+                                    target.src = '/images/placeholder.jpg';
+                                  }
                                 }}
                               />
                             ) : (
@@ -172,9 +185,13 @@ export default function AdminProductsPage() {
                                 alt={product.name}
                                 fill
                                 className="object-cover"
+                                unoptimized
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement;
-                                  target.src = '/images/placeholder.jpg';
+                                  // Prevent infinite retry loop
+                                  if (target.src !== '/images/placeholder.jpg' && !target.src.includes('placeholder')) {
+                                    target.src = '/images/placeholder.jpg';
+                                  }
                                 }}
                               />
                             );

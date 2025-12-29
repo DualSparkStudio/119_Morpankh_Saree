@@ -33,7 +33,12 @@ const images2Fallbacks = [
 
 const getProductImage = (product: Product, index: number = 0) => {
   if (product.images && product.images.length > 0 && product.images[0]) {
-    return product.images[0];
+    const image = product.images[0];
+    // Old hardcoded paths like /images/products/... don't exist - use fallback
+    if (image.startsWith('/images/products/')) {
+      return images2Fallbacks[index % images2Fallbacks.length];
+    }
+    return image;
   }
   return images2Fallbacks[index % images2Fallbacks.length];
 };
@@ -85,16 +90,47 @@ export default function FeaturedProducts({ products = [], title = 'Featured Prod
             >
               <Link href={`/products/${product.slug}`}>
                 <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 mb-3">
-                  <Image
-                    src={getProductImage(product, index)}
-                    alt={product.name}
-                    fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-300"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = images2Fallbacks[index % images2Fallbacks.length];
-                    }}
-                  />
+                  {(() => {
+                    const imageSrc = getProductImage(product, index);
+                    const originalImage = product.images?.[0];
+                    // Use regular img tag for old hardcoded paths or backend images to avoid Next.js Image optimization errors
+                    const shouldUseRegularImg = !originalImage || 
+                      originalImage.startsWith('/uploads') || 
+                      originalImage.startsWith('http') ||
+                      originalImage.startsWith('/images/products/');
+                    
+                    return shouldUseRegularImg ? (
+                      <img
+                        src={imageSrc}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          const fallback = images2Fallbacks[index % images2Fallbacks.length];
+                          // Prevent infinite retry loop
+                          if (target.src !== fallback && !target.src.includes('WhatsApp')) {
+                            target.src = fallback;
+                          }
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        src={imageSrc}
+                        alt={product.name}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-300"
+                        unoptimized
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          const fallback = images2Fallbacks[index % images2Fallbacks.length];
+                          // Prevent infinite retry loop
+                          if (target.src !== fallback && !target.src.includes('WhatsApp')) {
+                            target.src = fallback;
+                          }
+                        }}
+                      />
+                    );
+                  })()}
                   <button
                     onClick={(e) => toggleWishlist(e, product.id)}
                     className={`absolute top-2 right-2 p-2 rounded-full transition-colors ${

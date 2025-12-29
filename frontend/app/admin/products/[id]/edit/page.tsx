@@ -192,7 +192,8 @@ export default function EditProductPage() {
         return image;
       }
     }
-    // If it starts with /, it might be a frontend public image
+    // If it starts with /, it's a frontend public image (including /images/products/...)
+    // Let the browser try to load it, and onError will handle fallback
     if (image.startsWith('/')) {
       return image;
     }
@@ -433,47 +434,50 @@ export default function EditProductPage() {
             </button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {formData.images.map((image, index) => {
-              const imageUrl = getImageUrl(image);
-              // Use regular img tag for backend-uploaded images to avoid Next.js Image optimization issues
-              const isBackendImage = image.startsWith('/uploads') || image.startsWith('http');
-              return (
-                <div key={index} className="relative group">
-                  <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                    {isBackendImage ? (
+            {formData.images.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-gray-500">
+                <p>No images added. Click "+ Add Image URL" to add images.</p>
+              </div>
+            ) : (
+              formData.images.map((image, index) => {
+                const imageUrl = getImageUrl(image);
+                // Use regular img tag for all images to avoid Next.js Image optimization issues
+                // This ensures images from backend, frontend public folder, or external URLs all work
+                return (
+                  <div key={index} className="relative group">
+                    <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
                       <img
                         src={imageUrl}
                         alt={`Product image ${index + 1}`}
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.src = '/images/placeholder.jpg';
+                          // Prevent infinite retry loop - only set placeholder if not already set
+                          const placeholderUrl = '/images/placeholder.jpg';
+                          if (!target.src.includes('placeholder') && target.src !== placeholderUrl) {
+                            target.src = placeholderUrl;
+                          }
                         }}
-                      />
-                    ) : (
-                      <Image
-                        src={imageUrl}
-                        alt={`Product image ${index + 1}`}
-                        fill
-                        className="object-cover"
-                        unoptimized={isBackendImage}
-                        onError={(e) => {
+                        onLoad={(e) => {
+                          // Image loaded successfully
                           const target = e.target as HTMLImageElement;
-                          target.src = '/images/placeholder.jpg';
+                          target.style.opacity = '1';
                         }}
+                        style={{ opacity: 0, transition: 'opacity 0.3s' }}
                       />
-                    )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                      title="Remove image"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => removeImage(index)}
-                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
 
