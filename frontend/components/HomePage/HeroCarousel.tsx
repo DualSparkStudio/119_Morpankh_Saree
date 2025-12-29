@@ -173,27 +173,33 @@ const HeroCarousel = () => {
                       
                       {/* Main Title - Large White Sans-serif */}
                       <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-sans font-bold leading-tight text-white">
-                        {slide.title || 'Fabrics that matches your Personality'}
+                        {slide.title || 'Premium Indian Sarees'}
                       </h1>
+                      
+                      {/* Modern Stunning Tagline */}
+                      <p className="text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-lg leading-relaxed">
+                        Where Tradition Meets Elegance, Every Thread Tells a Story
+                      </p>
                       
                       {/* CTA Button - White with Dark Blue Text */}
                       <div className="pt-4">
                         <Link
                           href={slide.link || '/products'}
-                          className="inline-block bg-white text-deep-indigo hover:bg-white/95 px-8 py-3 md:px-10 md:py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
+                          className="inline-block bg-white text-deep-indigo hover:bg-white/95 px-8 py-3 md:px-10 md:py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform border border-deep-indigo/20"
                         >
                           {slide.linkText || 'Shop Now'}
                         </Link>
                       </div>
                     </div>
                     
-                    {/* Right Side - Model Image */}
+                    {/* Right Side - Model Image (No Background) */}
                     <div className="hidden md:block relative z-20">
-                      <div className="relative w-full max-w-lg mx-auto">
+                      <div className="relative w-full max-w-lg mx-auto flex items-center justify-center">
                         <img
                           src={slide.image}
                           alt={slide.title}
-                          className="w-full h-auto object-contain rounded-lg"
+                          className="w-full h-auto object-contain max-h-[600px] md:max-h-[700px]"
+                          style={{ mixBlendMode: 'normal' }}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.src = '/images2/img bg removed.png';
