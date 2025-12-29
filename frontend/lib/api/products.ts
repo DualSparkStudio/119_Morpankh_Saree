@@ -20,7 +20,12 @@ export interface Product {
   barcode?: string;
   basePrice: number;
   compareAtPrice?: number;
+  costPrice?: number;
   images: string[];
+  fabricType?: string;
+  sareeLength?: number;
+  blouseIncluded?: boolean;
+  tags?: string[];
   category?: {
     id: string;
     name: string;
@@ -36,6 +41,8 @@ export interface Product {
   _count?: {
     reviews: number;
   };
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ProductsResponse {
