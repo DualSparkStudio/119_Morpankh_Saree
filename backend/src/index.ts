@@ -28,7 +28,29 @@ import wishlistRoutes from './routes/wishlist';
 import inventoryRoutes from './routes/inventory';
 import paymentRoutes from './routes/payment';
 
-dotenv.config();
+// Load .env file from backend directory
+// Try multiple paths to handle both development and production builds
+const envPaths = [
+  path.resolve(__dirname, '../../.env'), // For compiled code (dist/)
+  path.resolve(__dirname, '../.env'),    // For compiled code alternative
+  path.resolve(process.cwd(), '.env'),   // Current working directory
+];
+
+let envLoaded = false;
+for (const envPath of envPaths) {
+  if (fs.existsSync(envPath)) {
+    dotenv.config({ path: envPath });
+    envLoaded = true;
+    console.log(`✅ Loaded .env from: ${envPath}`);
+    break;
+  }
+}
+
+if (!envLoaded) {
+  // Fallback to default dotenv behavior
+  dotenv.config();
+  console.log('⚠️  Using default .env loading (current directory)');
+}
 
 // Warn if DATABASE_URL is not set, but don't exit (for testing without DB)
 if (!process.env.DATABASE_URL) {
