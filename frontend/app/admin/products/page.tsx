@@ -59,21 +59,24 @@ export default function AdminProductsPage() {
     }
     // If it starts with /uploads, it's from the backend
     if (image.startsWith('/uploads')) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-      // In production, API_URL is '/api', so backend is on same domain
-      // In development, API_URL is 'http://localhost:5000/api'
-      if (apiUrl.startsWith('http')) {
-        // Development: extract base URL
-        const baseUrl = apiUrl.replace('/api', '');
-        return `${baseUrl}${image}`;
-      } else {
-        // Production: same domain, use image path directly
-        return image;
+      // In production, backend serves /uploads directly on the same domain
+      // In development, we need to prepend the backend URL
+      if (typeof window !== 'undefined') {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+        if (apiUrl.startsWith('http')) {
+          // Development: extract base URL
+          const baseUrl = apiUrl.replace('/api', '');
+          return `${baseUrl}${image}`;
+        } else {
+          // Production: same domain, backend serves /uploads directly
+          return image;
+        }
       }
+      return image;
     }
-    // Old hardcoded paths like /images/products/... don't exist - use placeholder
+    // Old hardcoded paths like /images/products/... - try to load, fallback on error
     if (image.startsWith('/images/products/')) {
-      return '/images/placeholder.jpg';
+      return image; // Let browser try to load it
     }
     // If it starts with /, it might be a frontend public image
     if (image.startsWith('/')) {
@@ -157,45 +160,24 @@ export default function AdminProductsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="relative w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden mr-4">
-                          {(() => {
-                            const imageUrl = getImageUrl(product.images?.[0]);
-                            const originalImage = product.images?.[0];
-                            // Use regular img tag for backend images or old hardcoded paths to avoid Next.js Image optimization errors
-                            const shouldUseRegularImg = !originalImage || 
-                              originalImage.startsWith('/uploads') || 
-                              originalImage.startsWith('http') ||
-                              originalImage.startsWith('/images/products/');
-                            
-                            return shouldUseRegularImg ? (
-                              <img
-                                src={imageUrl}
-                                alt={product.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  // Prevent infinite retry loop
-                                  if (target.src !== '/images/placeholder.jpg' && !target.src.includes('placeholder')) {
-                                    target.src = '/images/placeholder.jpg';
-                                  }
-                                }}
-                              />
-                            ) : (
-                              <Image
-                                src={imageUrl}
-                                alt={product.name}
-                                fill
-                                className="object-cover"
-                                unoptimized
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  // Prevent infinite retry loop
-                                  if (target.src !== '/images/placeholder.jpg' && !target.src.includes('placeholder')) {
-                                    target.src = '/images/placeholder.jpg';
-                                  }
-                                }}
-                              />
-                            );
-                          })()}
+                          <img
+                            src={getImageUrl(product.images?.[0])}
+                            alt={product.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              const placeholder = '/images/placeholder.jpg';
+                              // Prevent infinite retry loop
+                              if (!target.src.includes('placeholder') && target.src !== placeholder) {
+                                target.src = placeholder;
+                              }
+                            }}
+                            onLoad={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.opacity = '1';
+                            }}
+                            style={{ opacity: 0, transition: 'opacity 0.3s' }}
+                          />
                         </div>
                         <div>
                           <div className="text-sm font-medium text-gray-900">{product.name}</div>

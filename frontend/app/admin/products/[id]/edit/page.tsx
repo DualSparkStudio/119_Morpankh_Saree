@@ -180,20 +180,26 @@ export default function EditProductPage() {
     }
     // If it starts with /uploads, it's from the backend
     if (image.startsWith('/uploads')) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-      // In production, API_URL is '/api', so backend is on same domain
-      // In development, API_URL is 'http://localhost:5000/api'
-      if (apiUrl.startsWith('http')) {
-        // Development: extract base URL
-        const baseUrl = apiUrl.replace('/api', '');
-        return `${baseUrl}${image}`;
-      } else {
-        // Production: same domain, use image path directly
-        return image;
+      // In production, backend serves /uploads directly on the same domain
+      // In development, we need to prepend the backend URL
+      if (typeof window !== 'undefined') {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+        if (apiUrl.startsWith('http')) {
+          // Development: extract base URL
+          const baseUrl = apiUrl.replace('/api', '');
+          return `${baseUrl}${image}`;
+        } else {
+          // Production: same domain, backend serves /uploads directly
+          return image;
+        }
       }
+      return image;
     }
-    // If it starts with /, it's a frontend public image (including /images/products/...)
-    // Let the browser try to load it, and onError will handle fallback
+    // Old hardcoded paths like /images/products/... - try to load, fallback on error
+    if (image.startsWith('/images/products/')) {
+      return image; // Let browser try to load it
+    }
+    // If it starts with /, it might be a frontend public image
     if (image.startsWith('/')) {
       return image;
     }
