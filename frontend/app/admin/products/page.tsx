@@ -51,6 +51,23 @@ export default function AdminProductsPage() {
     }
   };
 
+  const getImageUrl = (image: string | undefined): string => {
+    if (!image) return '/images/placeholder.jpg';
+    // If it's already a full URL, return as is
+    if (image.startsWith('http://') || image.startsWith('https://')) {
+      return image;
+    }
+    // If it starts with /, it's a relative path from the backend
+    if (image.startsWith('/')) {
+      // In production, API_URL is '/api', so we need to remove '/api' and use the path
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      const baseUrl = apiUrl.replace('/api', '');
+      return `${baseUrl}${image}`;
+    }
+    // Otherwise, assume it's a relative path
+    return image;
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
@@ -126,10 +143,14 @@ export default function AdminProductsPage() {
                       <div className="flex items-center">
                         <div className="relative w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden mr-4">
                           <Image
-                            src={product.images?.[0] || '/images/placeholder.jpg'}
+                            src={getImageUrl(product.images?.[0])}
                             alt={product.name}
                             fill
                             className="object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/images/placeholder.jpg';
+                            }}
                           />
                         </div>
                         <div>
