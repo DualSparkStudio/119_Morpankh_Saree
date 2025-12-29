@@ -234,7 +234,7 @@ const HeroCarousel = () => {
                             className="w-full h-full object-cover rounded-xl shadow-2xl"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
+                              target.src = '/images2/hero sec(main photo).jpg';
                             }}
                           />
                         </div>
