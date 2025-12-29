@@ -7,117 +7,141 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#312e81] text-[#fffef9] mt-20">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* About */}
-          <div>
-            <h3 className="font-heading text-xl font-bold mb-4">Morpankh Saree</h3>
-            <p className="text-sm text-gray-300">
+    <footer className="bg-[#1e3a8a] text-white mt-20">
+      <div className="container mx-auto px-4 md:px-6 lg:px-8 py-12 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+          {/* Brand Description - Left Section */}
+          <div className="lg:col-span-1">
+            <p className="text-sm md:text-base text-white/90 leading-relaxed">
               Premium quality sarees with elegant designs. Experience luxury in every thread.
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* About Us & Support Links - Second Section */}
           <div>
-            <h4 className="font-heading text-lg font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-3 text-sm md:text-base">
               <li>
-                <Link href="/about" className="text-gray-300 hover:text-[#d4af37] transition-colors">
+                <Link 
+                  href="/about" 
+                  className="text-white/90 hover:text-white transition-colors inline-block"
+                >
                   About Us
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-gray-300 hover:text-[#d4af37] transition-colors">
+                <Link 
+                  href="/contact" 
+                  className="text-white/90 hover:text-white transition-colors inline-block"
+                >
                   Contact
                 </Link>
               </li>
               <li>
-                <Link href="/shipping" className="text-gray-300 hover:text-[#d4af37] transition-colors">
+                <Link 
+                  href="/shipping" 
+                  className="text-white/90 hover:text-white transition-colors inline-block"
+                >
                   Shipping & Returns
                 </Link>
               </li>
               <li>
-                <Link href="/faq" className="text-gray-300 hover:text-[#d4af37] transition-colors">
+                <Link 
+                  href="/faq" 
+                  className="text-white/90 hover:text-white transition-colors inline-block"
+                >
                   FAQ
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Customer Service */}
+          {/* Order & Policy Links - Third Section */}
           <div>
-            <h4 className="font-heading text-lg font-semibold mb-4">Customer Service</h4>
-            <ul className="space-y-2 text-sm">
+            <ul className="space-y-3 text-sm md:text-base">
               <li>
-                <Link href="/orders" className="text-gray-300 hover:text-[#d4af37] transition-colors">
+                <Link 
+                  href="/orders" 
+                  className="text-white/90 hover:text-white transition-colors inline-block"
+                >
                   Track Order
                 </Link>
               </li>
               <li>
-                <Link href="/returns" className="text-gray-300 hover:text-[#d4af37] transition-colors">
+                <Link 
+                  href="/returns" 
+                  className="text-white/90 hover:text-white transition-colors inline-block"
+                >
                   Returns
                 </Link>
               </li>
               <li>
-                <Link href="/terms" className="text-gray-300 hover:text-[#d4af37] transition-colors">
+                <Link 
+                  href="/terms" 
+                  className="text-white/90 hover:text-white transition-colors inline-block"
+                >
                   Terms & Conditions
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="text-gray-300 hover:text-[#d4af37] transition-colors">
+                <Link 
+                  href="/privacy" 
+                  className="text-white/90 hover:text-white transition-colors inline-block"
+                >
                   Privacy Policy
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Social Media */}
-          <div>
-            <h4 className="font-heading text-lg font-semibold mb-4">Follow Us</h4>
+          {/* Social Media Icons - Right Section */}
+          <div className="flex items-start">
             <div className="flex space-x-4">
               <a
                 href="https://facebook.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-300 hover:text-[#d4af37] transition-colors"
+                className="text-white hover:text-white/80 transition-colors p-2 hover:scale-110 transform duration-200"
                 aria-label="Facebook"
               >
-                <Facebook className="w-5 h-5" />
+                <Facebook className="w-6 h-6 stroke-2" />
               </a>
               <a
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-300 hover:text-[#d4af37] transition-colors"
+                className="text-white hover:text-white/80 transition-colors p-2 hover:scale-110 transform duration-200"
                 aria-label="Instagram"
               >
-                <Instagram className="w-5 h-5" />
+                <Instagram className="w-6 h-6 stroke-2" />
               </a>
               <a
                 href="https://youtube.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-300 hover:text-[#d4af37] transition-colors"
+                className="text-white hover:text-white/80 transition-colors p-2 hover:scale-110 transform duration-200"
                 aria-label="YouTube"
               >
-                <Youtube className="w-5 h-5" />
+                <Youtube className="w-6 h-6 stroke-2" />
               </a>
               <a
                 href="https://wa.me/1234567890"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-300 hover:text-[#d4af37] transition-colors"
+                className="text-white hover:text-white/80 transition-colors p-2 hover:scale-110 transform duration-200"
                 aria-label="WhatsApp"
               >
-                <MessageCircle className="w-5 h-5" />
+                <MessageCircle className="w-6 h-6 stroke-2" />
               </a>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-          <p>&copy; {currentYear} Morpankh Saree. All rights reserved.</p>
+        {/* Separator Line */}
+        <div className="border-t border-white/20 mt-10 md:mt-12 pt-6 md:pt-8">
+          {/* Copyright */}
+          <div className="text-center text-sm md:text-base text-white/80">
+            <p>&copy; {currentYear} Morpankh Saree. All rights reserved.</p>
+          </div>
         </div>
       </div>
     </footer>
