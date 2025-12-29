@@ -3,58 +3,76 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight, Sparkles, Tag } from 'lucide-react';
 import Link from 'next/link';
+import { bannersApi, Banner } from '@/lib/api/banners';
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [loading, setLoading] = useState(true);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   
-  const slides = [
-    {
-      id: 1,
-      image: '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
-      title: 'Premium Indian Sarees',
-      subtitle: 'Discover elegance in every thread',
-      badge: 'BUY 2 GET 1 FREE',
-      discount: 'Up to 70% OFF'
-    },
-    {
-      id: 2,
-      image: '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
-      title: 'Traditional Collection',
-      subtitle: 'Timeless beauty and craftsmanship',
-      badge: 'NEW ARRIVALS',
-      discount: 'Limited Edition'
-    },
-    {
-      id: 3,
-      image: '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
-      title: 'Designer Sarees',
-      subtitle: 'Modern elegance meets tradition',
-      badge: 'EXCLUSIVE',
-      discount: 'Premium Quality'
-    },
-    {
-      id: 4,
-      image: '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM.jpeg',
-      title: 'Luxury Fabrics',
-      subtitle: 'Silk, Cotton, and more',
-      badge: 'BESTSELLER',
-      discount: 'Trending Now'
-    },
-    {
-      id: 5,
-      image: '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
-      title: 'Special Occasions',
-      subtitle: 'Perfect for every celebration',
-      badge: 'WEDDING SPECIAL',
-      discount: 'Elegant Collection'
+  useEffect(() => {
+    loadBanners();
+  }, []);
+
+  const loadBanners = async () => {
+    try {
+      setLoading(true);
+      const data = await bannersApi.getBanners('HERO');
+      setBanners(data.filter(b => b.isActive));
+      // If no HERO banners, get all active banners
+      if (data.length === 0) {
+        const allBanners = await bannersApi.getBanners();
+        setBanners(allBanners.filter(b => b.isActive).slice(0, 5));
+      }
+    } catch (error) {
+      console.error('Error loading banners:', error);
+      // Fallback to default banner
+      setBanners([{
+        id: 'default',
+        image: '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
+        title: 'Premium Indian Sarees',
+        description: 'Discover elegance in every thread',
+        link: '/products',
+        linkText: 'Shop Now',
+        position: 'HERO',
+        order: 0,
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }]);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const getImageUrl = (image: string): string => {
+    if (!image) return '/images/placeholder.jpg';
+    if (image.startsWith('http://') || image.startsWith('https://')) {
+      return image;
+    }
+    if (image.startsWith('/')) {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      const baseUrl = apiUrl.replace('/api', '');
+      return `${baseUrl}${image}`;
+    }
+    return image;
+  };
+
+  const slides = banners.length > 0 ? banners.map((banner, index) => ({
+    id: banner.id,
+    image: getImageUrl(banner.image),
+    title: banner.title || 'Premium Indian Sarees',
+    subtitle: banner.description || 'Discover elegance in every thread',
+    badge: index === 0 ? 'BUY 2 GET 1 FREE' : index === 1 ? 'NEW ARRIVALS' : index === 2 ? 'EXCLUSIVE' : index === 3 ? 'BESTSELLER' : 'WEDDING SPECIAL',
+    discount: index === 0 ? 'Up to 70% OFF' : index === 1 ? 'Limited Edition' : index === 2 ? 'Premium Quality' : index === 3 ? 'Trending Now' : 'Elegant Collection',
+    link: banner.link || '/products',
+  })) : [];
 
   // Auto-play functionality
   useEffect(() => {
-    if (!isPaused) {
+    if (!isPaused && slides.length > 0) {
       intervalRef.current = setInterval(() => {
         setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
       }, 2500); // Change slide every 2.5 seconds
@@ -80,6 +98,18 @@ const HeroCarousel = () => {
       }, 2500);
     }
   };
+
+  if (loading) {
+    return (
+      <section className="relative h-[600px] md:h-[750px] lg:h-[850px] overflow-hidden bg-gradient-to-br from-deep-indigo via-navy-blue to-deep-indigo flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      </section>
+    );
+  }
+
+  if (slides.length === 0) {
+    return null;
+  }
 
   return (
     <section 
@@ -150,10 +180,10 @@ const HeroCarousel = () => {
                       {/* CTA Buttons */}
                       <div className="flex flex-col sm:flex-row gap-4 pt-4">
                         <Link
-                          href="/products"
+                          href={slide.link || '/products'}
                           className="group inline-flex items-center justify-center gap-2 bg-sale-red hover:bg-sale-red-light text-white px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 transform"
                         >
-                          <span>Shop Now</span>
+                          <span>{slide.linkText || 'Shop Now'}</span>
                           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </Link>
                         <Link
