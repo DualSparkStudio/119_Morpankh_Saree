@@ -11,8 +11,8 @@ export default function Header() {
   const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const wishlistCount = wishlist.length;
+  const cartCount = cart && cart.length > 0 ? cart.reduce((sum, item) => sum + (item.quantity || 0), 0) : 0;
+  const wishlistCount = wishlist ? wishlist.length : 0;
 
   const categories = [
     { name: 'Silk', slug: 'silk' },
@@ -45,7 +45,10 @@ export default function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="font-heading text-2xl text-[#312e81] font-bold">
+          <Link 
+            href="/" 
+            className="font-heading text-2xl text-[#312e81] font-bold hover:text-[#1e3a8a] transition-colors cursor-pointer"
+          >
             Morpankh Saree
           </Link>
 

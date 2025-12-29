@@ -69,8 +69,10 @@ export default function AdminLayout({
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 h-full w-64 bg-[#312e81] text-white">
         <div className="p-6 border-b border-[#1e3a8a]">
-          <h1 className="font-heading text-2xl font-bold">Admin Panel</h1>
-          <p className="text-sm text-gray-300 mt-1">Morpankh Saree</p>
+          <Link href="/" className="block">
+            <h1 className="font-heading text-2xl font-bold hover:text-[#d4af37] transition-colors cursor-pointer">Admin Panel</h1>
+            <p className="text-sm text-gray-300 mt-1 hover:text-white transition-colors cursor-pointer">Morpankh Saree</p>
+          </Link>
         </div>
         
         <nav className="p-4 space-y-2">
