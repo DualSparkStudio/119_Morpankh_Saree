@@ -178,7 +178,7 @@ const TrendingPatterns = () => {
                               quantity: 1,
                               price: product.basePrice,
                               productName: product.name,
-                              productImage: product.images?.[0] || '/images/placeholder.jpg',
+                              productImage: product.images?.[0] || '/images/cotton-saree.png',
                             });
                           }}
                           className="bg-sale-red text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-sale-red-light transition-all transform hover:scale-105 shadow-xl flex items-center gap-2"
@@ -232,7 +232,7 @@ const TrendingPatterns = () => {
                           quantity: 1,
                           price: product.basePrice,
                           productName: product.name,
-                          productImage: product.images?.[0] || '/images/placeholder.jpg',
+                          productImage: product.images?.[0] || '/images/cotton-saree.png',
                         });
                       }}
                       className="w-full bg-deep-indigo hover:bg-navy-blue text-white py-2 rounded-lg font-semibold text-xs md:text-sm transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2"

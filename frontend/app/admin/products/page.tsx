@@ -33,10 +33,12 @@ export default function AdminProductsPage() {
       
       // Debug: Log product images to see what's in the database
       response.products.forEach((product) => {
+        const imageCount = product.images?.length || 0;
         console.log(`Product: ${product.name} (${product.sku})`, {
-          images: product.images,
-          imagesCount: product.images?.length || 0,
-          firstImage: product.images?.[0] || 'NO IMAGE',
+          'Number of Images in Database': imageCount,
+          'Images Array': product.images,
+          'First Image URL': product.images?.[0] || 'NO IMAGE',
+          'Status': imageCount === 0 ? '⚠️ NO IMAGES - Add images via admin panel' : `✅ Has ${imageCount} image(s)`,
         });
       });
       
@@ -62,7 +64,7 @@ export default function AdminProductsPage() {
   };
 
   const getImageUrl = (image: string | undefined): string => {
-    if (!image) return '/images/placeholder.jpg';
+    if (!image) return '/images/cotton-saree.png';
     // If it's already a full URL, return as is
     if (image.startsWith('http://') || image.startsWith('https://')) {
       return image;
@@ -87,7 +89,7 @@ export default function AdminProductsPage() {
     // Old hardcoded paths like /images/products/... don't exist - use placeholder
     if (image.startsWith('/images/products/')) {
       console.log('Old hardcoded path detected (does not exist):', image);
-      return '/images/placeholder.jpg';
+      return '/images/cotton-saree.png';
     }
     // If it starts with /, it might be a frontend public image
     if (image.startsWith('/')) {
@@ -178,10 +180,10 @@ export default function AdminProductsPage() {
                               className="w-full h-full object-cover"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
-                                const placeholder = '/images/placeholder.jpg';
+                                const placeholder = '/images/cotton-saree.png';
                                 console.log(`Image failed to load for ${product.name}:`, target.src);
                                 // Prevent infinite retry loop
-                                if (!target.src.includes('placeholder') && target.src !== placeholder) {
+                                if (!target.src.includes('cotton-saree') && target.src !== placeholder) {
                                   target.src = placeholder;
                                 }
                               }}

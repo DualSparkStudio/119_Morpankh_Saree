@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Heart, ShoppingCart, Share2, ArrowLeft } from 'lucide-react';
-import { productsApi, Product } from '@/lib/api/products';
+import { Product, productsApi } from '@/lib/api/products';
 import { useStore } from '@/lib/store';
+import { ArrowLeft, Heart, Share2, ShoppingCart } from 'lucide-react';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -29,12 +29,14 @@ export default function ProductDetailPage() {
       const productData = await productsApi.getBySlug(slug);
       
       // Debug: Log product data to see what images are in the database
-      console.log('Product loaded:', {
-        id: productData.id,
-        name: productData.name,
-        slug: productData.slug,
-        images: productData.images,
-        imagesCount: productData.images?.length || 0,
+      const imageCount = productData.images?.length || 0;
+      console.log('📦 Product Detail Page - Product Data:', {
+        'Product Name': productData.name,
+        'Product SKU': productData.sku,
+        'Number of Images in Database': imageCount,
+        'Images Array': productData.images,
+        'First Image URL': productData.images?.[0] || 'NO IMAGE IN DATABASE',
+        'Status': imageCount === 0 ? '⚠️ NO IMAGES - This product has 0 images. Add images via admin panel.' : `✅ Has ${imageCount} image(s)`,
       });
       
       setProduct(productData);
@@ -62,8 +64,8 @@ export default function ProductDetailPage() {
 
   const getImageUrl = (image: string | undefined, index: number = 0): string => {
     if (!image) {
-      // Return placeholder if no image
-      return '/images/placeholder.jpg';
+      // Return a placeholder that exists - use one of the existing images
+      return '/images/cotton-saree.png';
     }
     
     // If it's already a full URL, return as is
@@ -85,7 +87,7 @@ export default function ProductDetailPage() {
     
     // Old hardcoded paths like /images/products/... don't exist - use placeholder
     if (image.startsWith('/images/products/')) {
-      return '/images/placeholder.jpg';
+      return '/images/cotton-saree.png';
     }
     
     // If it starts with /, it might be a frontend public image
@@ -118,7 +120,7 @@ export default function ProductDetailPage() {
       quantity: 1,
       price: product.basePrice,
       productName: product.name,
-      productImage: product.images?.[0] || '/images/placeholder.jpg',
+      productImage: product.images?.[0] || '/images/cotton-saree.png',
     });
   };
 
@@ -156,7 +158,7 @@ export default function ProductDetailPage() {
   // Use actual product images, or show placeholder if none exist
   const productImages = product.images && product.images.length > 0
     ? product.images
-    : ['/images/placeholder.jpg']; // Single placeholder if no images
+    : ['/images/cotton-saree.png']; // Single placeholder if no images
 
   const discount = product.compareAtPrice
     ? Math.round(((product.compareAtPrice - product.basePrice) / product.compareAtPrice) * 100)
@@ -198,8 +200,8 @@ export default function ProductDetailPage() {
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        const placeholder = '/images/placeholder.jpg';
-                        if (!target.src.includes('placeholder')) {
+                        const placeholder = '/images/cotton-saree.png';
+                        if (!target.src.includes('cotton-saree')) {
                           target.src = placeholder;
                         }
                       }}
@@ -218,8 +220,8 @@ export default function ProductDetailPage() {
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    const placeholder = '/images/placeholder.jpg';
-                    if (!target.src.includes('placeholder')) {
+                    const placeholder = '/images/cotton-saree.png';
+                    if (!target.src.includes('cotton-saree')) {
                       target.src = placeholder;
                     }
                   }}
@@ -346,15 +348,18 @@ export default function ProductDetailPage() {
                   <p className="text-sm text-gray-500 mb-1">Blouse Included</p>
                   <p className="text-gray-800 font-medium">{product.blouseIncluded ? 'Yes' : 'No'}</p>
                 </div>
-                {product.inventory && product.inventory.length > 0 && (
-                  <div>
-                    <p className="text-sm text-gray-500 mb-1">Stock Availability</p>
-                    <p className="text-gray-800 font-medium">
-                      {product.inventory.reduce((sum, inv) => sum + (inv.quantity || 0), 0)} units available
-                    </p>
-                  </div>
-                )}
-                {product._count?.reviews !== undefined && (
+                {product.inventory && product.inventory.length > 0 && (() => {
+                  const totalStock = product.inventory.reduce((sum, inv) => sum + (inv.quantity || 0), 0);
+                  return totalStock > 0 ? (
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">Stock Availability</p>
+                      <p className="text-gray-800 font-medium">
+                        {totalStock} units available
+                      </p>
+                    </div>
+                  ) : null;
+                })()}
+                {product._count?.reviews !== undefined && product._count.reviews > 0 && (
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Reviews</p>
                     <p className="text-gray-800 font-medium">{product._count.reviews} review(s)</p>

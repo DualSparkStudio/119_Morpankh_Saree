@@ -85,7 +85,7 @@ const PremiumPatterns = () => {
       quantity: 1,
       price: product.basePrice,
       productName: product.name,
-      productImage: product.images?.[0] || '/images/placeholder.jpg',
+      productImage: product.images?.[0] || '/images/cotton-saree.png',
     });
   };
 
