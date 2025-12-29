@@ -113,7 +113,7 @@ const HeroCarousel = () => {
 
   if (loading) {
     return (
-      <section className="relative h-[600px] md:h-[750px] lg:h-[850px] overflow-hidden bg-gradient-to-br from-deep-indigo via-navy-blue to-deep-indigo flex items-center justify-center">
+      <section className="relative h-[600px] md:h-[700px] lg:h-[800px] overflow-hidden bg-[#9CAF88] flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
       </section>
     );
@@ -125,122 +125,79 @@ const HeroCarousel = () => {
 
   return (
     <section 
-      className="relative h-[600px] md:h-[750px] lg:h-[850px] overflow-hidden bg-gradient-to-br from-deep-indigo via-navy-blue to-deep-indigo"
+      className="relative h-[600px] md:h-[700px] lg:h-[800px] overflow-hidden bg-[#9CAF88]"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       <div className="relative h-full">
+        {/* Decorative Geometric Shapes */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {/* Circles */}
+          <div className="absolute top-20 left-10 w-32 h-32 bg-[#B5C9A3] rounded-full opacity-30 blur-sm"></div>
+          <div className="absolute top-40 right-20 w-24 h-24 bg-[#B5C9A3] rounded-full opacity-25 blur-sm"></div>
+          <div className="absolute bottom-32 left-1/4 w-40 h-40 bg-[#B5C9A3] rounded-full opacity-20 blur-sm"></div>
+          
+          {/* Triangles */}
+          <div className="absolute top-1/4 right-1/3 w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[50px] border-b-[#B5C9A3] opacity-20 rotate-45"></div>
+          <div className="absolute bottom-1/4 left-1/3 w-0 h-0 border-l-[25px] border-l-transparent border-r-[25px] border-r-transparent border-b-[45px] border-b-[#B5C9A3] opacity-25 -rotate-12"></div>
+          
+          {/* Rounded Rectangles */}
+          <div className="absolute top-1/3 right-10 w-20 h-16 bg-[#B5C9A3] rounded-2xl opacity-20 rotate-12"></div>
+          <div className="absolute bottom-1/3 left-20 w-24 h-20 bg-[#B5C9A3] rounded-3xl opacity-15 -rotate-6"></div>
+          
+          {/* Leaf Motifs */}
+          <div className="absolute top-16 right-1/4 w-16 h-16 bg-[#B5C9A3] rounded-full opacity-15" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}></div>
+          <div className="absolute bottom-20 right-1/3 w-12 h-12 bg-[#B5C9A3] rounded-full opacity-20" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}></div>
+        </div>
+
         {/* Banner Images */}
         {slides.map((slide, index) => (
           <div
             key={slide.id}
             className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-              index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
+              index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             }`}
           >
             <div className="relative w-full h-full">
-              {/* Background Image */}
-              <div className="absolute inset-0">
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = '/images2/hero sec(main photo).jpg';
-                  }}
-                />
-              </div>
-              
-              {/* Gradient Overlay - More subtle */}
-              <div className="absolute inset-0 bg-gradient-to-r from-deep-indigo/85 via-deep-indigo/75 to-deep-indigo/85" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-              
               {/* Content */}
-              <div className="relative h-full flex items-center">
+              <div className="relative h-full flex items-center z-10">
                 <div className="container mx-auto px-4 md:px-6 lg:px-8 w-full">
-                  <div className="grid md:grid-cols-2 gap-8 items-center max-w-7xl mx-auto">
+                  <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
                     {/* Left Side - Text Content */}
-                    <div className="text-white space-y-6 z-10">
-                      {/* Badge */}
-                      {slide.badge && (
-                        <div className="inline-flex items-center gap-2 bg-sale-red text-white px-4 py-2 rounded-full text-sm font-bold mb-4 animate-pulse">
-                          <Tag className="w-4 h-4" />
-                          <span>{slide.badge}</span>
-                        </div>
-                      )}
-                      
-                      {/* Discount Badge */}
-                      {slide.discount && (
-                        <div className="inline-block bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm font-semibold mb-2 border border-white/30">
-                          {slide.discount}
-                        </div>
-                      )}
-                      
-                      {/* Main Title */}
-                      <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold leading-tight">
-                        <span className="block text-white drop-shadow-lg mb-2">
-                          {slide.title}
-                        </span>
-                      </h1>
-                      
-                      {/* Subtitle */}
-                      <p className="text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-lg leading-relaxed">
-                        {slide.subtitle}
+                    <div className="text-white space-y-4 md:space-y-6 z-20">
+                      {/* Small Script Text */}
+                      <p className="text-2xl md:text-3xl font-script text-white/90 mb-2">
+                        Amazing
                       </p>
                       
-                      {/* CTA Buttons */}
-                      <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                      {/* Main Title - Large White Sans-serif */}
+                      <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-sans font-bold leading-tight text-white">
+                        {slide.title || 'Fabrics that matches your Personality'}
+                      </h1>
+                      
+                      {/* CTA Button - White with Green Text */}
+                      <div className="pt-4">
                         <Link
                           href={slide.link || '/products'}
-                          className="group inline-flex items-center justify-center gap-2 bg-sale-red hover:bg-sale-red-light text-white px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 transform"
+                          className="inline-block bg-white text-[#9CAF88] hover:bg-white/95 px-8 py-3 md:px-10 md:py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
                         >
-                          <span>{slide.linkText || 'Shop Now'}</span>
-                          <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                          {slide.linkText || 'Shop Now'}
                         </Link>
-                        <Link
-                          href="/categories"
-                          className="inline-flex items-center justify-center gap-2 bg-white text-deep-indigo hover:bg-white/90 px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-300 shadow-xl hover:scale-105 transform"
-                        >
-                          <Sparkles className="w-5 h-5" />
-                          <span>Explore</span>
-                        </Link>
-                      </div>
-                      
-                      {/* Features */}
-                      <div className="flex flex-wrap gap-4 pt-4">
-                        <div className="flex items-center gap-2 text-white/80 text-sm">
-                          <div className="w-2 h-2 bg-sale-red rounded-full"></div>
-                          <span>Free Shipping</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-white/80 text-sm">
-                          <div className="w-2 h-2 bg-sale-red rounded-full"></div>
-                          <span>Easy Returns</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-white/80 text-sm">
-                          <div className="w-2 h-2 bg-sale-red rounded-full"></div>
-                          <span>Authentic Products</span>
-                        </div>
                       </div>
                     </div>
                     
-                    {/* Right Side - Image Showcase (Optional decorative element) */}
-                    <div className="hidden md:block relative">
-                      <div className="relative w-full aspect-square max-w-md mx-auto">
-                        <div className="absolute inset-0 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10 p-4">
-                          <img
-                            src={slide.image}
-                            alt={slide.title}
-                            className="w-full h-full object-cover rounded-xl shadow-2xl"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = '/images2/hero sec(main photo).jpg';
-                            }}
-                          />
-                        </div>
-                        {/* Decorative corner accent */}
-                        <div className="absolute -top-4 -right-4 w-24 h-24 bg-sale-red/20 rounded-full blur-2xl"></div>
-                        <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-deep-indigo/30 rounded-full blur-2xl"></div>
+                    {/* Right Side - Model Image */}
+                    <div className="hidden md:block relative z-20">
+                      <div className="relative w-full max-w-lg mx-auto">
+                        <img
+                          src={slide.image}
+                          alt={slide.title}
+                          className="w-full h-auto object-contain rounded-lg"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/images2/hero sec(main photo).jpg';
+                          }}
+                        />
                       </div>
                     </div>
                   </div>
@@ -250,48 +207,47 @@ const HeroCarousel = () => {
           </div>
         ))}
 
-        {/* Navigation Arrows - More prominent */}
-        <button
-          onClick={() => {
-            const newSlide = currentSlide === 0 ? slides.length - 1 : currentSlide - 1;
-            handleSlideChange(newSlide);
-          }}
-          className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 bg-white hover:bg-sale-red text-deep-indigo hover:text-white p-3 md:p-4 rounded-full shadow-2xl transition-all duration-300 z-20 hover:scale-110 group border-2 border-white"
-          aria-label="Previous slide"
-        >
-          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 group-hover:-translate-x-1 transition-transform" />
-        </button>
-        <button
-          onClick={() => {
-            const newSlide = currentSlide === slides.length - 1 ? 0 : currentSlide + 1;
-            handleSlideChange(newSlide);
-          }}
-          className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 bg-white hover:bg-sale-red text-deep-indigo hover:text-white p-3 md:p-4 rounded-full shadow-2xl transition-all duration-300 z-20 hover:scale-110 group border-2 border-white"
-          aria-label="Next slide"
-        >
-          <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
-        </button>
-
-        {/* Dots Indicator - Enhanced */}
-        <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full">
-          {slides.map((_, index) => (
+        {/* Navigation Arrows - Subtle Design */}
+        {slides.length > 1 && (
+          <>
             <button
-              key={index}
-              onClick={() => handleSlideChange(index)}
-              className={`rounded-full transition-all duration-300 ${
-                index === currentSlide 
-                  ? 'bg-sale-red w-8 h-3 shadow-lg' 
-                  : 'bg-white/50 hover:bg-white/80 w-3 h-3'
-              }`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-      </div>
-      
-      {/* Decorative bottom wave with pattern */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-soft-cream via-soft-cream/80 to-transparent pointer-events-none">
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-deep-indigo/20 to-transparent"></div>
+              onClick={() => {
+                const newSlide = currentSlide === 0 ? slides.length - 1 : currentSlide - 1;
+                handleSlideChange(newSlide);
+              }}
+              className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#9CAF88] hover:text-[#7A9570] p-3 md:p-4 rounded-full shadow-lg transition-all duration-300 z-30 hover:scale-110 group"
+              aria-label="Previous slide"
+            >
+              <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 group-hover:-translate-x-1 transition-transform" />
+            </button>
+            <button
+              onClick={() => {
+                const newSlide = currentSlide === slides.length - 1 ? 0 : currentSlide + 1;
+                handleSlideChange(newSlide);
+              }}
+              className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#9CAF88] hover:text-[#7A9570] p-3 md:p-4 rounded-full shadow-lg transition-all duration-300 z-30 hover:scale-110 group"
+              aria-label="Next slide"
+            >
+              <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
+            </button>
+
+            {/* Dots Indicator - Subtle */}
+            <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-30">
+              {slides.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSlideChange(index)}
+                  className={`rounded-full transition-all duration-300 ${
+                    index === currentSlide 
+                      ? 'bg-white w-8 h-2 shadow-md' 
+                      : 'bg-white/60 hover:bg-white/80 w-2 h-2'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </section>
   );
