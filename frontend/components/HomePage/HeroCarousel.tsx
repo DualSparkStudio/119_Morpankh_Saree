@@ -39,10 +39,10 @@ const HeroCarousel = () => {
       }
     } catch (error) {
       console.error('Error loading banners:', error);
-      // Fallback to default banner with main hero image
+      // Fallback to default banner with background removed image
       setBanners([{
         id: 'default',
-        image: '/images2/hero sec(main photo).jpg',
+        image: '/images2/img bg removed.png',
         title: 'Premium Indian Sarees',
         description: 'Discover elegance in every thread',
         link: '/products',
