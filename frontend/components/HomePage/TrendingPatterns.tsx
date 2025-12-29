@@ -209,7 +209,7 @@ const TrendingPatterns = () => {
                             />
                           ))}
                         </div>
-                        <span className="text-xs text-gray-600">({product._count.reviews})</span>
+                        <span className="text-xs text-gray-600">Reviews: ({product._count.reviews})</span>
                       </div>
                     )}
                     

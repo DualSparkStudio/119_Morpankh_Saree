@@ -350,19 +350,19 @@ export default function ProductDetailPage() {
                 </div>
                 {product.inventory && product.inventory.length > 0 && (() => {
                   const totalStock = product.inventory.reduce((sum, inv) => sum + (inv.quantity || 0), 0);
-                  return totalStock > 0 ? (
+                  return (
                     <div>
                       <p className="text-sm text-gray-500 mb-1">Stock Availability</p>
                       <p className="text-gray-800 font-medium">
-                        {totalStock} units available
+                        Stock: {totalStock} units available
                       </p>
                     </div>
-                  ) : null;
+                  );
                 })()}
-                {product._count?.reviews !== undefined && product._count.reviews > 0 && (
+                {product._count?.reviews !== undefined && (
                   <div>
                     <p className="text-sm text-gray-500 mb-1">Reviews</p>
-                    <p className="text-gray-800 font-medium">{product._count.reviews} review(s)</p>
+                    <p className="text-gray-800 font-medium">Reviews: {product._count.reviews} review(s)</p>
                   </div>
                 )}
               </div>
