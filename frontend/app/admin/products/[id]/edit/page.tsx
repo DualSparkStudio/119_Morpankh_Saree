@@ -17,6 +17,7 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -45,6 +46,16 @@ export default function EditProductPage() {
       sku: string;
     }>,
   });
+
+  // Function to generate slug from product name
+  const generateSlug = (name: string): string => {
+    return name
+      .toLowerCase()
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/[^a-z0-9-]/g, '') // Remove special characters
+      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+  };
 
   useEffect(() => {
     loadCategories();
@@ -89,6 +100,7 @@ export default function EditProductPage() {
           price: v.price?.toString() || '',
         })) || [],
       });
+      setSlugManuallyEdited(false); // Reset flag when loading product data
     } catch (error: any) {
       console.error('Error loading data:', error);
       alert('Failed to load product data');
@@ -165,14 +177,29 @@ export default function EditProductPage() {
 
   const getImageUrl = (image: string): string => {
     if (!image) return '/images/placeholder.jpg';
+    // If it's already a full URL, return as is
     if (image.startsWith('http://') || image.startsWith('https://')) {
       return image;
     }
-    if (image.startsWith('/')) {
+    // If it starts with /uploads, it's from the backend
+    if (image.startsWith('/uploads')) {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-      const baseUrl = apiUrl.replace('/api', '');
-      return `${baseUrl}${image}`;
+      // In production, API_URL is '/api', so backend is on same domain
+      // In development, API_URL is 'http://localhost:5000/api'
+      if (apiUrl.startsWith('http')) {
+        // Development: extract base URL
+        const baseUrl = apiUrl.replace('/api', '');
+        return `${baseUrl}${image}`;
+      } else {
+        // Production: same domain, use image path directly
+        return image;
+      }
     }
+    // If it starts with /, it might be a frontend public image
+    if (image.startsWith('/')) {
+      return image;
+    }
+    // Otherwise, assume it's a relative path
     return image;
   };
 
@@ -208,7 +235,15 @@ export default function EditProductPage() {
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) => {
+                const newName = e.target.value;
+                setFormData({
+                  ...formData,
+                  name: newName,
+                  // Auto-update slug only if it hasn't been manually edited
+                  slug: slugManuallyEdited ? formData.slug : generateSlug(newName),
+                });
+              }}
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
             />
@@ -221,10 +256,20 @@ export default function EditProductPage() {
             <input
               type="text"
               value={formData.slug}
-              onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+              onChange={(e) => {
+                setFormData({ ...formData, slug: e.target.value });
+                setSlugManuallyEdited(true); // Mark as manually edited
+              }}
+              onFocus={() => setSlugManuallyEdited(true)} // Mark as manually edited when focused
               required
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+              placeholder="Auto-generated from product name"
             />
+            {!slugManuallyEdited && (
+              <p className="mt-1 text-xs text-gray-500">
+                Slug will auto-update when you change the product name
+              </p>
+            )}
           </div>
 
           <div>
@@ -391,29 +436,47 @@ export default function EditProductPage() {
             </button>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {formData.images.map((image, index) => (
-              <div key={index} className="relative group">
-                <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                  <Image
-                    src={getImageUrl(image)}
-                    alt={`Product image ${index + 1}`}
-                    fill
-                    className="object-cover"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/images/placeholder.jpg';
-                    }}
-                  />
+            {formData.images.map((image, index) => {
+              const imageUrl = getImageUrl(image);
+              // Use regular img tag for backend-uploaded images to avoid Next.js Image optimization issues
+              const isBackendImage = image.startsWith('/uploads') || image.startsWith('http');
+              return (
+                <div key={index} className="relative group">
+                  <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                    {isBackendImage ? (
+                      <img
+                        src={imageUrl}
+                        alt={`Product image ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/images/placeholder.jpg';
+                        }}
+                      />
+                    ) : (
+                      <Image
+                        src={imageUrl}
+                        alt={`Product image ${index + 1}`}
+                        fill
+                        className="object-cover"
+                        unoptimized={isBackendImage}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/images/placeholder.jpg';
+                        }}
+                      />
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeImage(index)}
+                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => removeImage(index)}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
