@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { ShoppingBag, Heart, User, Menu, ChevronDown } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { useState, useRef, useEffect } from 'react';
@@ -47,9 +48,16 @@ export default function Header() {
           {/* Logo */}
           <Link 
             href="/" 
-            className="font-heading text-2xl text-[#312e81] font-bold hover:text-[#1e3a8a] transition-colors cursor-pointer"
+            className="flex items-center h-full py-2 hover:opacity-80 transition-opacity"
           >
-            Morpankh Saree
+            <Image
+              src="/images/Moprpankh-Sarees-Logo.png"
+              alt="Morpankh Saree Logo"
+              width={180}
+              height={60}
+              className="h-12 w-auto object-contain"
+              priority
+            />
           </Link>
 
           {/* Desktop Navigation */}
