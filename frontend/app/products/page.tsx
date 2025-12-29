@@ -71,34 +71,40 @@ function ProductsPageContent() {
     }
   };
 
-  const images2Fallbacks = [
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (1).jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (2).jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM.jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM (1).jpeg',
-  ];
-
   const getImageUrl = (image: string | undefined, index: number = 0): string => {
-    // If image exists and is valid, return it
-    if (image) {
-      if (image.startsWith('http://') || image.startsWith('https://')) {
-        return image;
-      }
-      if (image.startsWith('/')) {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-        const baseUrl = apiUrl.replace('/api', '');
-        return `${baseUrl}${image}`;
-      }
+    if (!image) {
+      return '/images/placeholder.jpg';
+    }
+    
+    // If it's already a full URL, return as is
+    if (image.startsWith('http://') || image.startsWith('https://')) {
       return image;
     }
     
-    // Fallback to images2 folder
-    return images2Fallbacks[index % images2Fallbacks.length];
+    // If it starts with /uploads, it's from the backend
+    if (image.startsWith('/uploads')) {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      if (apiUrl.startsWith('http')) {
+        // Development: extract base URL
+        const baseUrl = apiUrl.replace('/api', '');
+        return `${baseUrl}${image}`;
+      }
+      // Production: same domain, use image path directly
+      return image;
+    }
+    
+    // Old hardcoded paths like /images/products/... don't exist - use placeholder
+    if (image.startsWith('/images/products/')) {
+      return '/images/placeholder.jpg';
+    }
+    
+    // If it starts with /, it might be a frontend public image
+    if (image.startsWith('/')) {
+      return image;
+    }
+    
+    // Otherwise, return as is
+    return image;
   };
 
   const toggleCategory = (category: string) => {
@@ -216,9 +222,16 @@ function ProductsPageContent() {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          const fallbackIndex = products.indexOf(product);
-                          target.src = images2Fallbacks[fallbackIndex % images2Fallbacks.length];
+                          const placeholder = '/images/placeholder.jpg';
+                          if (!target.src.includes('placeholder')) {
+                            target.src = placeholder;
+                          }
                         }}
+                        onLoad={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.opacity = '1';
+                        }}
+                        style={{ opacity: 0, transition: 'opacity 0.3s' }}
                       />
                       {/* Hover UI */}
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">

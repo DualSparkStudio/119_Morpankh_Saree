@@ -27,6 +27,16 @@ export default function ProductDetailPage() {
     try {
       setLoading(true);
       const productData = await productsApi.getBySlug(slug);
+      
+      // Debug: Log product data to see what images are in the database
+      console.log('Product loaded:', {
+        id: productData.id,
+        name: productData.name,
+        slug: productData.slug,
+        images: productData.images,
+        imagesCount: productData.images?.length || 0,
+      });
+      
       setProduct(productData);
       
       // Load related products from the same category
@@ -52,33 +62,38 @@ export default function ProductDetailPage() {
 
   const getImageUrl = (image: string | undefined, index: number = 0): string => {
     if (!image) {
-      const images2Fallbacks = [
-        '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
-        '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
-        '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
-        '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
-        '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
-        '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (1).jpeg',
-        '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (2).jpeg',
-        '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM.jpeg',
-        '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM (1).jpeg',
-      ];
-      return images2Fallbacks[index % images2Fallbacks.length];
+      // Return placeholder if no image
+      return '/images/placeholder.jpg';
     }
     
+    // If it's already a full URL, return as is
     if (image.startsWith('http://') || image.startsWith('https://')) {
       return image;
     }
     
+    // If it starts with /uploads, it's from the backend
     if (image.startsWith('/uploads')) {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
       if (apiUrl.startsWith('http')) {
+        // Development: extract base URL
         const baseUrl = apiUrl.replace('/api', '');
         return `${baseUrl}${image}`;
       }
+      // Production: same domain, use image path directly
       return image;
     }
     
+    // Old hardcoded paths like /images/products/... don't exist - use placeholder
+    if (image.startsWith('/images/products/')) {
+      return '/images/placeholder.jpg';
+    }
+    
+    // If it starts with /, it might be a frontend public image
+    if (image.startsWith('/')) {
+      return image;
+    }
+    
+    // Otherwise, return as is
     return image;
   };
 
@@ -138,9 +153,10 @@ export default function ProductDetailPage() {
     );
   }
 
+  // Use actual product images, or show placeholder if none exist
   const productImages = product.images && product.images.length > 0
     ? product.images
-    : Array.from({ length: 5 }, (_, i) => getImageUrl(undefined, i));
+    : ['/images/placeholder.jpg']; // Single placeholder if no images
 
   const discount = product.compareAtPrice
     ? Math.round(((product.compareAtPrice - product.basePrice) / product.compareAtPrice) * 100)
@@ -182,9 +198,9 @@ export default function ProductDetailPage() {
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        const fallback = getImageUrl(undefined, index);
-                        if (!target.src.includes('WhatsApp')) {
-                          target.src = fallback;
+                        const placeholder = '/images/placeholder.jpg';
+                        if (!target.src.includes('placeholder')) {
+                          target.src = placeholder;
                         }
                       }}
                     />
@@ -202,11 +218,16 @@ export default function ProductDetailPage() {
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    const fallback = getImageUrl(undefined, selectedImage);
-                    if (!target.src.includes('WhatsApp')) {
-                      target.src = fallback;
+                    const placeholder = '/images/placeholder.jpg';
+                    if (!target.src.includes('placeholder')) {
+                      target.src = placeholder;
                     }
                   }}
+                  onLoad={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.opacity = '1';
+                  }}
+                  style={{ opacity: 0, transition: 'opacity 0.3s' }}
                 />
               </div>
             </div>
