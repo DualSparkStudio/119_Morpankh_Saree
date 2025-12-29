@@ -271,43 +271,127 @@ export default function ProductDetailPage() {
               </button>
             </div>
 
-            {/* Product Details */}
-            {(product.fabricType || product.sareeLength || product.blouseIncluded !== undefined) && (
+            {/* Product Description - Always Show */}
+            <div className="bg-white rounded-lg p-6">
+              <h2 className="text-xl font-heading text-deep-indigo mb-4">Product Description</h2>
+              {product.description ? (
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {product.description}
+                </div>
+              ) : product.shortDescription ? (
+                <div className="text-gray-700 leading-relaxed">
+                  {product.shortDescription}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">No description available for this product.</p>
+              )}
+            </div>
+
+            {/* Product Specifications */}
+            <div className="bg-white rounded-lg p-6">
+              <h2 className="text-xl font-heading text-deep-indigo mb-4">Product Specifications</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {product.category && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Category</p>
+                    <p className="text-gray-800 font-medium">{product.category.name}</p>
+                  </div>
+                )}
+                {product.sku && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">SKU</p>
+                    <p className="text-gray-800 font-medium">{product.sku}</p>
+                  </div>
+                )}
+                {product.barcode && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Barcode</p>
+                    <p className="text-gray-800 font-medium">{product.barcode}</p>
+                  </div>
+                )}
+                {product.fabricType && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Fabric Type</p>
+                    <p className="text-gray-800 font-medium">{product.fabricType}</p>
+                  </div>
+                )}
+                {product.sareeLength && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Saree Length</p>
+                    <p className="text-gray-800 font-medium">{product.sareeLength} meters</p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm text-gray-500 mb-1">Blouse Included</p>
+                  <p className="text-gray-800 font-medium">{product.blouseIncluded ? 'Yes' : 'No'}</p>
+                </div>
+                {product.inventory && product.inventory.length > 0 && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Stock Availability</p>
+                    <p className="text-gray-800 font-medium">
+                      {product.inventory.reduce((sum, inv) => sum + (inv.quantity || 0), 0)} units available
+                    </p>
+                  </div>
+                )}
+                {product._count?.reviews !== undefined && (
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Reviews</p>
+                    <p className="text-gray-800 font-medium">{product._count.reviews} review(s)</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Tags */}
+            {product.tags && product.tags.length > 0 && (
               <div className="bg-white rounded-lg p-6">
-                <h2 className="text-xl font-heading text-deep-indigo mb-4">Product Details</h2>
-                <div className="space-y-2">
-                  {product.fabricType && (
-                    <p className="text-gray-600"><strong>Fabric:</strong> {product.fabricType}</p>
-                  )}
-                  {product.sareeLength && (
-                    <p className="text-gray-600"><strong>Length:</strong> {product.sareeLength} meters</p>
-                  )}
-                  <p className="text-gray-600">
-                    <strong>Blouse Included:</strong> {product.blouseIncluded ? 'Yes' : 'No'}
-                  </p>
-                  {product.tags && product.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {product.tags.map((tag, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                <h2 className="text-xl font-heading text-deep-indigo mb-4">Tags</h2>
+                <div className="flex flex-wrap gap-2">
+                  {product.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="px-4 py-2 bg-deep-indigo/10 text-deep-indigo rounded-full text-sm font-medium"
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}
 
-            {/* Product Description */}
-            {product.description && (
+            {/* Product Variants */}
+            {product.variants && product.variants.length > 0 && (
               <div className="bg-white rounded-lg p-6">
-                <h2 className="text-xl font-heading text-deep-indigo mb-4">Description</h2>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-                  {product.description}
-                </p>
+                <h2 className="text-xl font-heading text-deep-indigo mb-4">Available Variants</h2>
+                <div className="space-y-3">
+                  {product.variants.map((variant) => (
+                    <div
+                      key={variant.id}
+                      className="border border-gray-200 rounded-lg p-4 hover:border-deep-indigo transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium text-gray-800">{variant.name}</p>
+                          {variant.color && (
+                            <p className="text-sm text-gray-600">Color: {variant.color}</p>
+                          )}
+                          {variant.fabric && (
+                            <p className="text-sm text-gray-600">Fabric: {variant.fabric}</p>
+                          )}
+                          {variant.occasion && (
+                            <p className="text-sm text-gray-600">Occasion: {variant.occasion}</p>
+                          )}
+                          <p className="text-sm text-gray-500 mt-1">SKU: {variant.sku}</p>
+                        </div>
+                        {variant.price && (
+                          <p className="text-lg font-bold text-royal-blue">
+                            ₹{variant.price.toLocaleString()}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>

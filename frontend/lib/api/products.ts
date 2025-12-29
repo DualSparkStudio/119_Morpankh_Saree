@@ -35,8 +35,10 @@ export interface Product {
   isFeatured?: boolean;
   isActive?: boolean;
   inventory?: Array<{
+    id?: string;
     type: string;
     quantity: number;
+    reserved?: number;
   }>;
   _count?: {
     reviews: number;
