@@ -30,18 +30,6 @@ export default function ProductDetailPage() {
     placeholderUrl: images2Fallbacks[(i + 1) % images2Fallbacks.length],
   }));
 
-  const images2Fallbacks = [
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (1).jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (2).jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM.jpeg',
-    '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM (1).jpeg',
-  ];
-
   const relatedProducts = Array.from({ length: 4 }, (_, i) => ({
     id: i + 1,
     name: `Related Product ${i + 1}`,
