@@ -68,6 +68,7 @@ const HeroCarousel = () => {
     badge: index === 0 ? 'BUY 2 GET 1 FREE' : index === 1 ? 'NEW ARRIVALS' : index === 2 ? 'EXCLUSIVE' : index === 3 ? 'BESTSELLER' : 'WEDDING SPECIAL',
     discount: index === 0 ? 'Up to 70% OFF' : index === 1 ? 'Limited Edition' : index === 2 ? 'Premium Quality' : index === 3 ? 'Trending Now' : 'Elegant Collection',
     link: banner.link || '/products',
+    linkText: banner.linkText || 'Shop Now',
   })) : [];
 
   // Auto-play functionality
