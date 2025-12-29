@@ -161,44 +161,16 @@ const HeroCarousel = () => {
           >
             <div className="relative w-full h-full bg-transparent">
               {/* Content */}
-              <div className="relative h-full flex items-center z-10 bg-transparent">
+              <div className="relative h-full flex items-center z-10 bg-transparent py-4 md:py-0">
                 <div className="container mx-auto px-4 md:px-6 lg:px-8 w-full bg-transparent">
-                  <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
-                    {/* Left Side - Text Content - Centered */}
-                    <div className="text-white space-y-4 md:space-y-6 z-20 text-center md:text-left">
-                      {/* Small Script Text */}
-                      <p className="text-2xl md:text-3xl font-script text-white/90 mb-2">
-                        Amazing
-                      </p>
-                      
-                      {/* Main Title - Large White Sans-serif */}
-                      <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-sans font-bold leading-tight text-white">
-                        {slide.title || 'Premium Indian Sarees'}
-                      </h1>
-                      
-                      {/* Modern Stunning Tagline - Centered */}
-                      <p className="text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-lg mx-auto md:mx-0 leading-relaxed">
-                        Where Tradition Meets Elegance, Every Thread Tells a Story
-                      </p>
-                      
-                      {/* CTA Button - White with Dark Blue Text */}
-                      <div className="pt-4">
-                        <Link
-                          href={slide.link || '/products'}
-                          className="inline-block bg-white text-deep-indigo hover:bg-white/95 px-8 py-3 md:px-10 md:py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform border border-deep-indigo/20"
-                        >
-                          {slide.linkText || 'Shop Now'}
-                        </Link>
-                      </div>
-                    </div>
-                    
-                    {/* Right Side - Model Image (No Background) */}
-                    <div className="hidden md:block relative z-20 bg-transparent">
-                      <div className="relative w-full max-w-lg mx-auto flex items-center justify-center bg-transparent" style={{ backgroundColor: 'transparent', background: 'none' }}>
+                  <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
+                    {/* Image - Above on Mobile, Right on Desktop */}
+                    <div className="relative z-20 bg-transparent order-1 md:order-2 w-full md:w-auto">
+                      <div className="relative w-full max-w-xs md:max-w-lg mx-auto flex items-center justify-center bg-transparent" style={{ backgroundColor: 'transparent', background: 'none' }}>
                         <img
                           src={slide.image}
                           alt={slide.title}
-                          className="w-full h-auto object-contain max-h-[600px] md:max-h-[700px]"
+                          className="w-full h-auto object-contain max-h-[250px] md:max-h-[600px] lg:max-h-[700px]"
                           style={{ 
                             mixBlendMode: 'normal',
                             backgroundColor: 'transparent',
@@ -212,6 +184,34 @@ const HeroCarousel = () => {
                             target.style.background = 'none';
                           }}
                         />
+                      </div>
+                    </div>
+                    
+                    {/* Text Content - Below on Mobile, Left on Desktop */}
+                    <div className="text-white space-y-2 md:space-y-4 lg:space-y-6 z-20 text-center md:text-left order-2 md:order-1">
+                      {/* Small Script Text */}
+                      <p className="text-xl md:text-2xl lg:text-3xl font-script text-white/90 mb-1 md:mb-2">
+                        Amazing
+                      </p>
+                      
+                      {/* Main Title - Large White Sans-serif */}
+                      <h1 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-sans font-bold leading-tight text-white">
+                        {slide.title || 'Premium Indian Sarees'}
+                      </h1>
+                      
+                      {/* Modern Stunning Tagline - Centered */}
+                      <p className="text-base md:text-lg lg:text-xl xl:text-2xl text-white/90 font-light max-w-lg mx-auto md:mx-0 leading-relaxed">
+                        Where Tradition Meets Elegance, Every Thread Tells a Story
+                      </p>
+                      
+                      {/* CTA Button - White with Dark Blue Text */}
+                      <div className="pt-2 md:pt-4">
+                        <Link
+                          href={slide.link || '/products'}
+                          className="inline-block bg-white text-deep-indigo hover:bg-white/95 px-6 py-2.5 md:px-8 md:py-3 lg:px-10 lg:py-4 rounded-lg font-semibold text-sm md:text-base lg:text-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform border border-deep-indigo/20"
+                        >
+                          {slide.linkText || 'Shop Now'}
+                        </Link>
                       </div>
                     </div>
                   </div>
