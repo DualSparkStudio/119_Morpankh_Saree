@@ -115,6 +115,8 @@ export default function EditProductPage() {
     setSaving(true);
 
     try {
+      // Don't include variants in update - they should be managed separately
+      // to avoid creating duplicates
       const productData = {
         name: formData.name,
         slug: formData.slug,
@@ -133,21 +135,16 @@ export default function EditProductPage() {
         isActive: formData.isActive,
         isFeatured: formData.isFeatured,
         tags: formData.tags,
-        variants: formData.variants.map(v => ({
-          name: v.name,
-          color: v.color || null,
-          fabric: v.fabric || null,
-          occasion: v.occasion || null,
-          price: v.price ? parseFloat(v.price) : null,
-          sku: v.sku,
-        })),
+        // Note: variants are not included here to prevent duplicate creation
+        // Variants should be managed through a separate API endpoint if needed
       };
 
       await adminApi.updateProduct(id, productData);
       router.push('/admin/products');
     } catch (error: any) {
       console.error('Error updating product:', error);
-      alert(error.response?.data?.message || 'Failed to update product');
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to update product';
+      alert(errorMessage);
     } finally {
       setSaving(false);
     }

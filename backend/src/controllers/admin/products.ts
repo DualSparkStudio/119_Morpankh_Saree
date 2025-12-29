@@ -160,13 +160,50 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
   await cache.delPattern('products:*');
   try {
     const { id } = req.params;
-    const updateData = req.body;
+    const updateData = { ...req.body };
+
+    // Remove variants from updateData - variants should be managed separately
+    // to avoid creating duplicates
+    delete updateData.variants;
 
     // Convert numeric strings to numbers
     if (updateData.basePrice) updateData.basePrice = parseFloat(updateData.basePrice);
-    if (updateData.compareAtPrice) updateData.compareAtPrice = parseFloat(updateData.compareAtPrice);
-    if (updateData.costPrice) updateData.costPrice = parseFloat(updateData.costPrice);
+    if (updateData.compareAtPrice) updateData.compareAtPrice = updateData.compareAtPrice ? parseFloat(updateData.compareAtPrice) : null;
+    if (updateData.costPrice) updateData.costPrice = updateData.costPrice ? parseFloat(updateData.costPrice) : null;
+    if (updateData.sareeLength) updateData.sareeLength = updateData.sareeLength ? parseFloat(updateData.sareeLength) : null;
 
+    // Check if product exists first
+    const existingProduct = await prisma.product.findUnique({
+      where: { id },
+      select: { id: true, slug: true, sku: true },
+    });
+
+    if (!existingProduct) {
+      return next(new AppError('Product not found', 404));
+    }
+
+    // Check for unique constraint violations (slug or SKU)
+    if (updateData.slug && updateData.slug !== existingProduct.slug) {
+      const slugExists = await prisma.product.findUnique({
+        where: { slug: updateData.slug },
+        select: { id: true },
+      });
+      if (slugExists && slugExists.id !== id) {
+        return next(new AppError('A product with this slug already exists', 400));
+      }
+    }
+
+    if (updateData.sku && updateData.sku !== existingProduct.sku) {
+      const skuExists = await prisma.product.findUnique({
+        where: { sku: updateData.sku },
+        select: { id: true },
+      });
+      if (skuExists && skuExists.id !== id) {
+        return next(new AppError('A product with this SKU already exists', 400));
+      }
+    }
+
+    // Update the product (only update, never create)
     const product = await prisma.product.update({
       where: { id },
       data: updateData,
@@ -180,6 +217,10 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     // Invalidate caches
     await cache.del(`product:${product.id}`);
     await cache.del(`product:slug:${product.slug}`);
+    // Also invalidate old slug cache if slug changed
+    if (existingProduct.slug !== product.slug) {
+      await cache.del(`product:slug:${existingProduct.slug}`);
+    }
     await cache.delPattern('products:*');
 
     res.json(product);
@@ -187,6 +228,12 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     if (error.code === 'P2025') {
       return next(new AppError('Product not found', 404));
     }
+    if (error.code === 'P2002') {
+      // Unique constraint violation
+      const field = error.meta?.target?.[0] || 'field';
+      return next(new AppError(`A product with this ${field} already exists`, 400));
+    }
+    console.error('Error updating product:', error);
     next(error);
   }
 };
