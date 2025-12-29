@@ -25,7 +25,7 @@ const HeroCarousel = () => {
       if (data.length === 0) {
         setBanners([{
           id: 'default',
-          image: '/images2/hero sec(main photo).jpg',
+          image: '/images2/img bg removed.png',
           title: 'Premium Indian Sarees',
           description: 'Discover elegance in every thread',
           link: '/products',
@@ -59,7 +59,8 @@ const HeroCarousel = () => {
   };
 
   const getImageUrl = (image: string): string => {
-    if (!image) return '/images2/hero sec(main photo).jpg';
+    // Use the background removed image as default
+    if (!image) return '/images2/img bg removed.png';
     if (image.startsWith('http://') || image.startsWith('https://')) {
       return image;
     }
@@ -113,7 +114,7 @@ const HeroCarousel = () => {
 
   if (loading) {
     return (
-      <section className="relative h-[600px] md:h-[700px] lg:h-[800px] overflow-hidden bg-[#9CAF88] flex items-center justify-center">
+      <section className="relative h-[600px] md:h-[700px] lg:h-[800px] overflow-hidden bg-gradient-to-br from-deep-indigo via-navy-blue to-deep-indigo flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
       </section>
     );
@@ -125,29 +126,29 @@ const HeroCarousel = () => {
 
   return (
     <section 
-      className="relative h-[600px] md:h-[700px] lg:h-[800px] overflow-hidden bg-[#9CAF88]"
+      className="relative h-[600px] md:h-[700px] lg:h-[800px] overflow-hidden bg-gradient-to-br from-deep-indigo via-navy-blue to-deep-indigo"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       <div className="relative h-full">
-        {/* Decorative Geometric Shapes */}
+        {/* Decorative Geometric Shapes - Dark Blue/White Theme */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           {/* Circles */}
-          <div className="absolute top-20 left-10 w-32 h-32 bg-[#B5C9A3] rounded-full opacity-30 blur-sm"></div>
-          <div className="absolute top-40 right-20 w-24 h-24 bg-[#B5C9A3] rounded-full opacity-25 blur-sm"></div>
-          <div className="absolute bottom-32 left-1/4 w-40 h-40 bg-[#B5C9A3] rounded-full opacity-20 blur-sm"></div>
+          <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full opacity-30 blur-sm"></div>
+          <div className="absolute top-40 right-20 w-24 h-24 bg-white/15 rounded-full opacity-25 blur-sm"></div>
+          <div className="absolute bottom-32 left-1/4 w-40 h-40 bg-white/10 rounded-full opacity-20 blur-sm"></div>
           
           {/* Triangles */}
-          <div className="absolute top-1/4 right-1/3 w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[50px] border-b-[#B5C9A3] opacity-20 rotate-45"></div>
-          <div className="absolute bottom-1/4 left-1/3 w-0 h-0 border-l-[25px] border-l-transparent border-r-[25px] border-r-transparent border-b-[45px] border-b-[#B5C9A3] opacity-25 -rotate-12"></div>
+          <div className="absolute top-1/4 right-1/3 w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[50px] border-b-white/15 opacity-20 rotate-45"></div>
+          <div className="absolute bottom-1/4 left-1/3 w-0 h-0 border-l-[25px] border-l-transparent border-r-[25px] border-r-transparent border-b-[45px] border-b-white/15 opacity-25 -rotate-12"></div>
           
           {/* Rounded Rectangles */}
-          <div className="absolute top-1/3 right-10 w-20 h-16 bg-[#B5C9A3] rounded-2xl opacity-20 rotate-12"></div>
-          <div className="absolute bottom-1/3 left-20 w-24 h-20 bg-[#B5C9A3] rounded-3xl opacity-15 -rotate-6"></div>
+          <div className="absolute top-1/3 right-10 w-20 h-16 bg-white/10 rounded-2xl opacity-20 rotate-12"></div>
+          <div className="absolute bottom-1/3 left-20 w-24 h-20 bg-white/10 rounded-3xl opacity-15 -rotate-6"></div>
           
           {/* Leaf Motifs */}
-          <div className="absolute top-16 right-1/4 w-16 h-16 bg-[#B5C9A3] rounded-full opacity-15" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}></div>
-          <div className="absolute bottom-20 right-1/3 w-12 h-12 bg-[#B5C9A3] rounded-full opacity-20" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}></div>
+          <div className="absolute top-16 right-1/4 w-16 h-16 bg-white/10 rounded-full opacity-15" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}></div>
+          <div className="absolute bottom-20 right-1/3 w-12 h-12 bg-white/15 rounded-full opacity-20" style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }}></div>
         </div>
 
         {/* Banner Images */}
@@ -175,11 +176,11 @@ const HeroCarousel = () => {
                         {slide.title || 'Fabrics that matches your Personality'}
                       </h1>
                       
-                      {/* CTA Button - White with Green Text */}
+                      {/* CTA Button - White with Dark Blue Text */}
                       <div className="pt-4">
                         <Link
                           href={slide.link || '/products'}
-                          className="inline-block bg-white text-[#9CAF88] hover:bg-white/95 px-8 py-3 md:px-10 md:py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
+                          className="inline-block bg-white text-deep-indigo hover:bg-white/95 px-8 py-3 md:px-10 md:py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform"
                         >
                           {slide.linkText || 'Shop Now'}
                         </Link>
@@ -195,7 +196,7 @@ const HeroCarousel = () => {
                           className="w-full h-auto object-contain rounded-lg"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = '/images2/hero sec(main photo).jpg';
+                            target.src = '/images2/img bg removed.png';
                           }}
                         />
                       </div>
@@ -215,7 +216,7 @@ const HeroCarousel = () => {
                 const newSlide = currentSlide === 0 ? slides.length - 1 : currentSlide - 1;
                 handleSlideChange(newSlide);
               }}
-              className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#9CAF88] hover:text-[#7A9570] p-3 md:p-4 rounded-full shadow-lg transition-all duration-300 z-30 hover:scale-110 group"
+              className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-deep-indigo hover:text-navy-blue p-3 md:p-4 rounded-full shadow-lg transition-all duration-300 z-30 hover:scale-110 group"
               aria-label="Previous slide"
             >
               <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 group-hover:-translate-x-1 transition-transform" />
@@ -225,7 +226,7 @@ const HeroCarousel = () => {
                 const newSlide = currentSlide === slides.length - 1 ? 0 : currentSlide + 1;
                 handleSlideChange(newSlide);
               }}
-              className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#9CAF88] hover:text-[#7A9570] p-3 md:p-4 rounded-full shadow-lg transition-all duration-300 z-30 hover:scale-110 group"
+              className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-deep-indigo hover:text-navy-blue p-3 md:p-4 rounded-full shadow-lg transition-all duration-300 z-30 hover:scale-110 group"
               aria-label="Next slide"
             >
               <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
