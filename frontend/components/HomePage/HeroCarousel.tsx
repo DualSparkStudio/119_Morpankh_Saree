@@ -166,11 +166,11 @@ const HeroCarousel = () => {
                   <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
                     {/* Image - Above on Mobile, Right on Desktop */}
                     <div className="relative z-20 bg-transparent order-1 md:order-2 w-full md:w-auto">
-                      <div className="relative w-full max-w-xs md:max-w-lg mx-auto flex items-center justify-center bg-transparent" style={{ backgroundColor: 'transparent', background: 'none' }}>
+                      <div className="relative w-full max-w-sm md:max-w-lg mx-auto flex items-center justify-center bg-transparent" style={{ backgroundColor: 'transparent', background: 'none' }}>
                         <img
                           src={slide.image}
                           alt={slide.title}
-                          className="w-full h-auto object-contain max-h-[250px] md:max-h-[600px] lg:max-h-[700px]"
+                          className="w-full h-auto object-contain max-h-[350px] md:max-h-[600px] lg:max-h-[700px] rounded-xl"
                           style={{ 
                             mixBlendMode: 'normal',
                             backgroundColor: 'transparent',
@@ -194,8 +194,8 @@ const HeroCarousel = () => {
                         Amazing
                       </p>
                       
-                      {/* Main Title - Large White Sans-serif */}
-                      <h1 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-sans font-bold leading-tight text-white">
+                      {/* Main Title - Large White with Heading Font (same as Categories) */}
+                      <h1 className="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-heading font-bold leading-tight text-white">
                         {slide.title || 'Premium Indian Sarees'}
                       </h1>
                       
