@@ -21,17 +21,28 @@ const HeroCarousel = () => {
       setLoading(true);
       const data = await bannersApi.getBanners('HERO');
       setBanners(data.filter(b => b.isActive));
-      // If no HERO banners, get all active banners
+      // If no HERO banners, use default with main hero image
       if (data.length === 0) {
-        const allBanners = await bannersApi.getBanners();
-        setBanners(allBanners.filter(b => b.isActive).slice(0, 5));
+        setBanners([{
+          id: 'default',
+          image: '/images2/hero sec(main photo).jpg',
+          title: 'Premium Indian Sarees',
+          description: 'Discover elegance in every thread',
+          link: '/products',
+          linkText: 'Shop Now',
+          position: 'HERO',
+          order: 0,
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }]);
       }
     } catch (error) {
       console.error('Error loading banners:', error);
-      // Fallback to default banner
+      // Fallback to default banner with main hero image
       setBanners([{
         id: 'default',
-        image: '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
+        image: '/images2/hero sec(main photo).jpg',
         title: 'Premium Indian Sarees',
         description: 'Discover elegance in every thread',
         link: '/products',
@@ -48,7 +59,7 @@ const HeroCarousel = () => {
   };
 
   const getImageUrl = (image: string): string => {
-    if (!image) return '/images/placeholder.jpg';
+    if (!image) return '/images2/hero sec(main photo).jpg';
     if (image.startsWith('http://') || image.startsWith('https://')) {
       return image;
     }
@@ -136,7 +147,7 @@ const HeroCarousel = () => {
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
+                    target.src = '/images2/hero sec(main photo).jpg';
                   }}
                 />
               </div>
