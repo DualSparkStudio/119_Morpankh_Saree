@@ -121,7 +121,7 @@ const PremiumPatterns = () => {
                 >
                   {/* Image Container */}
                   <Link href={`/products/${product.slug}`} className="block relative">
-                    <div className="relative aspect-[4/5] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                    <div className="relative aspect-[3/4] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                       <img
                         src={getImageUrl(product.images?.[0], products.indexOf(product))}
                         alt={product.name}
@@ -186,15 +186,15 @@ const PremiumPatterns = () => {
                   </Link>
                   
                   {/* Product Info */}
-                  <div className="p-3 md:p-4 bg-white">
+                  <div className="p-2.5 md:p-3 bg-white">
                     <Link href={`/products/${product.slug}`}>
-                      <h3 className="font-heading font-semibold text-gray-900 mb-1.5 line-clamp-2 group-hover:text-deep-indigo transition-colors text-sm md:text-base leading-tight min-h-[2.5rem]">
+                      <h3 className="font-heading font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-deep-indigo transition-colors text-sm md:text-base leading-tight min-h-[2rem]">
                         {product.name}
                       </h3>
                     </Link>
                     
-                    {/* Rating - Only show if reviews exist */}
-                    {product._count?.reviews && product._count.reviews > 0 && (
+                    {/* Rating - Only show if reviews exist and > 0 */}
+                    {product._count?.reviews && product._count.reviews > 0 ? (
                       <div className="flex items-center gap-2 mb-2">
                         <div className="flex items-center gap-0.5">
                           {[...Array(5)].map((_, i) => (
@@ -204,9 +204,9 @@ const PremiumPatterns = () => {
                             />
                           ))}
                         </div>
-                        <span className="text-xs text-gray-600">Reviews: ({product._count.reviews})</span>
+                        <span className="text-xs text-gray-600">({product._count.reviews})</span>
                       </div>
-                    )}
+                    ) : null}
                     
                     {/* Price */}
                     <div className="flex items-baseline gap-2 mb-2">

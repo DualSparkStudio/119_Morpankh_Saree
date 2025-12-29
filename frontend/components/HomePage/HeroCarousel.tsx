@@ -164,8 +164,8 @@ const HeroCarousel = () => {
               <div className="relative h-full flex items-center z-10 bg-transparent">
                 <div className="container mx-auto px-4 md:px-6 lg:px-8 w-full bg-transparent">
                   <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
-                    {/* Left Side - Text Content */}
-                    <div className="text-white space-y-4 md:space-y-6 z-20">
+                    {/* Left Side - Text Content - Centered */}
+                    <div className="text-white space-y-4 md:space-y-6 z-20 text-center md:text-left">
                       {/* Small Script Text */}
                       <p className="text-2xl md:text-3xl font-script text-white/90 mb-2">
                         Amazing
@@ -176,8 +176,8 @@ const HeroCarousel = () => {
                         {slide.title || 'Premium Indian Sarees'}
                       </h1>
                       
-                      {/* Modern Stunning Tagline */}
-                      <p className="text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-lg leading-relaxed">
+                      {/* Modern Stunning Tagline - Centered */}
+                      <p className="text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-lg mx-auto md:mx-0 leading-relaxed">
                         Where Tradition Meets Elegance, Every Thread Tells a Story
                       </p>
                       
