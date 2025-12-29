@@ -107,7 +107,7 @@ const TrendingPatterns = () => {
                 >
                   {/* Image Container */}
                   <Link href={`/products/${product.slug}`} className="block relative">
-                    <div className="relative aspect-[3/4] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                    <div className="relative aspect-[4/5] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                       <img
                         src={getImageUrl(product.images?.[0], products.indexOf(product))}
                         alt={product.name}
@@ -191,21 +191,21 @@ const TrendingPatterns = () => {
                   </Link>
                   
                   {/* Product Info */}
-                  <div className="p-4 md:p-5 bg-white">
+                  <div className="p-3 md:p-4 bg-white">
                     <Link href={`/products/${product.slug}`}>
-                      <h3 className="font-heading font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-deep-indigo transition-colors text-base md:text-lg leading-tight min-h-[3rem]">
+                      <h3 className="font-heading font-semibold text-gray-900 mb-1.5 line-clamp-2 group-hover:text-deep-indigo transition-colors text-sm md:text-base leading-tight min-h-[2.5rem]">
                         {product.name}
                       </h3>
                     </Link>
                     
-                    {/* Rating */}
+                    {/* Rating - Only show if reviews exist */}
                     {product._count?.reviews && product._count.reviews > 0 && (
-                      <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center gap-2 mb-2">
                         <div className="flex items-center gap-0.5">
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400"
+                              className="w-3 h-3 text-yellow-400 fill-yellow-400"
                             />
                           ))}
                         </div>
@@ -214,10 +214,10 @@ const TrendingPatterns = () => {
                     )}
                     
                     {/* Price */}
-                    <div className="flex items-baseline gap-2 mb-3">
-                      <span className="text-xl md:text-2xl font-bold text-sale-red">₹{product.basePrice.toLocaleString()}</span>
+                    <div className="flex items-baseline gap-2 mb-2">
+                      <span className="text-lg md:text-xl font-bold text-sale-red">₹{product.basePrice.toLocaleString()}</span>
                       {product.compareAtPrice && (
-                        <span className="text-sm text-gray-400 line-through">₹{product.compareAtPrice.toLocaleString()}</span>
+                        <span className="text-xs text-gray-400 line-through">₹{product.compareAtPrice.toLocaleString()}</span>
                       )}
                     </div>
                     
@@ -235,9 +235,9 @@ const TrendingPatterns = () => {
                           productImage: product.images?.[0] || '/images/placeholder.jpg',
                         });
                       }}
-                      className="w-full bg-deep-indigo hover:bg-navy-blue text-white py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                      className="w-full bg-deep-indigo hover:bg-navy-blue text-white py-2 rounded-lg font-semibold text-xs md:text-sm transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2"
                     >
-                      <ShoppingCart className="w-4 h-4" />
+                      <ShoppingCart className="w-3.5 h-3.5" />
                       <span>Add to Cart</span>
                     </button>
                   </div>
