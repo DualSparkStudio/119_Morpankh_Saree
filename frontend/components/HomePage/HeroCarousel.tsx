@@ -25,7 +25,7 @@ const HeroCarousel = () => {
       if (data.length === 0) {
         setBanners([{
           id: 'default',
-          image: '/images2/img bg removed.png',
+          image: '/images2/hero sec(main photo).jpg',
           title: 'Premium Indian Sarees',
           description: 'Discover elegance in every thread',
           link: '/products',
@@ -39,10 +39,10 @@ const HeroCarousel = () => {
       }
     } catch (error) {
       console.error('Error loading banners:', error);
-      // Fallback to default banner with background removed image
+      // Fallback to default banner with hero section image
       setBanners([{
         id: 'default',
-        image: '/images2/img bg removed.png',
+        image: '/images2/hero sec(main photo).jpg',
         title: 'Premium Indian Sarees',
         description: 'Discover elegance in every thread',
         link: '/products',
@@ -59,8 +59,8 @@ const HeroCarousel = () => {
   };
 
   const getImageUrl = (image: string): string => {
-    // Use the background removed image as default
-    if (!image) return '/images2/img bg removed.png';
+    // Use the hero section image as default
+    if (!image) return '/images2/hero sec(main photo).jpg';
     if (image.startsWith('http://') || image.startsWith('https://')) {
       return image;
     }
@@ -207,7 +207,7 @@ const HeroCarousel = () => {
                           }}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = '/images2/img bg removed.png';
+                            target.src = '/images2/hero sec(main photo).jpg';
                             target.style.backgroundColor = 'transparent';
                             target.style.background = 'none';
                           }}
