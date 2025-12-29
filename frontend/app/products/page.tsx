@@ -73,7 +73,7 @@ function ProductsPageContent() {
 
   const getImageUrl = (image: string | undefined, index: number = 0): string => {
     if (!image) {
-      return '/images/placeholder.jpg';
+      return '/images/cotton-saree.png';
     }
     
     // If it's already a full URL, return as is
@@ -95,7 +95,7 @@ function ProductsPageContent() {
     
     // Old hardcoded paths like /images/products/... don't exist - use placeholder
     if (image.startsWith('/images/products/')) {
-      return '/images/placeholder.jpg';
+      return '/images/cotton-saree.png';
     }
     
     // If it starts with /, it might be a frontend public image
@@ -222,8 +222,8 @@ function ProductsPageContent() {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          const placeholder = '/images/placeholder.jpg';
-                          if (!target.src.includes('placeholder')) {
+                          const placeholder = '/images/cotton-saree.png';
+                          if (!target.src.includes('cotton-saree')) {
                             target.src = placeholder;
                           }
                         }}
