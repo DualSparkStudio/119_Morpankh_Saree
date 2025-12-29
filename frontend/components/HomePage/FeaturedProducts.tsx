@@ -18,8 +18,26 @@ interface Product {
   };
 }
 
-// Helper to get first image
-const getProductImage = (product: Product) => product.images?.[0] || '/images/placeholder.jpg';
+// Helper to get first image with fallback
+const images2Fallbacks = [
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (1).jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (2).jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM.jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM (1).jpeg',
+];
+
+const getProductImage = (product: Product, index: number = 0) => {
+  if (product.images && product.images.length > 0 && product.images[0]) {
+    return product.images[0];
+  }
+  return images2Fallbacks[index % images2Fallbacks.length];
+};
+
 const getProductPrice = (product: Product) => product.basePrice;
 
 interface FeaturedProductsProps {
@@ -68,10 +86,14 @@ export default function FeaturedProducts({ products = [], title = 'Featured Prod
               <Link href={`/products/${product.slug}`}>
                 <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100 mb-3">
                   <Image
-                    src={getProductImage(product)}
+                    src={getProductImage(product, index)}
                     alt={product.name}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = images2Fallbacks[index % images2Fallbacks.length];
+                    }}
                   />
                   <button
                     onClick={(e) => toggleWishlist(e, product.id)}

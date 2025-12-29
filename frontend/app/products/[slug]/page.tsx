@@ -12,18 +12,42 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0);
 
   const productId = slug ? parseInt(slug) : 1;
+  const images2Fallbacks = [
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (1).jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (2).jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM.jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM (1).jpeg',
+  ];
+
   const images = Array.from({ length: 5 }, (_, i) => ({
     id: i,
-    url: `/images/products/product-${productId}-${i + 1}.jpg`,
-    placeholderUrl: `https://images.unsplash.com/photo-${1570000000000 + (productId * 10 + i + 1) * 100000}?w=400&h=600&fit=crop&q=80`,
+    url: images2Fallbacks[i % images2Fallbacks.length],
+    placeholderUrl: images2Fallbacks[(i + 1) % images2Fallbacks.length],
   }));
+
+  const images2Fallbacks = [
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (1).jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (2).jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM.jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM (1).jpeg',
+  ];
 
   const relatedProducts = Array.from({ length: 4 }, (_, i) => ({
     id: i + 1,
     name: `Related Product ${i + 1}`,
     price: (1999 + i * 500).toLocaleString(),
-    image: `/images/products/product-${i + 20}.jpg`,
-    placeholderImage: `https://images.unsplash.com/photo-${1570000000000 + (i + 20) * 100000}?w=300&h=400&fit=crop&q=80`,
+    image: images2Fallbacks[i % images2Fallbacks.length],
+    placeholderImage: images2Fallbacks[(i + 1) % images2Fallbacks.length],
   }));
 
   return (

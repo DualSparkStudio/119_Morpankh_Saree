@@ -14,7 +14,24 @@ interface Product {
   compareAtPrice?: number;
 }
 
-const getProductImage = (product: Product) => product.images?.[0] || '/images/placeholder.jpg';
+const images2Fallbacks = [
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (1).jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (2).jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM.jpeg',
+  '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM (1).jpeg',
+];
+
+const getProductImage = (product: Product, index: number = 0) => {
+  if (product.images && product.images.length > 0 && product.images[0]) {
+    return product.images[0];
+  }
+  return images2Fallbacks[index % images2Fallbacks.length];
+};
 
 interface Buy2Get1Props {
   products?: Product[];
@@ -54,10 +71,14 @@ export default function Buy2Get1({ products = [] }: Buy2Get1Props) {
               <Link href={`/products/${product.slug}`}>
                 <div className="relative aspect-square overflow-hidden rounded-lg bg-white shadow-md mb-3">
                   <Image
-                    src={getProductImage(product)}
+                    src={getProductImage(product, index)}
                     alt={product.name}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = images2Fallbacks[index % images2Fallbacks.length];
+                    }}
                   />
                   <div className="absolute top-2 left-2 bg-[#d4af37] text-white px-3 py-1 rounded text-xs font-semibold">
                     Buy 2 Get 1

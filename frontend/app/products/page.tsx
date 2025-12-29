@@ -71,17 +71,34 @@ function ProductsPageContent() {
     }
   };
 
-  const getImageUrl = (image: string | undefined): string => {
-    if (!image) return '/images/placeholder.jpg';
-    if (image.startsWith('http://') || image.startsWith('https://')) {
+  const images2Fallbacks = [
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (1).jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (2).jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM.jpeg',
+    '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM (1).jpeg',
+  ];
+
+  const getImageUrl = (image: string | undefined, index: number = 0): string => {
+    // If image exists and is valid, return it
+    if (image) {
+      if (image.startsWith('http://') || image.startsWith('https://')) {
+        return image;
+      }
+      if (image.startsWith('/')) {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+        const baseUrl = apiUrl.replace('/api', '');
+        return `${baseUrl}${image}`;
+      }
       return image;
     }
-    if (image.startsWith('/')) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-      const baseUrl = apiUrl.replace('/api', '');
-      return `${baseUrl}${image}`;
-    }
-    return image;
+    
+    // Fallback to images2 folder
+    return images2Fallbacks[index % images2Fallbacks.length];
   };
 
   const toggleCategory = (category: string) => {
@@ -194,12 +211,13 @@ function ProductsPageContent() {
                   <Link href={`/products/${product.slug}`}>
                     <div className="relative aspect-[3/4] bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 overflow-hidden">
                       <img
-                        src={getImageUrl(product.images?.[0])}
+                        src={getImageUrl(product.images?.[0], products.indexOf(product))}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          target.src = '/images/placeholder.jpg';
+                          const fallbackIndex = products.indexOf(product);
+                          target.src = images2Fallbacks[fallbackIndex % images2Fallbacks.length];
                         }}
                       />
                       {/* Hover UI */}

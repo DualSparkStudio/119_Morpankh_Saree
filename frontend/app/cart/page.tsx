@@ -59,11 +59,23 @@ export default function CartPage() {
                 <Link href={`/products/${item.productId}`} className="flex-shrink-0">
                   <div className="w-24 h-32 sm:w-32 sm:h-40 bg-gray-100 rounded-lg overflow-hidden">
                     <Image
-                      src="/images/placeholder.jpg"
-                      alt="Product"
+                      src={item.productImage || '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg'}
+                      alt={item.productName || 'Product'}
                       width={128}
                       height={160}
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        const images2Fallbacks = [
+                          '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
+                          '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
+                          '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
+                          '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
+                          '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
+                        ];
+                        const fallbackIndex = cart.indexOf(item) % images2Fallbacks.length;
+                        target.src = images2Fallbacks[fallbackIndex];
+                      }}
                     />
                   </div>
                 </Link>
