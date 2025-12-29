@@ -170,7 +170,7 @@ const HeroCarousel = () => {
                         <img
                           src={slide.image}
                           alt={slide.title}
-                          className="w-full h-auto object-contain max-h-[350px] md:max-h-[600px] lg:max-h-[700px] rounded-xl"
+                          className="w-full h-auto object-contain max-h-[350px] md:max-h-[600px] lg:max-h-[700px] rounded-2xl"
                           style={{ 
                             mixBlendMode: 'normal',
                             backgroundColor: 'transparent',
