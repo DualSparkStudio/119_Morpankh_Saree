@@ -37,8 +37,11 @@ const HeroCarousel = () => {
           updatedAt: new Date().toISOString(),
         }]);
       }
-    } catch (error) {
-      console.error('Error loading banners:', error);
+    } catch (error: any) {
+      // Silently handle rate limiting (429) errors - fallback is already in place
+      if (error?.response?.status !== 429) {
+        console.error('Error loading banners:', error);
+      }
       // Fallback to default banner with hero section image
       setBanners([{
         id: 'default',

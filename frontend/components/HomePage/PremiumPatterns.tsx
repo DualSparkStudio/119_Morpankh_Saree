@@ -24,8 +24,11 @@ const PremiumPatterns = () => {
         order: 'desc',
       });
       setProducts(data.products.filter(p => p.isActive).slice(0, 8));
-    } catch (error) {
-      console.error('Error loading products:', error);
+    } catch (error: any) {
+      // Silently handle rate limiting (429) errors - fallback images will be used
+      if (error?.response?.status !== 429) {
+        console.error('Error loading products:', error);
+      }
       setProducts([]);
     } finally {
       setLoading(false);

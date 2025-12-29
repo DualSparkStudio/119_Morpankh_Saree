@@ -85,8 +85,11 @@ const CategorySection = () => {
       setLoading(true);
       const data = await categoriesApi.getAll();
       setCategories(data.filter(c => c.isActive).slice(0, 8));
-    } catch (error) {
-      console.error('Error loading categories:', error);
+    } catch (error: any) {
+      // Silently handle rate limiting (429) errors
+      if (error?.response?.status !== 429) {
+        console.error('Error loading categories:', error);
+      }
       setCategories([]);
     } finally {
       setLoading(false);
