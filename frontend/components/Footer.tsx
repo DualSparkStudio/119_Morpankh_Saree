@@ -139,8 +139,19 @@ export default function Footer() {
         {/* Separator Line */}
         <div className="border-t border-white/20 mt-10 md:mt-12 pt-6 md:pt-8">
           {/* Copyright */}
-          <div className="text-center text-sm md:text-base text-white/80">
+          <div className="text-center text-sm md:text-base text-white/80 space-y-2">
             <p>&copy; {currentYear} Morpankh Saree. All rights reserved.</p>
+            <p className="text-white/60 text-xs md:text-sm">
+              Designed & Developed by{' '}
+              <a 
+                href="https://dualsparkstudio.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-white/80 hover:text-white transition-colors font-medium"
+              >
+                DualSpark Studio
+              </a>
+            </p>
           </div>
         </div>
       </div>
