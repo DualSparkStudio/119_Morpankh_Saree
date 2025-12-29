@@ -125,7 +125,7 @@ const HeroCarousel = () => {
 
   return (
     <section 
-      className="relative h-[600px] md:h-[750px] lg:h-[850px] overflow-hidden bg-gradient-to-br from-deep-indigo via-navy-blue to-deep-indigo"
+      className="relative h-[650px] md:h-[800px] lg:h-[900px] overflow-hidden bg-gradient-to-br from-deep-indigo via-navy-blue to-deep-indigo"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -135,112 +135,131 @@ const HeroCarousel = () => {
           <div
             key={slide.id}
             className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-              index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
+              index === currentSlide ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
             }`}
           >
             <div className="relative w-full h-full">
-              {/* Background Image */}
+              {/* Background Image - Left Side with Blend */}
               <div className="absolute inset-0">
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = '/images2/hero sec(main photo).jpg';
-                  }}
-                />
+                <div className="absolute left-0 top-0 bottom-0 w-full md:w-2/3 lg:w-1/2">
+                  <img
+                    src={slide.image}
+                    alt={slide.title}
+                    className="w-full h-full object-cover object-center"
+                    style={{ mixBlendMode: 'overlay', opacity: 0.4 }}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/images2/hero sec(main photo).jpg';
+                    }}
+                  />
+                </div>
               </div>
               
-              {/* Gradient Overlay - More subtle */}
-              <div className="absolute inset-0 bg-gradient-to-r from-deep-indigo/85 via-deep-indigo/75 to-deep-indigo/85" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+              {/* Gradient Overlay - Elegant blend */}
+              <div className="absolute inset-0 bg-gradient-to-r from-deep-indigo/90 via-deep-indigo/80 to-deep-indigo/70" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+              
+              {/* Animated Background Pattern */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]"></div>
+              </div>
               
               {/* Content */}
-              <div className="relative h-full flex items-center">
+              <div className="relative h-full flex items-center z-10">
                 <div className="container mx-auto px-4 md:px-6 lg:px-8 w-full">
-                  <div className="grid md:grid-cols-2 gap-8 items-center max-w-7xl mx-auto">
+                  <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
                     {/* Left Side - Text Content */}
-                    <div className="text-white space-y-6 z-10">
-                      {/* Badge */}
-                      {slide.badge && (
-                        <div className="inline-flex items-center gap-2 bg-sale-red text-white px-4 py-2 rounded-full text-sm font-bold mb-4 animate-pulse">
-                          <Tag className="w-4 h-4" />
-                          <span>{slide.badge}</span>
-                        </div>
-                      )}
+                    <div className="text-white space-y-5 md:space-y-6 z-20">
+                      {/* Badges Row */}
+                      <div className="flex flex-wrap items-center gap-3 mb-2">
+                        {slide.badge && (
+                          <div className="inline-flex items-center gap-2 bg-sale-red text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-lg border-2 border-white/30 animate-pulse">
+                            <Tag className="w-4 h-4" />
+                            <span>{slide.badge}</span>
+                          </div>
+                        )}
+                        
+                        {slide.discount && (
+                          <div className="inline-block bg-deep-indigo/90 backdrop-blur-sm text-white px-5 py-2.5 rounded-lg text-sm font-semibold border border-white/20 shadow-md">
+                            {slide.discount}
+                          </div>
+                        )}
+                      </div>
                       
-                      {/* Discount Badge */}
-                      {slide.discount && (
-                        <div className="inline-block bg-white/20 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm font-semibold mb-2 border border-white/30">
-                          {slide.discount}
-                        </div>
-                      )}
-                      
-                      {/* Main Title */}
-                      <h1 className="text-4xl md:text-6xl lg:text-7xl font-heading font-bold leading-tight">
-                        <span className="block text-white drop-shadow-lg mb-2">
-                          {slide.title}
+                      {/* Main Title - Elegant Typography */}
+                      <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-heading font-bold leading-[1.1]">
+                        <span className="block text-white drop-shadow-2xl mb-1">
+                          {slide.title.split(' ').slice(0, -1).join(' ')}
+                        </span>
+                        <span className="block text-white drop-shadow-2xl bg-gradient-to-r from-white via-white/95 to-white/90 bg-clip-text text-transparent">
+                          {slide.title.split(' ').slice(-1).join(' ')}
                         </span>
                       </h1>
                       
                       {/* Subtitle */}
-                      <p className="text-lg md:text-xl lg:text-2xl text-white/90 font-light max-w-lg leading-relaxed">
+                      <p className="text-xl md:text-2xl lg:text-3xl text-white/95 font-light max-w-xl leading-relaxed mt-4">
                         {slide.subtitle}
                       </p>
                       
-                      {/* CTA Buttons */}
-                      <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                      {/* CTA Buttons - Enhanced */}
+                      <div className="flex flex-col sm:flex-row gap-4 pt-6">
                         <Link
                           href={slide.link || '/products'}
-                          className="group inline-flex items-center justify-center gap-2 bg-sale-red hover:bg-sale-red-light text-white px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 transform"
+                          className="group inline-flex items-center justify-center gap-2 bg-sale-red hover:bg-sale-red-light text-white px-10 py-4 rounded-xl font-bold text-base md:text-lg transition-all duration-300 shadow-2xl hover:shadow-sale-red/50 hover:scale-105 transform border-2 border-sale-red/50"
                         >
                           <span>{slide.linkText || 'Shop Now'}</span>
                           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                         </Link>
                         <Link
                           href="/categories"
-                          className="inline-flex items-center justify-center gap-2 bg-white text-deep-indigo hover:bg-white/90 px-8 py-4 rounded-lg font-semibold text-base md:text-lg transition-all duration-300 shadow-xl hover:scale-105 transform"
+                          className="inline-flex items-center justify-center gap-2 bg-white/95 hover:bg-white text-deep-indigo hover:text-deep-indigo px-10 py-4 rounded-xl font-bold text-base md:text-lg transition-all duration-300 shadow-xl hover:scale-105 transform border-2 border-white/50"
                         >
                           <Sparkles className="w-5 h-5" />
                           <span>Explore</span>
                         </Link>
                       </div>
                       
-                      {/* Features */}
-                      <div className="flex flex-wrap gap-4 pt-4">
-                        <div className="flex items-center gap-2 text-white/80 text-sm">
-                          <div className="w-2 h-2 bg-sale-red rounded-full"></div>
+                      {/* Features - Enhanced */}
+                      <div className="flex flex-wrap gap-5 pt-6">
+                        <div className="flex items-center gap-2.5 text-white/90 text-sm md:text-base font-medium">
+                          <div className="w-2.5 h-2.5 bg-sale-red rounded-full shadow-lg animate-pulse"></div>
                           <span>Free Shipping</span>
                         </div>
-                        <div className="flex items-center gap-2 text-white/80 text-sm">
-                          <div className="w-2 h-2 bg-sale-red rounded-full"></div>
+                        <div className="flex items-center gap-2.5 text-white/90 text-sm md:text-base font-medium">
+                          <div className="w-2.5 h-2.5 bg-sale-red rounded-full shadow-lg animate-pulse"></div>
                           <span>Easy Returns</span>
                         </div>
-                        <div className="flex items-center gap-2 text-white/80 text-sm">
-                          <div className="w-2 h-2 bg-sale-red rounded-full"></div>
+                        <div className="flex items-center gap-2.5 text-white/90 text-sm md:text-base font-medium">
+                          <div className="w-2.5 h-2.5 bg-sale-red rounded-full shadow-lg animate-pulse"></div>
                           <span>Authentic Products</span>
                         </div>
                       </div>
                     </div>
                     
-                    {/* Right Side - Image Showcase (Optional decorative element) */}
-                    <div className="hidden md:block relative">
-                      <div className="relative w-full aspect-square max-w-md mx-auto">
-                        <div className="absolute inset-0 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10 p-4">
-                          <img
-                            src={slide.image}
-                            alt={slide.title}
-                            className="w-full h-full object-cover rounded-xl shadow-2xl"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                            }}
-                          />
+                    {/* Right Side - Showcase Image Frame */}
+                    <div className="hidden lg:block relative z-20">
+                      <div className="relative w-full max-w-lg mx-auto">
+                        {/* Main Showcase Frame */}
+                        <div className="relative bg-white/10 backdrop-blur-md rounded-3xl p-6 border-2 border-white/20 shadow-2xl">
+                          <div className="relative aspect-[3/4] rounded-2xl overflow-hidden">
+                            <img
+                              src={slide.image}
+                              alt={slide.title}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = '/images2/hero sec(main photo).jpg';
+                              }}
+                            />
+                            {/* Image Overlay Gradient */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
+                          </div>
                         </div>
-                        {/* Decorative corner accent */}
-                        <div className="absolute -top-4 -right-4 w-24 h-24 bg-sale-red/20 rounded-full blur-2xl"></div>
-                        <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-deep-indigo/30 rounded-full blur-2xl"></div>
+                        
+                        {/* Decorative Elements */}
+                        <div className="absolute -top-6 -right-6 w-32 h-32 bg-sale-red/20 rounded-full blur-3xl animate-pulse"></div>
+                        <div className="absolute -bottom-6 -left-6 w-40 h-40 bg-deep-indigo/30 rounded-full blur-3xl"></div>
+                        <div className="absolute top-1/2 -left-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
                       </div>
                     </div>
                   </div>
@@ -250,38 +269,38 @@ const HeroCarousel = () => {
           </div>
         ))}
 
-        {/* Navigation Arrows - More prominent */}
+        {/* Navigation Arrows - Elegant Design */}
         <button
           onClick={() => {
             const newSlide = currentSlide === 0 ? slides.length - 1 : currentSlide - 1;
             handleSlideChange(newSlide);
           }}
-          className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 bg-white hover:bg-sale-red text-deep-indigo hover:text-white p-3 md:p-4 rounded-full shadow-2xl transition-all duration-300 z-20 hover:scale-110 group border-2 border-white"
+          className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white text-deep-indigo hover:text-sale-red p-4 md:p-5 rounded-full shadow-2xl transition-all duration-300 z-30 hover:scale-110 group border-2 border-white/50 backdrop-blur-sm"
           aria-label="Previous slide"
         >
-          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 group-hover:-translate-x-1 transition-transform" />
+          <ChevronLeft className="w-6 h-6 md:w-7 md:h-7 group-hover:-translate-x-1 transition-transform" />
         </button>
         <button
           onClick={() => {
             const newSlide = currentSlide === slides.length - 1 ? 0 : currentSlide + 1;
             handleSlideChange(newSlide);
           }}
-          className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 bg-white hover:bg-sale-red text-deep-indigo hover:text-white p-3 md:p-4 rounded-full shadow-2xl transition-all duration-300 z-20 hover:scale-110 group border-2 border-white"
+          className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white text-deep-indigo hover:text-sale-red p-4 md:p-5 rounded-full shadow-2xl transition-all duration-300 z-30 hover:scale-110 group border-2 border-white/50 backdrop-blur-sm"
           aria-label="Next slide"
         >
-          <ChevronRight className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-x-1 transition-transform" />
+          <ChevronRight className="w-6 h-6 md:w-7 md:h-7 group-hover:translate-x-1 transition-transform" />
         </button>
 
-        {/* Dots Indicator - Enhanced */}
-        <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full">
+        {/* Dots Indicator - Refined */}
+        <div className="absolute bottom-8 md:bottom-10 left-1/2 -translate-x-1/2 flex gap-3 z-30 bg-white/10 backdrop-blur-lg px-5 py-3 rounded-full border border-white/20 shadow-xl">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => handleSlideChange(index)}
               className={`rounded-full transition-all duration-300 ${
                 index === currentSlide 
-                  ? 'bg-sale-red w-8 h-3 shadow-lg' 
-                  : 'bg-white/50 hover:bg-white/80 w-3 h-3'
+                  ? 'bg-sale-red w-10 h-3 shadow-lg shadow-sale-red/50' 
+                  : 'bg-white/60 hover:bg-white/90 w-3 h-3'
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
@@ -289,9 +308,19 @@ const HeroCarousel = () => {
         </div>
       </div>
       
-      {/* Decorative bottom wave with pattern */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-soft-cream via-soft-cream/80 to-transparent pointer-events-none">
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-deep-indigo/20 to-transparent"></div>
+      {/* Elegant Bottom Transition */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-soft-cream via-soft-cream/90 to-transparent pointer-events-none z-10">
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-deep-indigo/30 to-transparent"></div>
+        {/* Decorative wave pattern */}
+        <svg className="absolute bottom-0 left-0 w-full h-8" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path d="M0,60 Q300,40 600,60 T1200,60 L1200,120 L0,120 Z" fill="url(#wave-gradient)" opacity="0.1"/>
+          <defs>
+            <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#312e81" />
+              <stop offset="100%" stopColor="#1e3a8a" />
+            </linearGradient>
+          </defs>
+        </svg>
       </div>
     </section>
   );
