@@ -30,6 +30,16 @@ export default function AdminProductsPage() {
         limit: pagination.limit,
         search: search || undefined,
       });
+      
+      // Debug: Log product images to see what's in the database
+      response.products.forEach((product) => {
+        console.log(`Product: ${product.name} (${product.sku})`, {
+          images: product.images,
+          imagesCount: product.images?.length || 0,
+          firstImage: product.images?.[0] || 'NO IMAGE',
+        });
+      });
+      
       setProducts(response.products);
       setPagination(response.pagination);
     } catch (error) {
@@ -74,9 +84,10 @@ export default function AdminProductsPage() {
       }
       return image;
     }
-    // Old hardcoded paths like /images/products/... - try to load, fallback on error
+    // Old hardcoded paths like /images/products/... don't exist - use placeholder
     if (image.startsWith('/images/products/')) {
-      return image; // Let browser try to load it
+      console.log('Old hardcoded path detected (does not exist):', image);
+      return '/images/placeholder.jpg';
     }
     // If it starts with /, it might be a frontend public image
     if (image.startsWith('/')) {
@@ -159,25 +170,32 @@ export default function AdminProductsPage() {
                   <tr key={product.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="relative w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden mr-4">
-                          <img
-                            src={getImageUrl(product.images?.[0])}
-                            alt={product.name}
-                            className="w-full h-full object-cover"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              const placeholder = '/images/placeholder.jpg';
-                              // Prevent infinite retry loop
-                              if (!target.src.includes('placeholder') && target.src !== placeholder) {
-                                target.src = placeholder;
-                              }
-                            }}
-                            onLoad={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.style.opacity = '1';
-                            }}
-                            style={{ opacity: 0, transition: 'opacity 0.3s' }}
-                          />
+                        <div className="relative w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden mr-4 border border-gray-200">
+                          {product.images && product.images.length > 0 ? (
+                            <img
+                              src={getImageUrl(product.images[0])}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                const placeholder = '/images/placeholder.jpg';
+                                console.log(`Image failed to load for ${product.name}:`, target.src);
+                                // Prevent infinite retry loop
+                                if (!target.src.includes('placeholder') && target.src !== placeholder) {
+                                  target.src = placeholder;
+                                }
+                              }}
+                              onLoad={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.opacity = '1';
+                              }}
+                              style={{ opacity: 0, transition: 'opacity 0.3s' }}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs">
+                              No Image
+                            </div>
+                          )}
                         </div>
                         <div>
                           <div className="text-sm font-medium text-gray-900">{product.name}</div>
