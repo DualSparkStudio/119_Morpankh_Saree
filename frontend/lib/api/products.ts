@@ -20,7 +20,12 @@ export interface Product {
   barcode?: string;
   basePrice: number;
   compareAtPrice?: number;
+  costPrice?: number;
   images: string[];
+  fabricType?: string;
+  sareeLength?: number;
+  blouseIncluded?: boolean;
+  tags?: string[];
   category?: {
     id: string;
     name: string;
@@ -30,12 +35,16 @@ export interface Product {
   isFeatured?: boolean;
   isActive?: boolean;
   inventory?: Array<{
+    id?: string;
     type: string;
     quantity: number;
+    reserved?: number;
   }>;
   _count?: {
     reviews: number;
   };
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ProductsResponse {
