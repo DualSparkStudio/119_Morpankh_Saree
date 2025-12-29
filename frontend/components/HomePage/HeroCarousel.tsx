@@ -167,16 +167,16 @@ const HeroCarousel = () => {
                     {/* Image - Above on Mobile, Right on Desktop */}
                     <div className="relative z-20 bg-transparent order-1 md:order-2 w-full md:w-auto">
                       <div className="relative w-full max-w-sm md:max-w-lg mx-auto flex items-center justify-center bg-transparent" style={{ backgroundColor: 'transparent', background: 'none' }}>
-                        <img
-                          src={slide.image}
-                          alt={slide.title}
-                          className="w-full h-auto object-contain max-h-[350px] md:max-h-[600px] lg:max-h-[700px] rounded-2xl"
-                          style={{ 
-                            mixBlendMode: 'normal',
-                            backgroundColor: 'transparent',
-                            background: 'none',
-                            display: 'block'
-                          }}
+                         <img
+                           src={slide.image}
+                           alt={slide.title}
+                           className="w-full h-auto object-contain max-h-[350px] md:max-h-[600px] lg:max-h-[700px] rounded-2xl"
+                           style={{ 
+                             mixBlendMode: 'normal',
+                             backgroundColor: 'transparent',
+                             background: 'none',
+                             display: 'block'
+                           }}
                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.src = '/images2/hero sec(main photo).jpg';
