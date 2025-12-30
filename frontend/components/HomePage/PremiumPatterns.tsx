@@ -60,20 +60,8 @@ const PremiumPatterns = () => {
       return image;
     }
     
-    // Fallback to images2 folder
-    const images2Fallbacks = [
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (1).jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (2).jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM.jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM (1).jpeg',
-    ];
-    const fallbackIndex = index % images2Fallbacks.length;
-    return images2Fallbacks[fallbackIndex];
+    // No fallback - return empty string
+    return '';
   };
 
   const isInWishlist = (productId: string) => {
@@ -99,7 +87,7 @@ const PremiumPatterns = () => {
       quantity: 1,
       price: product.basePrice,
       productName: product.name,
-      productImage: product.images?.[0] || '/images/cotton-saree.png',
+      productImage: product.images?.[0] || '',
     });
   };
 
@@ -142,19 +130,7 @@ const PremiumPatterns = () => {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          const fallbackIndex = products.indexOf(product);
-                          const images2Fallbacks = [
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (1).jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (2).jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM.jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM (1).jpeg',
-                          ];
-                          target.src = images2Fallbacks[fallbackIndex % images2Fallbacks.length];
+                          target.style.display = 'none';
                         }}
                       />
                       

@@ -64,7 +64,7 @@ export default function AdminProductsPage() {
   };
 
   const getImageUrl = (image: string | undefined): string => {
-    if (!image) return '/images/cotton-saree.png';
+    if (!image) return '';
     // If it's already a full URL, return as is
     if (image.startsWith('http://') || image.startsWith('https://')) {
       return image;
@@ -86,10 +86,10 @@ export default function AdminProductsPage() {
       }
       return image;
     }
-    // Old hardcoded paths like /images/products/... don't exist - use placeholder
+    // Old hardcoded paths like /images/products/... don't exist - return empty
     if (image.startsWith('/images/products/')) {
       console.log('Old hardcoded path detected (does not exist):', image);
-      return '/images/cotton-saree.png';
+      return '';
     }
     // If it starts with /, it might be a frontend public image
     if (image.startsWith('/')) {
@@ -180,12 +180,7 @@ export default function AdminProductsPage() {
                               className="w-full h-full object-cover"
                               onError={(e) => {
                                 const target = e.target as HTMLImageElement;
-                                const placeholder = '/images/cotton-saree.png';
-                                console.log(`Image failed to load for ${product.name}:`, target.src);
-                                // Prevent infinite retry loop
-                                if (!target.src.includes('cotton-saree') && target.src !== placeholder) {
-                                  target.src = placeholder;
-                                }
+                                target.style.display = 'none';
                               }}
                               onLoad={(e) => {
                                 const target = e.target as HTMLImageElement;

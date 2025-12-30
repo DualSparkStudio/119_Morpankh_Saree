@@ -60,20 +60,8 @@ const TrendingPatterns = () => {
       return image;
     }
     
-    // Fallback to images2 folder
-    const images2Fallbacks = [
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (1).jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (2).jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM.jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM (1).jpeg',
-    ];
-    const fallbackIndex = index % images2Fallbacks.length;
-    return images2Fallbacks[fallbackIndex];
+    // No fallback - return empty string
+    return '';
   };
 
   const isInWishlist = (productId: string) => {
@@ -128,19 +116,7 @@ const TrendingPatterns = () => {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          const fallbackIndex = products.indexOf(product);
-                          const images2Fallbacks = [
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (1).jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (2).jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM.jpeg',
-                            '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM (1).jpeg',
-                          ];
-                          target.src = images2Fallbacks[fallbackIndex % images2Fallbacks.length];
+                          target.style.display = 'none';
                         }}
                       />
                       
@@ -192,7 +168,7 @@ const TrendingPatterns = () => {
                               quantity: 1,
                               price: product.basePrice,
                               productName: product.name,
-                              productImage: product.images?.[0] || '/images/cotton-saree.png',
+                              productImage: product.images?.[0] || '',
                             });
                           }}
                           className="bg-sale-red text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-sale-red-light transition-all transform hover:scale-105 shadow-xl flex items-center gap-2"
@@ -246,7 +222,7 @@ const TrendingPatterns = () => {
                           quantity: 1,
                           price: product.basePrice,
                           productName: product.name,
-                          productImage: product.images?.[0] || '/images/cotton-saree.png',
+                          productImage: product.images?.[0] || '',
                         });
                       }}
                       className="w-full bg-deep-indigo hover:bg-navy-blue text-white py-2 rounded-lg font-semibold text-xs md:text-sm transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2"

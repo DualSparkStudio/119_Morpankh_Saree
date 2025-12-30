@@ -64,8 +64,8 @@ export default function ProductDetailPage() {
 
   const getImageUrl = (image: string | undefined, product?: Product, index: number = 0): string => {
     if (!image) {
-      // Return a placeholder that exists - use one of the existing images
-      return '/images/cotton-saree.png';
+      // Return empty string - image will be hidden if no image available
+      return '';
     }
     
     // If it's already a full URL, return as is (but add cache busting if product was updated)
@@ -98,9 +98,9 @@ export default function ProductDetailPage() {
       return url;
     }
     
-    // Old hardcoded paths like /images/products/... don't exist - use placeholder
+    // Old hardcoded paths like /images/products/... don't exist - return empty
     if (image.startsWith('/images/products/')) {
-      return '/images/cotton-saree.png';
+      return '';
     }
     
     // If it starts with /, it might be a frontend public image
@@ -133,7 +133,7 @@ export default function ProductDetailPage() {
       quantity: 1,
       price: product.basePrice,
       productName: product.name,
-      productImage: product.images?.[0] || '/images/cotton-saree.png',
+      productImage: product.images?.[0] || '',
     });
   };
 
@@ -171,7 +171,7 @@ export default function ProductDetailPage() {
   // Use actual product images, or show placeholder if none exist
   const productImages = product.images && product.images.length > 0
     ? product.images
-    : ['/images/cotton-saree.png']; // Single placeholder if no images
+    : []; // No images available
 
   const discount = product.compareAtPrice
     ? Math.round(((product.compareAtPrice - product.basePrice) / product.compareAtPrice) * 100)
@@ -213,10 +213,7 @@ export default function ProductDetailPage() {
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        const placeholder = '/images/cotton-saree.png';
-                        if (!target.src.includes('cotton-saree')) {
-                          target.src = placeholder;
-                        }
+                        target.style.display = 'none';
                       }}
                     />
                   </button>
@@ -233,10 +230,7 @@ export default function ProductDetailPage() {
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    const placeholder = '/images/cotton-saree.png';
-                    if (!target.src.includes('cotton-saree')) {
-                      target.src = placeholder;
-                    }
+                    target.style.display = 'none';
                   }}
                   onLoad={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -457,10 +451,7 @@ export default function ProductDetailPage() {
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          const fallback = getImageUrl(undefined, relatedProduct, 0);
-                          if (!target.src.includes('WhatsApp')) {
-                            target.src = fallback;
-                          }
+                          target.style.display = 'none';
                         }}
                       />
                     </div>

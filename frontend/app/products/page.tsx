@@ -73,7 +73,7 @@ function ProductsPageContent() {
 
   const getImageUrl = (image: string | undefined, product?: any, index: number = 0): string => {
     if (!image) {
-      return '/images/cotton-saree.png';
+      return '';
     }
     
     // If it's already a full URL, return as is (but add cache busting if product was updated)
@@ -106,9 +106,9 @@ function ProductsPageContent() {
       return url;
     }
     
-    // Old hardcoded paths like /images/products/... don't exist - use placeholder
+    // Old hardcoded paths like /images/products/... don't exist - return empty
     if (image.startsWith('/images/products/')) {
-      return '/images/cotton-saree.png';
+      return '';
     }
     
     // If it starts with /, it might be a frontend public image
@@ -235,10 +235,7 @@ function ProductsPageContent() {
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          const placeholder = '/images/cotton-saree.png';
-                          if (!target.src.includes('cotton-saree')) {
-                            target.src = placeholder;
-                          }
+                          target.style.display = 'none';
                         }}
                         onLoad={(e) => {
                           const target = e.target as HTMLImageElement;

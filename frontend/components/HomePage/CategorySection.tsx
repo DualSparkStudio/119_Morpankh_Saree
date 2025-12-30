@@ -97,7 +97,7 @@ const CategorySection = () => {
   };
 
   const getImageUrl = (image: string | undefined): string => {
-    if (!image) return '/images/cotton-saree.png';
+    if (!image) return '';
     if (image.startsWith('http://') || image.startsWith('https://')) {
       return image;
     }
@@ -172,7 +172,7 @@ const CategorySection = () => {
                       loading="lazy"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = '/images/cotton-saree.png';
+                        target.style.display = 'none';
                       }}
                     />
                     {/* Decorative ring on hover */}

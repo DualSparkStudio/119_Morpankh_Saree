@@ -173,7 +173,7 @@ export default function EditProductPage() {
   };
 
   const getImageUrl = (image: string): string => {
-    if (!image) return '/images/cotton-saree.png';
+    if (!image) return '';
     // If it's already a full URL, return as is
     if (image.startsWith('http://') || image.startsWith('https://')) {
       return image;
@@ -195,9 +195,9 @@ export default function EditProductPage() {
       }
       return image;
     }
-    // Old hardcoded paths like /images/products/... - try to load, fallback on error
+    // Old hardcoded paths like /images/products/... - return empty
     if (image.startsWith('/images/products/')) {
-      return image; // Let browser try to load it
+      return '';
     }
     // If it starts with /, it might be a frontend public image
     if (image.startsWith('/')) {
@@ -458,11 +458,8 @@ export default function EditProductPage() {
                         className="w-full h-full object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          // Prevent infinite retry loop - only set placeholder if not already set
-                          const placeholderUrl = '/images/cotton-saree.png';
-                          if (!target.src.includes('cotton-saree') && target.src !== placeholderUrl) {
-                            target.src = placeholderUrl;
-                          }
+                          // Hide image if it fails to load
+                          target.style.display = 'none';
                         }}
                         onLoad={(e) => {
                           // Image loaded successfully

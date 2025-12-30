@@ -18,29 +18,17 @@ interface Product {
   };
 }
 
-// Helper to get first image with fallback
-const images2Fallbacks = [
-  '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
-  '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
-  '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
-  '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
-  '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
-  '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (1).jpeg',
-  '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM (2).jpeg',
-  '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM.jpeg',
-  '/images2/WhatsApp Image 2025-12-26 at 1.50.04 PM (1).jpeg',
-];
-
+// Helper to get first image
 const getProductImage = (product: Product, index: number = 0) => {
   if (product.images && product.images.length > 0 && product.images[0]) {
     const image = product.images[0];
-    // Old hardcoded paths like /images/products/... don't exist - use fallback
+    // Old hardcoded paths like /images/products/... don't exist - return empty
     if (image.startsWith('/images/products/')) {
-      return images2Fallbacks[index % images2Fallbacks.length];
+      return '';
     }
     return image;
   }
-  return images2Fallbacks[index % images2Fallbacks.length];
+  return '';
 };
 
 const getProductPrice = (product: Product) => product.basePrice;
@@ -106,11 +94,7 @@ export default function FeaturedProducts({ products = [], title = 'Featured Prod
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          const fallback = images2Fallbacks[index % images2Fallbacks.length];
-                          // Prevent infinite retry loop
-                          if (target.src !== fallback && !target.src.includes('WhatsApp')) {
-                            target.src = fallback;
-                          }
+                          target.style.display = 'none';
                         }}
                       />
                     ) : (
@@ -122,11 +106,7 @@ export default function FeaturedProducts({ products = [], title = 'Featured Prod
                         unoptimized
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          const fallback = images2Fallbacks[index % images2Fallbacks.length];
-                          // Prevent infinite retry loop
-                          if (target.src !== fallback && !target.src.includes('WhatsApp')) {
-                            target.src = fallback;
-                          }
+                          target.style.display = 'none';
                         }}
                       />
                     );
