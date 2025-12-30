@@ -88,7 +88,7 @@ export default function EditProductPage() {
         basePrice: productData.basePrice?.toString() || '',
         compareAtPrice: productData.compareAtPrice?.toString() || '',
         costPrice: (productData as any).costPrice?.toString() || '',
-        images: productData.images || [],
+        images: (productData.images || []).filter(img => !img.startsWith('/images/products/')),
         fabricType: (productData as any).fabricType || '',
         sareeLength: (productData as any).sareeLength?.toString() || '',
         blouseIncluded: (productData as any).blouseIncluded ?? false,
@@ -128,7 +128,8 @@ export default function EditProductPage() {
         basePrice: parseFloat(formData.basePrice),
         compareAtPrice: formData.compareAtPrice ? parseFloat(formData.compareAtPrice) : null,
         costPrice: formData.costPrice ? parseFloat(formData.costPrice) : null,
-        images: formData.images,
+        // Filter out old hardcoded paths and empty strings
+        images: formData.images.filter(img => img && img.trim() !== '' && !img.startsWith('/images/products/')),
         fabricType: formData.fabricType || null,
         sareeLength: formData.sareeLength ? parseFloat(formData.sareeLength) : null,
         blouseIncluded: formData.blouseIncluded,

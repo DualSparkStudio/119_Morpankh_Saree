@@ -88,7 +88,6 @@ export default function AdminProductsPage() {
     }
     // Old hardcoded paths like /images/products/... don't exist - return empty
     if (image.startsWith('/images/products/')) {
-      console.log('Old hardcoded path detected (does not exist):', image);
       return '';
     }
     // If it starts with /, it might be a frontend public image
