@@ -62,7 +62,7 @@ export default function ProductDetailPage() {
     }
   };
 
-  const getImageUrl = (image: string | undefined, index: number = 0): string => {
+  const getImageUrl = (image: string | undefined, product?: Product, index: number = 0): string => {
     if (!image) {
       // Return a placeholder that exists - use one of the existing images
       return '/images/cotton-saree.png';
