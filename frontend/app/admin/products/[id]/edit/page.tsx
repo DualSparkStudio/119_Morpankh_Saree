@@ -151,10 +151,28 @@ export default function EditProductPage() {
     }
   };
 
+  // Convert Google Drive share link to direct image URL
+  const convertGoogleDriveUrl = (url: string): string => {
+    // Check if it's a Google Drive share link
+    const driveShareMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+    if (driveShareMatch) {
+      const fileId = driveShareMatch[1];
+      // Convert to direct image URL
+      return `https://drive.google.com/uc?export=view&id=${fileId}`;
+    }
+    // Check if it's already a direct Google Drive image URL
+    if (url.includes('drive.google.com/uc?export=view&id=')) {
+      return url;
+    }
+    // Return as is if not a Google Drive link
+    return url;
+  };
+
   const addImage = () => {
-    const url = prompt('Enter image URL:');
-    if (url) {
-      setFormData({ ...formData, images: [...formData.images, url] });
+    const url = prompt('Enter image URL (Google Drive links will be auto-converted):');
+    if (url && url.trim()) {
+      const convertedUrl = convertGoogleDriveUrl(url.trim());
+      setFormData({ ...formData, images: [...formData.images, convertedUrl] });
     }
   };
 
