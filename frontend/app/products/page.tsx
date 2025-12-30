@@ -71,26 +71,39 @@ function ProductsPageContent() {
     }
   };
 
-  const getImageUrl = (image: string | undefined, index: number = 0): string => {
+  const getImageUrl = (image: string | undefined, product?: any, index: number = 0): string => {
     if (!image) {
       return '/images/cotton-saree.png';
     }
     
-    // If it's already a full URL, return as is
+    // If it's already a full URL, return as is (but add cache busting if product was updated)
     if (image.startsWith('http://') || image.startsWith('https://')) {
+      // Add cache busting for external URLs using product updatedAt timestamp
+      if (product?.updatedAt) {
+        const separator = image.includes('?') ? '&' : '?';
+        return `${image}${separator}v=${new Date(product.updatedAt).getTime()}`;
+      }
       return image;
     }
     
     // If it starts with /uploads, it's from the backend
     if (image.startsWith('/uploads')) {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      let url = '';
       if (apiUrl.startsWith('http')) {
         // Development: extract base URL
         const baseUrl = apiUrl.replace('/api', '');
-        return `${baseUrl}${image}`;
+        url = `${baseUrl}${image}`;
+      } else {
+        // Production: same domain, use image path directly
+        url = image;
       }
-      // Production: same domain, use image path directly
-      return image;
+      // Add cache busting using product updatedAt timestamp
+      if (product?.updatedAt) {
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}v=${new Date(product.updatedAt).getTime()}`;
+      }
+      return url;
     }
     
     // Old hardcoded paths like /images/products/... don't exist - use placeholder
@@ -217,7 +230,7 @@ function ProductsPageContent() {
                   <Link href={`/products/${product.slug}`}>
                     <div className="relative aspect-[3/4] bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 overflow-hidden">
                       <img
-                        src={getImageUrl(product.images?.[0], products.indexOf(product))}
+                        src={getImageUrl(product.images?.[0], product, products.indexOf(product))}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                         onError={(e) => {

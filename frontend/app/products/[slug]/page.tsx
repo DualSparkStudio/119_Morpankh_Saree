@@ -68,21 +68,34 @@ export default function ProductDetailPage() {
       return '/images/cotton-saree.png';
     }
     
-    // If it's already a full URL, return as is
+    // If it's already a full URL, return as is (but add cache busting if product was updated)
     if (image.startsWith('http://') || image.startsWith('https://')) {
+      // Add cache busting for external URLs using product updatedAt timestamp
+      if (product?.updatedAt) {
+        const separator = image.includes('?') ? '&' : '?';
+        return `${image}${separator}v=${new Date(product.updatedAt).getTime()}`;
+      }
       return image;
     }
     
     // If it starts with /uploads, it's from the backend
     if (image.startsWith('/uploads')) {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      let url = '';
       if (apiUrl.startsWith('http')) {
         // Development: extract base URL
         const baseUrl = apiUrl.replace('/api', '');
-        return `${baseUrl}${image}`;
+        url = `${baseUrl}${image}`;
+      } else {
+        // Production: same domain, use image path directly
+        url = image;
       }
-      // Production: same domain, use image path directly
-      return image;
+      // Add cache busting using product updatedAt timestamp
+      if (product?.updatedAt) {
+        const separator = url.includes('?') ? '&' : '?';
+        return `${url}${separator}v=${new Date(product.updatedAt).getTime()}`;
+      }
+      return url;
     }
     
     // Old hardcoded paths like /images/products/... don't exist - use placeholder
@@ -195,7 +208,7 @@ export default function ProductDetailPage() {
                     }`}
                   >
                     <img
-                      src={getImageUrl(img, index)}
+                      src={getImageUrl(img, product, index)}
                       alt={`Thumbnail ${index + 1}`}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -215,7 +228,7 @@ export default function ProductDetailPage() {
             <div className="flex-1 order-1 lg:order-2">
               <div className="aspect-[3/4] bg-white rounded-lg overflow-hidden shadow-lg">
                 <img
-                  src={getImageUrl(productImages[selectedImage], selectedImage)}
+                  src={getImageUrl(productImages[selectedImage], product, selectedImage)}
                   alt={product.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -439,7 +452,7 @@ export default function ProductDetailPage() {
                   >
                     <div className="aspect-[3/4] bg-gray-100 overflow-hidden">
                       <img
-                        src={getImageUrl(relatedProduct.images?.[0], 0)}
+                        src={getImageUrl(relatedProduct.images?.[0], relatedProduct, 0)}
                         alt={relatedProduct.name}
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                         onError={(e) => {

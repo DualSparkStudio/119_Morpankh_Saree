@@ -35,16 +35,27 @@ const PremiumPatterns = () => {
     }
   };
 
-  const getImageUrl = (image: string | undefined, index: number = 0): string => {
+  const getImageUrl = (image: string | undefined, product?: Product, index: number = 0): string => {
     // If image exists and is valid, return it
     if (image) {
       if (image.startsWith('http://') || image.startsWith('https://')) {
+        // Add cache busting for external URLs using product updatedAt timestamp
+        if (product?.updatedAt) {
+          const separator = image.includes('?') ? '&' : '?';
+          return `${image}${separator}v=${new Date(product.updatedAt).getTime()}`;
+        }
         return image;
       }
       if (image.startsWith('/')) {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
         const baseUrl = apiUrl.replace('/api', '');
-        return `${baseUrl}${image}`;
+        let url = `${baseUrl}${image}`;
+        // Add cache busting using product updatedAt timestamp
+        if (product?.updatedAt) {
+          const separator = url.includes('?') ? '&' : '?';
+          url = `${url}${separator}v=${new Date(product.updatedAt).getTime()}`;
+        }
+        return url;
       }
       return image;
     }
@@ -126,7 +137,7 @@ const PremiumPatterns = () => {
                   <Link href={`/products/${product.slug}`} className="block relative">
                     <div className="relative aspect-[3/4] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                       <img
-                        src={getImageUrl(product.images?.[0], products.indexOf(product))}
+                        src={getImageUrl(product.images?.[0], product, products.indexOf(product))}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         onError={(e) => {
