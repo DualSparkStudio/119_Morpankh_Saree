@@ -228,7 +228,7 @@ function ProductsPageContent() {
                   className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow group"
                 >
                   <Link href={`/products/${product.slug}`}>
-                    <div className="relative aspect-[4/5] bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 overflow-hidden">
+                    <div className="relative aspect-[5/6] bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 overflow-hidden">
                       {(() => {
                         const imageUrl = getImageUrl(product.images?.[0], product, products.indexOf(product));
                         return imageUrl ? (
