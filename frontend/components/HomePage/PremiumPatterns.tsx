@@ -123,7 +123,7 @@ const PremiumPatterns = () => {
                 >
                   {/* Image Container */}
                   <Link href={`/products/${product.slug}`} className="block relative">
-                    <div className="relative aspect-[5/6] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                    <div className="relative aspect-[7/8] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                       {(() => {
                         const imageUrl = getImageUrl(product.images?.[0], product, products.indexOf(product));
                         return imageUrl ? (

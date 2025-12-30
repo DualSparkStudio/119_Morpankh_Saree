@@ -62,6 +62,9 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
+            <Link href="/" className="text-gray-700 hover:text-[#1e3a8a] transition-colors">
+              Home
+            </Link>
             <Link href="/products" className="text-gray-700 hover:text-[#1e3a8a] transition-colors">
               Products
             </Link>
@@ -139,6 +142,9 @@ export default function Header() {
         {mobileMenuOpen && (
           <nav className="md:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-4">
+              <Link href="/" className="text-gray-700 hover:text-[#1e3a8a]">
+                Home
+              </Link>
               <Link href="/products" className="text-gray-700 hover:text-[#1e3a8a]">
                 Products
               </Link>
