@@ -457,7 +457,7 @@ export default function ProductDetailPage() {
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
-                          const fallback = getImageUrl(undefined, 0);
+                          const fallback = getImageUrl(undefined, relatedProduct, 0);
                           if (!target.src.includes('WhatsApp')) {
                             target.src = fallback;
                           }
