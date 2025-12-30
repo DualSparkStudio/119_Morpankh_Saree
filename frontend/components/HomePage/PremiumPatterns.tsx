@@ -38,6 +38,14 @@ const PremiumPatterns = () => {
   const getImageUrl = (image: string | undefined, product?: Product, index: number = 0): string => {
     // If image exists and is valid, return it
     if (image && image.trim() !== '') {
+      // Convert old Google Drive format to thumbnail format for better reliability
+      if (image.includes('drive.google.com/uc?export=view&id=')) {
+        const fileIdMatch = image.match(/id=([a-zA-Z0-9_-]+)/);
+        if (fileIdMatch) {
+          image = `https://drive.google.com/thumbnail?id=${fileIdMatch[1]}&sz=w1920`;
+        }
+      }
+      
       if (image.startsWith('http://') || image.startsWith('https://')) {
         // Add cache busting for external URLs using product updatedAt timestamp
         if (product?.updatedAt) {
@@ -46,10 +54,16 @@ const PremiumPatterns = () => {
         }
         return image;
       }
-      if (image.startsWith('/')) {
+      
+      if (image.startsWith('/uploads')) {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-        const baseUrl = apiUrl.replace('/api', '');
-        let url = `${baseUrl}${image}`;
+        let url = '';
+        if (apiUrl.startsWith('http')) {
+          const baseUrl = apiUrl.replace('/api', '');
+          url = `${baseUrl}${image}`;
+        } else {
+          url = image;
+        }
         // Add cache busting using product updatedAt timestamp
         if (product?.updatedAt) {
           const separator = url.includes('?') ? '&' : '?';
@@ -57,6 +71,11 @@ const PremiumPatterns = () => {
         }
         return url;
       }
+      
+      if (image.startsWith('/')) {
+        return image;
+      }
+      
       return image;
     }
     

@@ -18,7 +18,27 @@ interface FlashSaleProduct {
 
 const getProductImage = (product: FlashSaleProduct, index: number = 0) => {
   if (product.images && product.images.length > 0 && product.images[0]) {
-    return product.images[0];
+    let image = product.images[0];
+    
+    // Convert old Google Drive format to thumbnail format
+    if (image.includes('drive.google.com/uc?export=view&id=')) {
+      const fileIdMatch = image.match(/id=([a-zA-Z0-9_-]+)/);
+      if (fileIdMatch) {
+        image = `https://drive.google.com/thumbnail?id=${fileIdMatch[1]}&sz=w1920`;
+      }
+    }
+    
+    // Handle /uploads paths
+    if (image.startsWith('/uploads')) {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+      if (apiUrl.startsWith('http')) {
+        const baseUrl = apiUrl.replace('/api', '');
+        return `${baseUrl}${image}`;
+      }
+      return image;
+    }
+    
+    return image;
   }
   return '';
 };
