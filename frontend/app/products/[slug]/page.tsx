@@ -295,48 +295,104 @@ export default function ProductDetailPage() {
                 })()}
               </div>
               
-              {/* Image Navigation Arrows */}
+              {/* Image Navigation Arrows - More Prominent */}
               {productImages.length > 1 && (
                 <>
                   <button
                     onClick={() => setSelectedImage(prev => prev === 0 ? productImages.length - 1 : prev - 1)}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg z-10"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-50 p-3 rounded-full shadow-lg z-10 border border-gray-200 transition-all hover:scale-110"
+                    aria-label="Previous image"
                   >
-                    <ChevronLeft className="w-5 h-5 text-gray-700" />
+                    <ChevronLeft className="w-6 h-6 text-gray-700" />
                   </button>
                   <button
                     onClick={() => setSelectedImage(prev => prev === productImages.length - 1 ? 0 : prev + 1)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg z-10"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-50 p-3 rounded-full shadow-lg z-10 border border-gray-200 transition-all hover:scale-110"
+                    aria-label="Next image"
                   >
-                    <ChevronRight className="w-5 h-5 text-gray-700" />
+                    <ChevronRight className="w-6 h-6 text-gray-700" />
                   </button>
                 </>
               )}
             </div>
 
-            {/* Thumbnail Gallery */}
+            {/* Thumbnail Gallery - Below Main Image */}
             {productImages.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
-                {productImages.map((img, index) => {
-                  const imageUrl = getImageUrl(img, product);
-                  return imageUrl ? (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedImage(index)}
-                      className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                        selectedImage === index
-                          ? 'border-deep-indigo ring-2 ring-deep-indigo/20'
-                          : 'border-gray-200 hover:border-gray-400'
-                      }`}
-                    >
-                      <img
-                        src={imageUrl}
-                        alt={`Thumbnail ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ) : null;
-                })}
+              <div className="space-y-3">
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                  {productImages.map((img, index) => {
+                    const imageUrl = getImageUrl(img, product);
+                    return imageUrl ? (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImage(index)}
+                        className={`flex-shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-lg overflow-hidden border-2 transition-all ${
+                          selectedImage === index
+                            ? 'border-deep-indigo ring-2 ring-deep-indigo/20 scale-105'
+                            : 'border-gray-200 hover:border-gray-400'
+                        }`}
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={`Thumbnail ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Color Selection - Below Thumbnails */}
+            {availableColors.length > 0 && (
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-gray-900">Color:</span>
+                  <span className="text-sm text-gray-600">{selectedColor || 'Select a color'}</span>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {availableColors.map((variant) => {
+                    const isSelected = selectedColor === variant.color;
+                    // Color mapping for common colors
+                    const colorMap: { [key: string]: string } = {
+                      'red': '#EF4444',
+                      'blue': '#3B82F6',
+                      'green': '#10B981',
+                      'yellow': '#F59E0B',
+                      'purple': '#8B5CF6',
+                      'pink': '#EC4899',
+                      'black': '#1F2937',
+                      'white': '#F3F4F6',
+                      'orange': '#F97316',
+                      'maroon': '#991B1B',
+                      'navy': '#1E3A8A',
+                      'gold': '#D4AF37',
+                    };
+                    const colorValue = colorMap[variant.color?.toLowerCase() || ''] || '#6B7280';
+                    
+                    return (
+                      <button
+                        key={variant.id}
+                        onClick={() => {
+                          setSelectedColor(variant.color || null);
+                          setSelectedVariant(variant.id);
+                        }}
+                        className={`relative w-12 h-12 rounded-full border-2 transition-all ${
+                          isSelected
+                            ? 'border-deep-indigo ring-2 ring-deep-indigo/30 scale-110'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                        style={{ backgroundColor: colorValue }}
+                        title={variant.color}
+                      >
+                        {isSelected && (
+                          <Check className="absolute inset-0 m-auto w-5 h-5 text-white drop-shadow-lg" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
@@ -395,58 +451,6 @@ export default function ProductDetailPage() {
               <div className="border-b border-gray-200 pb-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">About this item</h3>
                 <p className="text-gray-700 leading-relaxed">{product.shortDescription}</p>
-              </div>
-            )}
-
-            {/* Color Selection (Amazon Style) */}
-            {availableColors.length > 0 && (
-              <div className="border-b border-gray-200 pb-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-sm font-semibold text-gray-900">Color:</span>
-                  <span className="text-sm text-gray-600">{selectedColor || 'Select a color'}</span>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  {availableColors.map((variant) => {
-                    const isSelected = selectedColor === variant.color;
-                    // Color mapping for common colors
-                    const colorMap: { [key: string]: string } = {
-                      'red': '#EF4444',
-                      'blue': '#3B82F6',
-                      'green': '#10B981',
-                      'yellow': '#F59E0B',
-                      'purple': '#8B5CF6',
-                      'pink': '#EC4899',
-                      'black': '#1F2937',
-                      'white': '#F3F4F6',
-                      'orange': '#F97316',
-                      'maroon': '#991B1B',
-                      'navy': '#1E3A8A',
-                      'gold': '#D4AF37',
-                    };
-                    const colorValue = colorMap[variant.color?.toLowerCase() || ''] || '#6B7280';
-                    
-                    return (
-                      <button
-                        key={variant.id}
-                        onClick={() => {
-                          setSelectedColor(variant.color || null);
-                          setSelectedVariant(variant.id);
-                        }}
-                        className={`relative w-12 h-12 rounded-full border-2 transition-all ${
-                          isSelected
-                            ? 'border-deep-indigo ring-2 ring-deep-indigo/30 scale-110'
-                            : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                        style={{ backgroundColor: colorValue }}
-                        title={variant.color}
-                      >
-                        {isSelected && (
-                          <Check className="absolute inset-0 m-auto w-5 h-5 text-white drop-shadow-lg" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
             )}
 
@@ -552,7 +556,10 @@ export default function ProductDetailPage() {
                 Specifications
               </button>
               <button className="px-6 py-4 font-medium text-gray-600 hover:text-deep-indigo whitespace-nowrap">
-                Reviews ({product._count?.reviews || 0})
+                {product._count?.reviews && product._count.reviews > 0 
+                  ? `Reviews (${product._count.reviews})`
+                  : 'Reviews'
+                }
               </button>
             </div>
           </div>
