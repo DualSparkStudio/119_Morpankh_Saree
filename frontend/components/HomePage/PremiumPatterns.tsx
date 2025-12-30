@@ -141,8 +141,8 @@ const PremiumPatterns = () => {
                   className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-deep-indigo/30 relative"
                 >
                   {/* Image Container */}
-                  <Link href={`/products/${product.slug}`} className="block relative">
-                    <div className="relative aspect-[7/8] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                  <div className="relative aspect-[7/8] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                    <Link href={`/products/${product.slug}`} className="block w-full h-full">
                       {(() => {
                         const imageUrl = getImageUrl(product.images?.[0], product, products.indexOf(product));
                         return imageUrl ? (
@@ -161,52 +161,58 @@ const PremiumPatterns = () => {
                           </div>
                         );
                       })()}
-                      
-                      {/* Discount Badge - Top Left */}
-                      {discount > 0 && (
-                        <div className="absolute top-3 left-3 bg-sale-red text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg flex items-center gap-1 z-10">
-                          <Percent className="w-3 h-3" />
-                          <span>{discount}% OFF</span>
-                        </div>
-                      )}
+                    </Link>
                     
-                      {/* Wishlist Button - Top Right */}
-                      <button
-                        onClick={(e) => toggleWishlist(e, product.id)}
-                        className={`absolute top-3 right-3 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-10 shadow-lg ${
-                          inWishlist 
-                            ? 'bg-sale-red text-white' 
-                            : 'bg-white/90 text-gray-700 hover:bg-white'
-                        }`}
-                        aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-                      >
-                        <Heart className={`w-4 h-4 ${inWishlist ? 'fill-current' : ''}`} />
-                      </button>
-                      
-                      {/* Quick Actions on Hover */}
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 pointer-events-none z-20">
-                        <Link
-                          href={`/products/${product.slug}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="bg-white text-deep-indigo px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-deep-indigo hover:text-white transition-all transform hover:scale-105 shadow-xl flex items-center gap-2 pointer-events-auto z-30"
-                        >
-                          <Eye className="w-4 h-4" />
-                          <span>Quick View</span>
-                        </Link>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleAddToCart(e, product);
-                          }}
-                          className="bg-sale-red text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-sale-red-light transition-all transform hover:scale-105 shadow-xl flex items-center gap-2 pointer-events-auto z-30"
-                        >
-                          <ShoppingCart className="w-4 h-4" />
-                          <span>Add to Cart</span>
-                        </button>
+                    {/* Discount Badge - Top Left */}
+                    {discount > 0 && (
+                      <div className="absolute top-3 left-3 bg-sale-red text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg flex items-center gap-1 z-10">
+                        <Percent className="w-3 h-3" />
+                        <span>{discount}% OFF</span>
                       </div>
+                    )}
+                  
+                    {/* Wishlist Button - Top Right */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleWishlist(e, product.id);
+                      }}
+                      className={`absolute top-3 right-3 p-2.5 rounded-full backdrop-blur-md transition-all duration-300 z-50 shadow-lg ${
+                        inWishlist 
+                          ? 'bg-sale-red text-white' 
+                          : 'bg-white/90 text-gray-700 hover:bg-white'
+                      }`}
+                      aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                    >
+                      <Heart className={`w-4 h-4 ${inWishlist ? 'fill-current' : ''}`} />
+                    </button>
+                    
+                    {/* Quick Actions on Hover */}
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 pointer-events-none z-40">
+                      <Link
+                        href={`/products/${product.slug}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                        }}
+                        className="bg-white text-deep-indigo px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-deep-indigo hover:text-white transition-all transform hover:scale-105 shadow-xl flex items-center gap-2 pointer-events-auto z-50 relative"
+                      >
+                        <Eye className="w-4 h-4" />
+                        <span>Quick View</span>
+                      </Link>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleAddToCart(e, product);
+                        }}
+                        className="bg-sale-red text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-sale-red-light transition-all transform hover:scale-105 shadow-xl flex items-center gap-2 pointer-events-auto z-50 relative"
+                      >
+                        <ShoppingCart className="w-4 h-4" />
+                        <span>Add to Cart</span>
+                      </button>
                     </div>
-                  </Link>
+                  </div>
                   
                   {/* Product Info */}
                   <div className="p-2.5 md:p-3 bg-white">
