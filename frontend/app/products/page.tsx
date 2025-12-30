@@ -76,6 +76,14 @@ function ProductsPageContent() {
       return '';
     }
     
+    // Convert old Google Drive format to thumbnail format for better reliability
+    if (image.includes('drive.google.com/uc?export=view&id=')) {
+      const fileIdMatch = image.match(/id=([a-zA-Z0-9_-]+)/);
+      if (fileIdMatch) {
+        image = `https://drive.google.com/thumbnail?id=${fileIdMatch[1]}&sz=w1920`;
+      }
+    }
+    
     // If it's already a full URL, return as is (but add cache busting if product was updated)
     if (image.startsWith('http://') || image.startsWith('https://')) {
       // Add cache busting for external URLs using product updatedAt timestamp

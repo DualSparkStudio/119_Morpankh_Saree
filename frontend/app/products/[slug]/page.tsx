@@ -31,6 +31,15 @@ export default function ProductDetailPage() {
     try {
       setLoading(true);
       const productData = await productsApi.getBySlug(slug);
+      
+      // Debug: Log image URLs to diagnose display issues
+      console.log('🔍 Product Image Debug:', {
+        productName: productData.name,
+        imageCount: productData.images?.length || 0,
+        rawImages: productData.images,
+        firstImageRaw: productData.images?.[0] || 'NO IMAGE',
+      });
+      
       setProduct(productData);
       
       // Set default color if variants exist
@@ -67,6 +76,14 @@ export default function ProductDetailPage() {
   const getImageUrl = (image: string | undefined, product?: Product): string => {
     if (!image || image.trim() === '') {
       return '';
+    }
+    
+    // Convert old Google Drive format to thumbnail format for better reliability
+    if (image.includes('drive.google.com/uc?export=view&id=')) {
+      const fileIdMatch = image.match(/id=([a-zA-Z0-9_-]+)/);
+      if (fileIdMatch) {
+        image = `https://drive.google.com/thumbnail?id=${fileIdMatch[1]}&sz=w1920`;
+      }
     }
     
     if (image.startsWith('http://') || image.startsWith('https://')) {

@@ -157,12 +157,14 @@ export default function EditProductPage() {
     const driveShareMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
     if (driveShareMatch) {
       const fileId = driveShareMatch[1];
-      // Convert to direct image URL
-      return `https://drive.google.com/uc?export=view&id=${fileId}`;
+      // Use thumbnail format which is more reliable for embedding
+      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1920`;
     }
-    // Check if it's already a direct Google Drive image URL
-    if (url.includes('drive.google.com/uc?export=view&id=')) {
-      return url;
+    // Check if it's already a direct Google Drive image URL (convert old format to new)
+    const oldFormatMatch = url.match(/drive\.google\.com\/uc\?export=view&id=([a-zA-Z0-9_-]+)/);
+    if (oldFormatMatch) {
+      const fileId = oldFormatMatch[1];
+      return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1920`;
     }
     // Return as is if not a Google Drive link
     return url;

@@ -68,6 +68,15 @@ export default function AdminProductsPage() {
 
   const getImageUrl = (image: string | undefined): string => {
     if (!image || image.trim() === '') return '';
+    
+    // Convert old Google Drive format to thumbnail format for better reliability
+    if (image.includes('drive.google.com/uc?export=view&id=')) {
+      const fileIdMatch = image.match(/id=([a-zA-Z0-9_-]+)/);
+      if (fileIdMatch) {
+        image = `https://drive.google.com/thumbnail?id=${fileIdMatch[1]}&sz=w1920`;
+      }
+    }
+    
     // If it's already a full URL, return as is
     if (image.startsWith('http://') || image.startsWith('https://')) {
       return image;
