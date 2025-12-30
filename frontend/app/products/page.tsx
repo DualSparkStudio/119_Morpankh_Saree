@@ -72,7 +72,7 @@ function ProductsPageContent() {
   };
 
   const getImageUrl = (image: string | undefined, product?: any, index: number = 0): string => {
-    if (!image) {
+    if (!image || image.trim() === '') {
       return '';
     }
     
@@ -229,20 +229,29 @@ function ProductsPageContent() {
                 >
                   <Link href={`/products/${product.slug}`}>
                     <div className="relative aspect-[3/4] bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 overflow-hidden">
-                      <img
-                        src={getImageUrl(product.images?.[0], product, products.indexOf(product))}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                        }}
-                        onLoad={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.opacity = '1';
-                        }}
-                        style={{ opacity: 0, transition: 'opacity 0.3s' }}
-                      />
+                      {(() => {
+                        const imageUrl = getImageUrl(product.images?.[0], product, products.indexOf(product));
+                        return imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                            }}
+                            onLoad={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.opacity = '1';
+                            }}
+                            style={{ opacity: 0, transition: 'opacity 0.3s' }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                            No Image
+                          </div>
+                        );
+                      })()}
                       {/* Hover UI */}
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
                         <button

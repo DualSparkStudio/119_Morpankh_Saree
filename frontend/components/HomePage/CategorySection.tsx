@@ -165,16 +165,25 @@ const CategorySection = () => {
                 >
                   <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-xl overflow-hidden border-4 border-white shadow-xl group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:border-deep-indigo">
                     <div className="absolute inset-0 bg-gradient-to-br from-deep-indigo/20 to-navy-blue/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
-                    <img
-                      src={getImageUrl(category.image)}
-                      alt={category.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      loading="lazy"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                      }}
-                    />
+                    {(() => {
+                      const imageUrl = getImageUrl(category.image);
+                      return imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt={category.name}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          loading="lazy"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                          No Image
+                        </div>
+                      );
+                    })()}
                     {/* Decorative ring on hover */}
                     <div className="absolute inset-0 rounded-xl ring-2 ring-deep-indigo/0 group-hover:ring-deep-indigo/50 transition-all duration-300"></div>
                   </div>

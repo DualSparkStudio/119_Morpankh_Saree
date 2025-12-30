@@ -174,7 +174,7 @@ export default function EditProductPage() {
   };
 
   const getImageUrl = (image: string): string => {
-    if (!image) return '';
+    if (!image || image.trim() === '') return '';
     // If it's already a full URL, return as is
     if (image.startsWith('http://') || image.startsWith('https://')) {
       return image;

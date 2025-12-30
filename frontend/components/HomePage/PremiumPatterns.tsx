@@ -37,7 +37,7 @@ const PremiumPatterns = () => {
 
   const getImageUrl = (image: string | undefined, product?: Product, index: number = 0): string => {
     // If image exists and is valid, return it
-    if (image) {
+    if (image && image.trim() !== '') {
       if (image.startsWith('http://') || image.startsWith('https://')) {
         // Add cache busting for external URLs using product updatedAt timestamp
         if (product?.updatedAt) {
@@ -124,15 +124,24 @@ const PremiumPatterns = () => {
                   {/* Image Container */}
                   <Link href={`/products/${product.slug}`} className="block relative">
                     <div className="relative aspect-[3/4] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-                      <img
-                        src={getImageUrl(product.images?.[0], product, products.indexOf(product))}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                        }}
-                      />
+                      {(() => {
+                        const imageUrl = getImageUrl(product.images?.[0], product, products.indexOf(product));
+                        return imageUrl ? (
+                          <img
+                            src={imageUrl}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.style.display = 'none';
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                            No Image
+                          </div>
+                        );
+                      })()}
                       
                       {/* Discount Badge - Top Left */}
                       {discount > 0 && (

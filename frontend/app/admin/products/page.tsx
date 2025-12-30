@@ -34,11 +34,14 @@ export default function AdminProductsPage() {
       // Debug: Log product images to see what's in the database
       response.products.forEach((product) => {
         const imageCount = product.images?.length || 0;
+        const firstImageUrl = product.images?.[0] || '';
+        const processedUrl = firstImageUrl ? getImageUrl(firstImageUrl) : '';
         console.log(`Product: ${product.name} (${product.sku})`, {
           'Number of Images in Database': imageCount,
-          'Images Array': product.images,
-          'First Image URL': product.images?.[0] || 'NO IMAGE',
-          'Status': imageCount === 0 ? '⚠️ NO IMAGES - Add images via admin panel' : `✅ Has ${imageCount} image(s)`,
+          'Raw Images Array': product.images,
+          'First Image URL (Raw from DB)': firstImageUrl || 'NO IMAGE',
+          'First Image URL (Processed)': processedUrl || 'EMPTY AFTER PROCESSING',
+          'Status': imageCount === 0 ? '⚠️ NO IMAGES - Add images via admin panel' : processedUrl ? `✅ Image URL ready` : '⚠️ Image URL is empty after processing',
         });
       });
       
@@ -64,7 +67,7 @@ export default function AdminProductsPage() {
   };
 
   const getImageUrl = (image: string | undefined): string => {
-    if (!image) return '';
+    if (!image || image.trim() === '') return '';
     // If it's already a full URL, return as is
     if (image.startsWith('http://') || image.startsWith('https://')) {
       return image;

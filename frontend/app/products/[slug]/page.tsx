@@ -30,13 +30,15 @@ export default function ProductDetailPage() {
       
       // Debug: Log product data to see what images are in the database
       const imageCount = productData.images?.length || 0;
+      const firstImageUrl = productData.images?.[0] || '';
+      // Note: getImageUrl is defined later, so we'll log the raw URL here
       console.log('📦 Product Detail Page - Product Data:', {
         'Product Name': productData.name,
         'Product SKU': productData.sku,
         'Number of Images in Database': imageCount,
-        'Images Array': productData.images,
-        'First Image URL': productData.images?.[0] || 'NO IMAGE IN DATABASE',
-        'Status': imageCount === 0 ? '⚠️ NO IMAGES - This product has 0 images. Add images via admin panel.' : `✅ Has ${imageCount} image(s)`,
+        'Raw Images Array': productData.images,
+        'First Image URL (Raw from DB)': firstImageUrl || 'NO IMAGE IN DATABASE',
+        'Status': imageCount === 0 ? '⚠️ NO IMAGES - Add images via admin panel.' : `✅ Has ${imageCount} image(s) in database`,
       });
       
       setProduct(productData);
@@ -63,7 +65,7 @@ export default function ProductDetailPage() {
   };
 
   const getImageUrl = (image: string | undefined, product?: Product, index: number = 0): string => {
-    if (!image) {
+    if (!image || image.trim() === '') {
       // Return empty string - image will be hidden if no image available
       return '';
     }
@@ -108,7 +110,7 @@ export default function ProductDetailPage() {
       return image;
     }
     
-    // Otherwise, return as is
+    // Otherwise, return as is (might be a relative path or external URL without protocol)
     return image;
   };
 
@@ -197,47 +199,59 @@ export default function ProductDetailPage() {
             {/* Thumbnails */}
             {productImages.length > 1 && (
               <div className="flex lg:flex-col gap-2 order-2 lg:order-1">
-                {productImages.map((img, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`w-20 h-20 lg:w-24 lg:h-24 rounded-lg overflow-hidden border-2 transition-all ${
-                      selectedImage === index
-                        ? 'border-royal-blue'
-                        : 'border-transparent hover:border-gray-300'
-                    }`}
-                  >
-                    <img
-                      src={getImageUrl(img, product, index)}
-                      alt={`Thumbnail ${index + 1}`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                      }}
-                    />
-                  </button>
-                ))}
+                {productImages.map((img, index) => {
+                  const imageUrl = getImageUrl(img, product, index);
+                  return imageUrl ? (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImage(index)}
+                      className={`w-20 h-20 lg:w-24 lg:h-24 rounded-lg overflow-hidden border-2 transition-all ${
+                        selectedImage === index
+                          ? 'border-royal-blue'
+                          : 'border-transparent hover:border-gray-300'
+                      }`}
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                        }}
+                      />
+                    </button>
+                  ) : null;
+                })}
               </div>
             )}
 
             {/* Main Image */}
             <div className="flex-1 order-1 lg:order-2">
               <div className="aspect-[3/4] bg-white rounded-lg overflow-hidden shadow-lg">
-                <img
-                  src={getImageUrl(productImages[selectedImage], product, selectedImage)}
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                  }}
-                  onLoad={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.opacity = '1';
-                  }}
-                  style={{ opacity: 0, transition: 'opacity 0.3s' }}
-                />
+                {(() => {
+                  const imageUrl = getImageUrl(productImages[selectedImage], product, selectedImage);
+                  return imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                      onLoad={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.opacity = '1';
+                      }}
+                      style={{ opacity: 0, transition: 'opacity 0.3s' }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      No Image Available
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </div>
@@ -446,7 +460,10 @@ export default function ProductDetailPage() {
                   >
                     <div className="aspect-[3/4] bg-gray-100 overflow-hidden">
                       <img
-                        src={getImageUrl(relatedProduct.images?.[0], relatedProduct, 0)}
+                        src={(() => {
+                          const imgUrl = getImageUrl(relatedProduct.images?.[0], relatedProduct, 0);
+                          return imgUrl || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="400"%3E%3Crect fill="%23f3f4f6" width="400" height="400"/%3E%3Ctext fill="%239ca3af" font-family="sans-serif" font-size="16" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E';
+                        })()}
                         alt={relatedProduct.name}
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                         onError={(e) => {
