@@ -118,7 +118,7 @@ export default function FlashSale({ products = [], endTime }: FlashSaleProps) {
                     className="object-cover group-hover:scale-110 transition-transform duration-300"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = images2Fallbacks[index % images2Fallbacks.length];
+                      target.style.display = 'none';
                     }}
                   />
                   {product.discount && (

@@ -65,7 +65,7 @@ export default function Buy2Get1({ products = [] }: Buy2Get1Props) {
                     className="object-cover group-hover:scale-110 transition-transform duration-300"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
-                      target.src = images2Fallbacks[index % images2Fallbacks.length];
+                      target.style.display = 'none';
                     }}
                   />
                   <div className="absolute top-2 left-2 bg-[#d4af37] text-white px-3 py-1 rounded text-xs font-semibold">
