@@ -261,31 +261,29 @@ function ProductsPageContent() {
                         );
                       })()}
                       {/* Hover UI */}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 pointer-events-none z-20">
                         <button
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                           }}
-                          className="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors"
+                          className="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors pointer-events-auto z-30"
                         >
                           <Heart className="w-5 h-5 text-gray-700" />
                         </button>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                          className="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors"
+                        <Link
+                          href={`/products/${product.slug}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors pointer-events-auto z-30"
                         >
                           <Eye className="w-5 h-5 text-gray-700" />
-                        </button>
+                        </Link>
                         <button
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                           }}
-                          className="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors"
+                          className="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors pointer-events-auto z-30"
                         >
                           <ShoppingCart className="w-5 h-5 text-gray-700" />
                         </button>

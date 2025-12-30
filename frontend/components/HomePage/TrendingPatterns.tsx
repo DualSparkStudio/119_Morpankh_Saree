@@ -178,10 +178,11 @@ const TrendingPatterns = () => {
                       </button>
                       
                       {/* Quick Actions on Hover */}
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3">
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 pointer-events-none z-20">
                         <Link
                           href={`/products/${product.slug}`}
-                          className="bg-white text-deep-indigo px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-deep-indigo hover:text-white transition-all transform hover:scale-105 shadow-xl flex items-center gap-2"
+                          onClick={(e) => e.stopPropagation()}
+                          className="bg-white text-deep-indigo px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-deep-indigo hover:text-white transition-all transform hover:scale-105 shadow-xl flex items-center gap-2 pointer-events-auto z-30"
                         >
                           <Eye className="w-4 h-4" />
                           <span>Quick View</span>
@@ -199,7 +200,7 @@ const TrendingPatterns = () => {
                               productImage: product.images?.[0] || '',
                             });
                           }}
-                          className="bg-sale-red text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-sale-red-light transition-all transform hover:scale-105 shadow-xl flex items-center gap-2"
+                          className="bg-sale-red text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:bg-sale-red-light transition-all transform hover:scale-105 shadow-xl flex items-center gap-2 pointer-events-auto z-30"
                         >
                           <ShoppingCart className="w-4 h-4" />
                           <span>Add to Cart</span>
