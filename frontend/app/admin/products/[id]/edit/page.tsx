@@ -35,6 +35,9 @@ export default function EditProductPage() {
     blouseIncluded: false,
     isActive: true,
     isFeatured: false,
+    showInPremium: false,
+    showInTrending: false,
+    showInCategories: false,
     tags: [] as string[],
     variants: [] as Array<{
       id?: string;
@@ -94,6 +97,9 @@ export default function EditProductPage() {
         blouseIncluded: (productData as any).blouseIncluded ?? false,
         isActive: productData.isActive ?? true,
         isFeatured: productData.isFeatured ?? false,
+        showInPremium: (productData as any).showInPremium ?? false,
+        showInTrending: (productData as any).showInTrending ?? false,
+        showInCategories: (productData as any).showInCategories ?? false,
         tags: (productData as any).tags || [],
         variants: productData.variants?.map(v => ({
           ...v,
@@ -135,6 +141,9 @@ export default function EditProductPage() {
         blouseIncluded: formData.blouseIncluded,
         isActive: formData.isActive,
         isFeatured: formData.isFeatured,
+        showInPremium: formData.showInPremium,
+        showInTrending: formData.showInTrending,
+        showInCategories: formData.showInCategories,
         tags: formData.tags,
         // Note: variants are not included here to prevent duplicate creation
         // Variants should be managed through a separate API endpoint if needed
@@ -537,27 +546,60 @@ export default function EditProductPage() {
         </div>
 
         {/* Status */}
-        <div className="flex items-center gap-6">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={formData.isActive}
-              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-              className="w-4 h-4 text-[#312e81] border-gray-300 rounded focus:ring-[#1e3a8a]"
-            />
-            <span className="text-sm font-medium text-gray-700">Active</span>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={formData.isFeatured}
-              onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
-              className="w-4 h-4 text-[#312e81] border-gray-300 rounded focus:ring-[#1e3a8a]"
-            />
-            <span className="text-sm font-medium text-gray-700">
-              Featured (Show in Premium & Trending Patterns and Categories)
-            </span>
-          </label>
+        <div className="space-y-4">
+          <div className="flex items-center gap-6">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                className="w-4 h-4 text-[#312e81] border-gray-300 rounded focus:ring-[#1e3a8a]"
+              />
+              <span className="text-sm font-medium text-gray-700">Active</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.isFeatured}
+                onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
+                className="w-4 h-4 text-[#312e81] border-gray-300 rounded focus:ring-[#1e3a8a]"
+              />
+              <span className="text-sm font-medium text-gray-700">Featured</span>
+            </label>
+          </div>
+          
+          <div className="border-t pt-4">
+            <p className="text-sm font-semibold text-gray-700 mb-3">Show in Home Page Sections:</p>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.showInPremium}
+                  onChange={(e) => setFormData({ ...formData, showInPremium: e.target.checked })}
+                  className="w-4 h-4 text-[#312e81] border-gray-300 rounded focus:ring-[#1e3a8a]"
+                />
+                <span className="text-sm font-medium text-gray-700">Show in Premium Patterns</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.showInTrending}
+                  onChange={(e) => setFormData({ ...formData, showInTrending: e.target.checked })}
+                  className="w-4 h-4 text-[#312e81] border-gray-300 rounded focus:ring-[#1e3a8a]"
+                />
+                <span className="text-sm font-medium text-gray-700">Show in Trending Patterns</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.showInCategories}
+                  onChange={(e) => setFormData({ ...formData, showInCategories: e.target.checked })}
+                  className="w-4 h-4 text-[#312e81] border-gray-300 rounded focus:ring-[#1e3a8a]"
+                />
+                <span className="text-sm font-medium text-gray-700">Show in Categories Carousel</span>
+              </label>
+            </div>
+          </div>
         </div>
 
         {/* Submit */}

@@ -34,6 +34,9 @@ export interface Product {
   variants?: ProductVariant[];
   isFeatured?: boolean;
   isActive?: boolean;
+  showInPremium?: boolean;
+  showInTrending?: boolean;
+  showInCategories?: boolean;
   inventory?: Array<{
     id?: string;
     type: string;

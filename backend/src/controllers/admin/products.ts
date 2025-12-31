@@ -90,6 +90,9 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
       images,
       isActive,
       isFeatured,
+      showInPremium,
+      showInTrending,
+      showInCategories,
       tags,
       variants,
     } = req.body;
@@ -112,6 +115,9 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         images: images || [],
         isActive: isActive !== undefined ? isActive : true,
         isFeatured: isFeatured || false,
+        showInPremium: showInPremium || false,
+        showInTrending: showInTrending || false,
+        showInCategories: showInCategories || false,
         tags: tags || [],
         variants: variants
           ? {

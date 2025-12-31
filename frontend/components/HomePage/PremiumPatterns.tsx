@@ -23,7 +23,7 @@ const PremiumPatterns = () => {
         sort: 'createdAt',
         order: 'desc',
       });
-      setProducts(data.products.filter(p => p.isActive && p.isFeatured).slice(0, 8));
+      setProducts(data.products.filter(p => p.isActive && (p as any).showInPremium).slice(0, 8));
     } catch (error: any) {
       // Silently handle rate limiting (429) errors - fallback images will be used
       if (error?.response?.status !== 429) {

@@ -123,6 +123,9 @@ model Product {
   blouseIncluded  Boolean          @default(false)
   isActive        Boolean          @default(true)
   isFeatured      Boolean          @default(false)
+  showInPremium   Boolean          @default(false)
+  showInTrending  Boolean          @default(false)
+  showInCategories Boolean         @default(false)
   tags            String[]
   variants        ProductVariant[]
   inventory       Inventory[]
