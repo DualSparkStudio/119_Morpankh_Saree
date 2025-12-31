@@ -147,9 +147,10 @@ const TrendingPatterns = () => {
                           </div>
                         );
                       })()}
-                      
-                      {/* Discount Badge - Top Left */}
-                      {discount > 0 && (
+                    </Link>
+                    
+                    {/* Discount Badge - Top Left */}
+                    {discount > 0 && (
                         <div className="absolute top-3 left-3 bg-sale-red text-white px-2.5 py-1 rounded-lg text-xs font-bold shadow-lg flex items-center gap-1 z-10">
                           <Percent className="w-3 h-3" />
                           <span>{discount}% OFF</span>
