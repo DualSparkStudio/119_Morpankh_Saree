@@ -554,7 +554,9 @@ export default function EditProductPage() {
               onChange={(e) => setFormData({ ...formData, isFeatured: e.target.checked })}
               className="w-4 h-4 text-[#312e81] border-gray-300 rounded focus:ring-[#1e3a8a]"
             />
-            <span className="text-sm font-medium text-gray-700">Featured</span>
+            <span className="text-sm font-medium text-gray-700">
+              Featured (Show in Premium & Trending Patterns and Categories)
+            </span>
           </label>
         </div>
 
