@@ -34,9 +34,7 @@ export default function CheckoutPage() {
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = subtotal > 5000 ? 0 : 100;
-  const tax = subtotal * 0.18;
-  const total = subtotal + shipping + tax;
+  const total = subtotal;
 
   useEffect(() => {
     if (!user) {
@@ -244,14 +242,6 @@ export default function CheckoutPage() {
                 </div>
 
                 <div className="space-y-2 mb-6">
-                  <div className="flex justify-between text-gray-700">
-                    <span>Subtotal</span>
-                    <span>₹{subtotal.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-700">
-                    <span>Shipping</span>
-                    <span>₹{shipping.toLocaleString()}</span>
-                  </div>
                   <div className="flex justify-between text-xl font-bold text-deep-indigo pt-4 border-t border-gray-200">
                     <span>Total</span>
                     <span>₹{total.toLocaleString()}</span>

@@ -12,9 +12,7 @@ export default function CartPage() {
   const router = useRouter();
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = subtotal > 5000 ? 0 : 100; // Free shipping over ₹5000
-  const tax = subtotal * 0.18; // 18% GST
-  const total = subtotal + shipping + tax;
+  const total = subtotal;
 
   const handleCheckout = () => {
     if (!user) {
@@ -114,15 +112,7 @@ export default function CartPage() {
             <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
               <h2 className="text-xl font-heading text-deep-indigo mb-4">Order Summary</h2>
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between text-gray-700">
-                  <span>Subtotal</span>
-                  <span>₹{subtotal.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between text-gray-700">
-                  <span>Shipping</span>
-                  <span>₹{shipping.toLocaleString()}</span>
-                </div>
-                <div className="border-t border-gray-200 pt-3 flex justify-between text-xl font-bold text-deep-indigo">
+                <div className="flex justify-between text-xl font-bold text-deep-indigo">
                   <span>Total</span>
                   <span>₹{total.toLocaleString()}</span>
                 </div>

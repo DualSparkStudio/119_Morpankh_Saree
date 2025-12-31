@@ -7,9 +7,11 @@ import { useSearchParams } from 'next/navigation';
 import { Heart, Eye, ShoppingCart } from 'lucide-react';
 import { productsApi, Product } from '@/lib/api/products';
 import { categoriesApi, Category } from '@/lib/api/categories';
+import { useStore } from '@/lib/store';
 
 function ProductsPageContent() {
   const searchParams = useSearchParams();
+  const { wishlist, addToWishlist, removeFromWishlist, addToCart } = useStore();
   const [priceRange, setPriceRange] = useState({ min: 0, max: 50000 });
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState('all');
@@ -235,8 +237,8 @@ function ProductsPageContent() {
                   key={product.id}
                   className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-shadow group"
                 >
-                  <Link href={`/products/${product.slug}`}>
-                    <div className="relative aspect-[7/8] bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 overflow-hidden">
+                  <div className="relative aspect-[7/8] bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 overflow-hidden">
+                    <Link href={`/products/${product.slug}`} className="block w-full h-full">
                       {(() => {
                         const imageUrl = getImageUrl(product.images?.[0], product, products.indexOf(product));
                         return imageUrl ? (
@@ -260,47 +262,67 @@ function ProductsPageContent() {
                           </div>
                         );
                       })()}
-                      {/* Hover UI */}
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 pointer-events-none z-20">
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                          className="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors pointer-events-auto z-30"
-                        >
-                          <Heart className="w-5 h-5 text-gray-700" />
-                        </button>
-                        <Link
-                          href={`/products/${product.slug}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors pointer-events-auto z-30"
-                        >
-                          <Eye className="w-5 h-5 text-gray-700" />
-                        </Link>
-                        <button
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                          }}
-                          className="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors pointer-events-auto z-30"
-                        >
-                          <ShoppingCart className="w-5 h-5 text-gray-700" />
-                        </button>
-                      </div>
+                    </Link>
+                    {/* Hover UI */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 pointer-events-none z-20">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          if (wishlist.includes(product.id)) {
+                            removeFromWishlist(product.id);
+                          } else {
+                            addToWishlist(product.id);
+                          }
+                        }}
+                        className={`bg-white p-2 rounded-full hover:bg-gray-100 transition-colors pointer-events-auto z-30 ${
+                          wishlist.includes(product.id) ? 'text-red-500' : 'text-gray-700'
+                        }`}
+                        aria-label={wishlist.includes(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                      >
+                        <Heart className={`w-5 h-5 ${wishlist.includes(product.id) ? 'fill-current' : ''}`} />
+                      </button>
+                      <Link
+                        href={`/products/${product.slug}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors pointer-events-auto z-30"
+                        aria-label="Quick view"
+                      >
+                        <Eye className="w-5 h-5 text-gray-700" />
+                      </Link>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          addToCart({
+                            id: `product-${product.id}`,
+                            productId: product.id,
+                            quantity: 1,
+                            price: product.basePrice,
+                            productName: product.name,
+                            productImage: product.images?.[0] || '',
+                          });
+                        }}
+                        className="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors pointer-events-auto z-30"
+                        aria-label="Add to cart"
+                      >
+                        <ShoppingCart className="w-5 h-5 text-gray-700" />
+                      </button>
                     </div>
-                    <div className="p-4">
-                      <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2">
+                  </div>
+                  <div className="p-4">
+                    <Link href={`/products/${product.slug}`}>
+                      <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2 hover:text-deep-indigo transition-colors">
                         {product.name}
                       </h3>
-                      <div className="flex items-baseline gap-2">
-                        <p className="text-lg font-bold text-deep-indigo">₹{product.basePrice.toLocaleString()}</p>
-                        {product.compareAtPrice && (
-                          <p className="text-sm text-gray-400 line-through">₹{product.compareAtPrice.toLocaleString()}</p>
-                        )}
-                      </div>
+                    </Link>
+                    <div className="flex items-baseline gap-2">
+                      <p className="text-lg font-bold text-deep-indigo">₹{product.basePrice.toLocaleString()}</p>
+                      {product.compareAtPrice && (
+                        <p className="text-sm text-gray-400 line-through">₹{product.compareAtPrice.toLocaleString()}</p>
+                      )}
                     </div>
-                  </Link>
+                  </div>
                 </div>
               ))
               )}

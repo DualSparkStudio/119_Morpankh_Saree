@@ -27,6 +27,7 @@ import reviewRoutes from './routes/reviews';
 import wishlistRoutes from './routes/wishlist';
 import inventoryRoutes from './routes/inventory';
 import paymentRoutes from './routes/payment';
+import settingsRoutes from './routes/settings';
 
 dotenv.config();
 
@@ -121,6 +122,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Only serve Next.js static files if running standalone (not when imported as module)
 // When imported, the custom Next.js server will handle frontend serving
