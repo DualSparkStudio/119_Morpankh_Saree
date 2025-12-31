@@ -29,6 +29,10 @@ export const metadata: Metadata = {
   title: "Morpankh Saree - Premium Indian Fashion",
   description: "Discover premium quality sarees at Morpankh Saree. Elegant, luxurious, and timeless Indian fashion.",
   keywords: "saree, indian fashion, premium sarees, designer sarees, morpankh saree",
+  icons: {
+    icon: '/icon.png',
+    apple: '/icon.png',
+  },
 };
 
 export default function RootLayout({
