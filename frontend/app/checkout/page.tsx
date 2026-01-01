@@ -65,8 +65,8 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Update guest checkout mode based on user login status
-    if (!user && !isGuestCheckout) {
+    // If no user is logged in, always use guest checkout (no toggle option)
+    if (!user) {
       setIsGuestCheckout(true);
     }
 
@@ -282,26 +282,28 @@ export default function CheckoutPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left - Billing Form */}
-            <div className="bg-white rounded-lg p-6 shadow-md">
-              <h2 className="text-2xl font-heading text-deep-indigo mb-6">Billing Details</h2>
-              
-              {/* Guest/User Toggle */}
-              {user && (
-                <div className="mb-6">
-                  <button
-                    onClick={() => setIsGuestCheckout(!isGuestCheckout)}
-                    className="text-sm text-deep-indigo hover:underline"
-                  >
-                    {isGuestCheckout ? 'Use saved address' : 'Checkout as guest'}
-                  </button>
-                </div>
-              )}
+                <div className="bg-white rounded-lg p-6 shadow-md">
+                  <h2 className="text-2xl font-heading text-deep-indigo mb-6">Billing Details</h2>
+                  
+                  {/* Guest/User Toggle - Only show if user is logged in */}
+                  {user && (
+                    <div className="mb-6">
+                      <button
+                        onClick={() => setIsGuestCheckout(!isGuestCheckout)}
+                        className="text-sm text-deep-indigo hover:underline"
+                      >
+                        {isGuestCheckout ? 'Use saved address' : 'Checkout as guest'}
+                      </button>
+                    </div>
+                  )}
 
-              <div className="space-y-4">
-                {isGuestCheckout ? (
                   <div className="space-y-4">
-                    {/* Guest Checkout Form */}
-                    <h3 className="text-xl font-heading text-deep-indigo mb-4">Contact Information</h3>
+                    {isGuestCheckout ? (
+                      <div className="space-y-4">
+                        {/* Guest Checkout Form - Only show heading if user is logged in (otherwise it's obvious) */}
+                        {user && (
+                          <h3 className="text-xl font-heading text-deep-indigo mb-4">Contact Information</h3>
+                        )}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Full Name <span className="text-red-500">*</span>
