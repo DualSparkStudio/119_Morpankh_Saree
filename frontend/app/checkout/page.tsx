@@ -460,37 +460,36 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-lg p-6 shadow-md h-fit">
               <h2 className="text-2xl font-heading text-deep-indigo mb-6">Order Summary</h2>
                 
-                <div className="space-y-4 mb-6">
-                  {cart.map((item) => (
-                    <div key={item.id} className="flex justify-between items-center pb-4 border-b border-gray-200">
-                      <div>
-                        <p className="font-medium text-gray-800">{item.productName || 'Product'}</p>
-                        <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
-                      </div>
-                      <p className="font-semibold text-deep-indigo">₹{(item.price * item.quantity).toLocaleString()}</p>
+              <div className="space-y-4 mb-6">
+                {cart.map((item) => (
+                  <div key={item.id} className="flex justify-between items-center pb-4 border-b border-gray-200">
+                    <div>
+                      <p className="font-medium text-gray-800">{item.productName || 'Product'}</p>
+                      <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
                     </div>
-                  ))}
-                </div>
-
-                <div className="space-y-2 mb-6">
-                  <div className="flex justify-between text-xl font-bold text-deep-indigo pt-4 border-t border-gray-200">
-                    <span>Total</span>
-                    <span>₹{total.toLocaleString()}</span>
+                    <p className="font-semibold text-deep-indigo">₹{(item.price * item.quantity).toLocaleString()}</p>
                   </div>
-                </div>
-
-                <button
-                  onClick={handlePayment}
-                  disabled={loading || (!isGuestCheckout && !selectedAddress)}
-                  className="w-full bg-royal-blue hover:bg-deep-indigo text-white px-6 py-4 rounded-lg font-semibold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {loading ? 'Processing...' : 'Place Order'}
-                </button>
-
-                <p className="text-xs text-gray-500 text-center mt-4">
-                  Your personal data will be used to process your order and support your experience.
-                </p>
+                ))}
               </div>
+
+              <div className="space-y-2 mb-6">
+                <div className="flex justify-between text-xl font-bold text-deep-indigo pt-4 border-t border-gray-200">
+                  <span>Total</span>
+                  <span>₹{total.toLocaleString()}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={handlePayment}
+                disabled={loading || (!isGuestCheckout && !selectedAddress)}
+                className="w-full bg-royal-blue hover:bg-deep-indigo text-white px-6 py-4 rounded-lg font-semibold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Processing...' : 'Place Order'}
+              </button>
+
+              <p className="text-xs text-gray-500 text-center mt-4">
+                Your personal data will be used to process your order and support your experience.
+              </p>
             </div>
           </div>
         </div>
@@ -498,4 +497,3 @@ export default function CheckoutPage() {
     </>
   );
 }
-
