@@ -51,10 +51,12 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
         { description: { contains: search as string, mode: 'insensitive' } },
       ];
     }
-    if (premium === 'true' || premium === true) {
+    // Check premium filter - query params are strings
+    if (premium && (String(premium) === 'true' || String(premium) === '1')) {
       where.showInPremium = true;
     }
-    if (trending === 'true' || trending === true) {
+    // Check trending filter - query params are strings
+    if (trending && (String(trending) === 'true' || String(trending) === '1')) {
       where.showInTrending = true;
     }
 
