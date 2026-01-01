@@ -65,6 +65,11 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Update guest checkout mode based on user login status
+    if (!user && !isGuestCheckout) {
+      setIsGuestCheckout(true);
+    }
+
     // Load addresses only if user is logged in and not in guest mode
     if (user && !isGuestCheckout) {
       loadAddresses();
@@ -131,6 +136,7 @@ export default function CheckoutPage() {
 
     try {
       setLoading(true);
+      console.log('Starting payment process...', { isGuestCheckout, user: !!user });
 
       // Prepare shipping address
       let shippingAddr: any;
@@ -191,7 +197,14 @@ export default function CheckoutPage() {
         orderData.guestPhone = guestAddress.phone;
       }
 
-      const order = await ordersApi.createOrder(orderData);
+      // Create order on backend
+      let order;
+      try {
+        order = await ordersApi.createOrder(orderData);
+      } catch (orderError: any) {
+        console.error('Order creation error:', orderError);
+        throw new Error(orderError?.response?.data?.message || 'Failed to create order. Please try again.');
+      }
 
       // Create Razorpay order
       const orderResponse = await paymentApi.createRazorpayOrder({

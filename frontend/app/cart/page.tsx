@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
+import { getImageUrl } from '@/lib/utils/imageHelper';
 
 export default function CartPage() {
   const { cart, updateCartItem, removeFromCart, clearCart, user } = useStore();
@@ -14,11 +14,8 @@ export default function CartPage() {
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = subtotal;
 
+  // Guest checkout is allowed - no need to check for user
   const handleCheckout = () => {
-    if (!user) {
-      router.push('/login?redirect=/cart');
-      return;
-    }
     router.push('/checkout');
   };
 
@@ -55,18 +52,27 @@ export default function CartPage() {
                 className="bg-white rounded-lg shadow-md p-4 flex flex-col sm:flex-row gap-4"
               >
                 <Link href={`/products/${item.productId}`} className="flex-shrink-0">
-                  <div className="w-24 h-32 sm:w-32 sm:h-40 bg-gray-100 rounded-lg overflow-hidden">
-                    <Image
-                      src={item.productImage || ''}
-                      alt={item.productName || 'Product'}
-                      width={128}
-                      height={160}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                      }}
-                    />
+                  <div className="w-24 h-32 sm:w-32 sm:h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                    {(() => {
+                      const imageUrl = item.productImage ? getImageUrl(item.productImage) : '';
+                      return imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt={item.productName || 'Product'}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg';
+                          }}
+                        />
+                      ) : (
+                        <img
+                          src="/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg"
+                          alt={item.productName || 'Product'}
+                          className="w-full h-full object-cover"
+                        />
+                      );
+                    })()}
                   </div>
                 </Link>
                 <div className="flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

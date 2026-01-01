@@ -6,6 +6,15 @@ export const getImageUrl = (image: string | undefined, index: number = 0): strin
       return image;
     }
     if (image.startsWith('/')) {
+      // Handle special characters in image paths (e.g., spaces, parentheses)
+      if (image.includes(' ') || image.includes('(') || image.includes(')')) {
+        const pathParts = image.split('/');
+        const filename = pathParts.pop() || '';
+        if (filename && (filename.includes(' ') || filename.includes('(') || filename.includes(')'))) {
+          const encodedFilename = encodeURIComponent(filename);
+          image = [...pathParts, encodedFilename].join('/');
+        }
+      }
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
       const baseUrl = apiUrl.replace('/api', '');
       return `${baseUrl}${image}`;

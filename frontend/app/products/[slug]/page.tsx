@@ -181,6 +181,7 @@ export default function ProductDetailPage() {
     addToCart({
       id: `product-${product.id}${variant ? `-${variant.id}` : ''}`,
       productId: product.id,
+      variantId: variant?.id || undefined,
       quantity: quantity,
       price: variant?.price || product.basePrice,
       productName: product.name,
