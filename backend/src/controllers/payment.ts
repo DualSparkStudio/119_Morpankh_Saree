@@ -19,6 +19,7 @@ if (razorpayKeyId && razorpayKeySecret) {
   }
 } else {
   console.warn('⚠️ Razorpay keys not configured. Payment features will be disabled.');
+  console.warn('⚠️ Please set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables in Render dashboard.');
 }
 
 export const createRazorpayOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
