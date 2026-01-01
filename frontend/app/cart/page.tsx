@@ -1,23 +1,63 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import { getImageUrl } from '@/lib/utils/imageHelper';
+import { productsApi } from '@/lib/api/products';
 
 export default function CartPage() {
   const { cart, updateCartItem, removeFromCart, clearCart, user } = useStore();
   const router = useRouter();
+  const [cartItemsWithData, setCartItemsWithData] = useState<any[]>([]);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = subtotal;
+
+  // Fetch product data for cart items that don't have slug or need updated images
+  useEffect(() => {
+    const fetchProductData = async () => {
+      const itemsToUpdate: any[] = [];
+      
+      for (const item of cart) {
+        // If item doesn't have slug or image, fetch product data
+        if (!item.productSlug || !item.productImage) {
+          try {
+            const product = await productsApi.getById(item.productId);
+            itemsToUpdate.push({
+              ...item,
+              productSlug: product.slug,
+              productImage: product.images?.[0] || item.productImage || '',
+              productName: product.name || item.productName,
+            });
+          } catch (error) {
+            // If fetch fails, use existing item data
+            itemsToUpdate.push(item);
+          }
+        } else {
+          itemsToUpdate.push(item);
+        }
+      }
+      
+      setCartItemsWithData(itemsToUpdate);
+    };
+
+    if (cart.length > 0) {
+      fetchProductData();
+    } else {
+      setCartItemsWithData([]);
+    }
+  }, [cart]);
 
   // Guest checkout is allowed - no need to check for user
   const handleCheckout = () => {
     router.push('/checkout');
   };
+
+  // Use cartItemsWithData if available, otherwise use cart
+  const displayCart = cartItemsWithData.length > 0 ? cartItemsWithData : cart;
 
   if (cart.length === 0) {
     return (
@@ -46,12 +86,12 @@ export default function CartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {cart.map((item) => (
+            {displayCart.map((item) => (
               <div
                 key={item.id}
                 className="bg-white rounded-lg shadow-md p-4 flex flex-col sm:flex-row gap-4"
               >
-                <Link href={`/products/${item.productId}`} className="flex-shrink-0">
+                <Link href={`/products/${item.productSlug || item.productId}`} className="flex-shrink-0">
                   <div className="w-24 h-32 sm:w-32 sm:h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                     {(() => {
                       const imageUrl = item.productImage ? getImageUrl(item.productImage) : '';
@@ -61,23 +101,22 @@ export default function CartPage() {
                           alt={item.productName || 'Product'}
                           className="w-full h-full object-cover"
                           onError={(e) => {
+                            // If image fails to load, show placeholder
                             const target = e.target as HTMLImageElement;
-                            target.src = '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg';
+                            target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="160"%3E%3Crect fill="%23f3f4f6" width="128" height="160"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-family="sans-serif" font-size="14"%3ENo Image%3C/text%3E%3C/svg%3E';
                           }}
                         />
                       ) : (
-                        <img
-                          src="/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg"
-                          alt={item.productName || 'Product'}
-                          className="w-full h-full object-cover"
-                        />
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs">
+                          No Image
+                        </div>
                       );
                     })()}
                   </div>
                 </Link>
                 <div className="flex-1 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="flex-1">
-                    <Link href={`/products/${item.productId}`}>
+                    <Link href={`/products/${item.productSlug || item.productId}`}>
                       <h3 className="font-semibold text-gray-800 mb-2 hover:text-royal-blue">{item.productName || 'Product Name'}</h3>
                     </Link>
                     <p className="text-lg font-bold text-deep-indigo">₹{(item.price * item.quantity).toLocaleString()}</p>

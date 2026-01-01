@@ -197,6 +197,7 @@ const TrendingPatterns = () => {
                             addToCart({
                               id: `product-${product.id}`,
                               productId: product.id,
+                              productSlug: product.slug,
                               quantity: 1,
                               price: product.basePrice,
                               productName: product.name,
@@ -250,6 +251,7 @@ const TrendingPatterns = () => {
                         addToCart({
                           id: `product-${product.id}`,
                           productId: product.id,
+                          productSlug: product.slug,
                           quantity: 1,
                           price: product.basePrice,
                           productName: product.name,

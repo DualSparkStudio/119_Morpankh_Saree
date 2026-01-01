@@ -30,15 +30,28 @@ export default function ProductDetailPage() {
   const loadProduct = async () => {
     try {
       setLoading(true);
-      const productData = await productsApi.getBySlug(slug);
+      let productData: Product;
       
-      // Debug: Log image URLs to diagnose display issues
-      console.log('🔍 Product Image Debug:', {
-        productName: productData.name,
-        imageCount: productData.images?.length || 0,
-        rawImages: productData.images,
-        firstImageRaw: productData.images?.[0] || 'NO IMAGE',
-      });
+      // Try to load by slug first, if that fails and slug looks like an ID, try by ID
+      try {
+        productData = await productsApi.getBySlug(slug);
+      } catch (slugError: any) {
+        // If slug lookup fails and slug looks like an ID (cuid format), try by ID
+        if (slug.length === 25 && slugError?.response?.status === 404) {
+          try {
+            productData = await productsApi.getById(slug);
+            // Redirect to slug-based URL for better SEO
+            if (productData.slug && productData.slug !== slug) {
+              router.replace(`/products/${productData.slug}`);
+              return;
+            }
+          } catch (idError) {
+            throw slugError; // Throw original error if ID lookup also fails
+          }
+        } else {
+          throw slugError;
+        }
+      }
       
       setProduct(productData);
       
@@ -144,19 +157,13 @@ export default function ProductDetailPage() {
       // If variant has images, use them; otherwise use product images
     }
     
-    // Use product images, or fallback to images2 folder
+    // Use product images from database - no hardcoded fallbacks
     if (product.images && product.images.length > 0) {
       return product.images.filter(img => img && img.trim() !== '');
     }
     
-    // Fallback images from images2 folder
-    return [
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM.jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.01 PM (1).jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM.jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.02 PM (1).jpeg',
-      '/images2/WhatsApp Image 2025-12-26 at 1.50.03 PM.jpeg',
-    ];
+    // Return empty array if no images - let the UI handle the display
+    return [];
   };
 
   const isInWishlist = (productId: string) => {
@@ -178,14 +185,20 @@ export default function ProductDetailPage() {
       ? product.variants?.find(v => v.id === selectedVariant)
       : null;
     
+    // Get the actual product image from the product data
+    const productImage = product.images && product.images.length > 0 
+      ? product.images[0] 
+      : '';
+    
     addToCart({
       id: `product-${product.id}${variant ? `-${variant.id}` : ''}`,
       productId: product.id,
+      productSlug: product.slug,
       variantId: variant?.id || undefined,
       quantity: quantity,
       price: variant?.price || product.basePrice,
       productName: product.name,
-      productImage: getDisplayImages()[0] || '',
+      productImage: productImage,
     });
   };
 

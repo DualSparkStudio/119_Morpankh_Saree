@@ -12,6 +12,7 @@ interface User {
 interface CartItem {
   id: string;
   productId: string;
+  productSlug?: string; // Optional for backward compatibility, will be fetched if missing
   variantId?: string;
   quantity: number;
   price: number;
