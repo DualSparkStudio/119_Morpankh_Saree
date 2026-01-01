@@ -16,8 +16,8 @@ export default function Providers({ children }: { children: ReactNode }) {
       setUser(null);
       setToken(null);
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('refreshToken');
       }
     }
 
@@ -27,8 +27,8 @@ export default function Providers({ children }: { children: ReactNode }) {
       setUser(null);
       setToken(null);
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('refreshToken');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('refreshToken');
       }
     }
   }, [_hasHydrated, user, token, setUser, setToken]);

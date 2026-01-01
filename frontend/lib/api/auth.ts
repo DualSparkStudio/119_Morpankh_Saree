@@ -36,7 +36,10 @@ export const authApi = {
 
   logout: async () => {
     // Clear tokens locally (API doesn't need logout endpoint for JWT)
+    // Clear both sessionStorage (tab-specific) and localStorage (for cleanup)
     if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('token');
+      sessionStorage.removeItem('refreshToken');
       localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
     }

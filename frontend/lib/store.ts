@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 interface User {
   id: string;
@@ -57,13 +57,13 @@ export const useStore = create<AppState>()(
       },
       setToken: (token) => {
         set({ token });
-        // Sync with localStorage (Zustand persist handles this, but we ensure consistency)
+        // Sync with sessionStorage for tab isolation (Zustand persist handles this, but we ensure consistency)
         if (typeof window !== 'undefined') {
           if (token) {
-            localStorage.setItem('token', token);
+            sessionStorage.setItem('token', token);
           } else {
-            localStorage.removeItem('token');
-            localStorage.removeItem('refreshToken');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('refreshToken');
           }
         }
       },
@@ -114,13 +114,13 @@ export const useStore = create<AppState>()(
         })),
       
       logout: () => {
-        // Clear all auth-related storage completely
+        // Clear all auth-related storage completely (tab-specific with sessionStorage)
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('refreshToken');
           // Don't clear the entire morpankh-store, just clear auth parts
           // Cart and wishlist should persist across logout (for guest users)
-          const storeData = localStorage.getItem('morpankh-store');
+          const storeData = sessionStorage.getItem('morpankh-store');
           if (storeData) {
             try {
               const parsed = JSON.parse(storeData);
@@ -129,10 +129,10 @@ export const useStore = create<AppState>()(
                 user: null,
                 token: null,
               };
-              localStorage.setItem('morpankh-store', JSON.stringify(parsed));
+              sessionStorage.setItem('morpankh-store', JSON.stringify(parsed));
             } catch (e) {
               // If parsing fails, clear everything
-              localStorage.removeItem('morpankh-store');
+              sessionStorage.removeItem('morpankh-store');
             }
           }
         }
@@ -147,6 +147,7 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'morpankh-store',
+      storage: createJSONStorage(() => sessionStorage), // Use sessionStorage for tab isolation
       partialize: (state) => ({
         user: state.user,
         token: state.token,
@@ -161,19 +162,36 @@ export const useStore = create<AppState>()(
           // If token exists but user is missing, clear token (security)
           // If user exists but no token, clear user (security)
           if (typeof window !== 'undefined') {
-            const tokenFromStorage = localStorage.getItem('token');
+            // Check sessionStorage for token (tab-specific)
+            const tokenFromStorage = sessionStorage.getItem('token');
             
-            // If we have a token in localStorage but no user in store, token might be stale
+            // Migrate from localStorage to sessionStorage on first load (one-time migration)
+            if (!tokenFromStorage) {
+              const oldToken = localStorage.getItem('token');
+              if (oldToken) {
+                // Migrate to sessionStorage for tab isolation
+                sessionStorage.setItem('token', oldToken);
+                const oldRefreshToken = localStorage.getItem('refreshToken');
+                if (oldRefreshToken) {
+                  sessionStorage.setItem('refreshToken', oldRefreshToken);
+                }
+              }
+            }
+            
+            // Use migrated token if available
+            const activeToken = sessionStorage.getItem('token');
+            
+            // If we have a token in sessionStorage but no user in store, token might be stale
             // Clear it to prevent security issues
-            if (tokenFromStorage && !state.user) {
+            if (activeToken && !state.user) {
               console.warn('Token found but no user - clearing stale token');
-              localStorage.removeItem('token');
-              localStorage.removeItem('refreshToken');
+              sessionStorage.removeItem('token');
+              sessionStorage.removeItem('refreshToken');
               state.token = null;
             }
             
             // If we have a user but no token, clear user (inconsistent state)
-            if (state.user && !tokenFromStorage) {
+            if (state.user && !activeToken) {
               console.warn('User found but no token - clearing user');
               state.user = null;
             }
@@ -183,9 +201,9 @@ export const useStore = create<AppState>()(
               console.warn('Invalid user structure after hydration - clearing user');
               state.user = null;
               state.token = null;
-              if (tokenFromStorage) {
-                localStorage.removeItem('token');
-                localStorage.removeItem('refreshToken');
+              if (activeToken) {
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('refreshToken');
               }
             }
           }

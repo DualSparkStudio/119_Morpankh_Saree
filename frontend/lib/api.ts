@@ -14,11 +14,12 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add auth token (use sessionStorage for tab isolation)
 api.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
+      // Check sessionStorage first (tab-specific), then localStorage (for backward compatibility)
+      const token = sessionStorage.getItem('token') || localStorage.getItem('token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -37,11 +38,14 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       // Clear invalid token and user state
       if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('token');
+        // Check both sessionStorage and localStorage for token
+        const token = sessionStorage.getItem('token') || localStorage.getItem('token');
         // Only redirect if there was a token (meaning user was logged in but token expired)
         // Don't redirect if no token (guest user)
         if (token) {
-          // Clear all auth-related storage
+          // Clear all auth-related storage (both sessionStorage and localStorage for cleanup)
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('refreshToken');
           localStorage.removeItem('token');
           localStorage.removeItem('refreshToken');
           

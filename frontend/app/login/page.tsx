@@ -78,12 +78,12 @@ function LoginForm() {
         password,
       });
 
-      // Store tokens and user through store (store handles localStorage sync)
+      // Store tokens and user through store (store handles sessionStorage sync for tab isolation)
       setToken(response.token);
       setUser(response.user);
-      // Store refresh token separately (not in Zustand store)
+      // Store refresh token separately in sessionStorage (tab-specific)
       if (typeof window !== 'undefined') {
-        localStorage.setItem('refreshToken', response.refreshToken);
+        sessionStorage.setItem('refreshToken', response.refreshToken);
       }
 
       // Redirect
