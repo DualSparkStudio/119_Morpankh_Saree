@@ -12,42 +12,62 @@ export default function CartPage() {
   const { cart, updateCartItem, removeFromCart, clearCart, user } = useStore();
   const router = useRouter();
   const [cartItemsWithData, setCartItemsWithData] = useState<any[]>([]);
+  const [loadingImages, setLoadingImages] = useState(true);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = subtotal;
 
-  // Fetch product data for cart items that don't have slug or need updated images
+  // Always fetch fresh product data to ensure images are up-to-date
   useEffect(() => {
     const fetchProductData = async () => {
       const itemsToUpdate: any[] = [];
       
       for (const item of cart) {
-        // If item doesn't have slug or image, fetch product data
-        if (!item.productSlug || !item.productImage) {
-          try {
-            const product = await productsApi.getById(item.productId);
-            itemsToUpdate.push({
-              ...item,
-              productSlug: product.slug,
-              productImage: product.images?.[0] || item.productImage || '',
-              productName: product.name || item.productName,
-            });
-          } catch (error) {
-            // If fetch fails, use existing item data
-            itemsToUpdate.push(item);
+        // Always fetch product data to get latest images and slug
+        // This ensures we have the most current product information
+        try {
+          const product = await productsApi.getById(item.productId);
+          
+          // Get the first valid image from the product's images array
+          let productImage = '';
+          if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            // Find first non-empty image
+            for (const img of product.images) {
+              if (img && typeof img === 'string' && img.trim() !== '') {
+                productImage = img;
+                break;
+              }
+            }
           }
-        } else {
+          
+          // Fallback to existing productImage if no valid image found
+          if (!productImage && item.productImage && typeof item.productImage === 'string' && item.productImage.trim() !== '') {
+            productImage = item.productImage;
+          }
+          
+          itemsToUpdate.push({
+            ...item,
+            productSlug: product.slug || item.productSlug || item.productId,
+            productImage: productImage,
+            productName: product.name || item.productName,
+          });
+        } catch (error) {
+          console.error('Error fetching product data for cart item:', item.productId, error);
+          // If fetch fails, use existing item data
           itemsToUpdate.push(item);
         }
       }
       
       setCartItemsWithData(itemsToUpdate);
+      setLoadingImages(false);
     };
 
     if (cart.length > 0) {
+      setLoadingImages(true);
       fetchProductData();
     } else {
       setCartItemsWithData([]);
+      setLoadingImages(false);
     }
   }, [cart]);
 
@@ -56,8 +76,8 @@ export default function CartPage() {
     router.push('/checkout');
   };
 
-  // Use cartItemsWithData if available, otherwise use cart
-  const displayCart = cartItemsWithData.length > 0 ? cartItemsWithData : cart;
+  // Use cartItemsWithData if available and loaded, otherwise use cart
+  const displayCart = !loadingImages && cartItemsWithData.length > 0 ? cartItemsWithData : cart;
 
   if (cart.length === 0) {
     return (
@@ -94,19 +114,44 @@ export default function CartPage() {
                 <Link href={`/products/${item.productSlug || item.productId}`} className="flex-shrink-0">
                   <div className="w-24 h-32 sm:w-32 sm:h-40 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
                     {(() => {
-                      const imageUrl = item.productImage ? getImageUrl(item.productImage) : '';
-                      return imageUrl ? (
-                        <img
-                          src={imageUrl}
-                          alt={item.productName || 'Product'}
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            // If image fails to load, show placeholder
-                            const target = e.target as HTMLImageElement;
-                            target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="128" height="160"%3E%3Crect fill="%23f3f4f6" width="128" height="160"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-family="sans-serif" font-size="14"%3ENo Image%3C/text%3E%3C/svg%3E';
-                          }}
-                        />
-                      ) : (
+                      // Get image URL - handle both string and array formats
+                      let imagePath = item.productImage;
+                      
+                      // If productImage is a string and not empty, use it
+                      if (typeof imagePath === 'string' && imagePath.trim() !== '') {
+                        const imageUrl = getImageUrl(imagePath);
+                        if (imageUrl && imageUrl.trim() !== '') {
+                          return (
+                            <img
+                              src={imageUrl}
+                              alt={item.productName || 'Product'}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                              onError={(e) => {
+                                console.error('Image failed to load:', imageUrl, 'Original path:', imagePath);
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                // Show placeholder if image fails
+                                const parent = target.parentElement;
+                                if (parent && !parent.querySelector('.image-placeholder')) {
+                                  const placeholder = document.createElement('div');
+                                  placeholder.className = 'image-placeholder w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs';
+                                  placeholder.textContent = 'Image not found';
+                                  parent.appendChild(placeholder);
+                                }
+                              }}
+                              onLoad={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.opacity = '1';
+                              }}
+                              style={{ opacity: 0, transition: 'opacity 0.3s' }}
+                            />
+                          );
+                        }
+                      }
+                      
+                      // No valid image URL - show placeholder
+                      return (
                         <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs">
                           No Image
                         </div>
