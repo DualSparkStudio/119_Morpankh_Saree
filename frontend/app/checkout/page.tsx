@@ -65,11 +65,12 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Load addresses only if user is logged in
+    // Load addresses only if user is logged in and not in guest mode
     if (user && !isGuestCheckout) {
       loadAddresses();
     }
-  }, [user, cart, isGuestCheckout]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, cart.length, isGuestCheckout]);
 
   const loadAddresses = async () => {
     try {
@@ -163,12 +164,18 @@ export default function CheckoutPage() {
       }
 
       // Prepare order items
-      const orderItems = cart.map((item) => ({
-        productId: item.productId,
-        variantId: item.variantId || undefined,
-        quantity: item.quantity,
-        price: item.price,
-      }));
+      const orderItems = cart.map((item) => {
+        const orderItem: any = {
+          productId: item.productId,
+          quantity: item.quantity,
+          price: item.price,
+        };
+        // Only include variantId if it exists and is not empty
+        if (item.variantId && typeof item.variantId === 'string' && item.variantId.trim() !== '') {
+          orderItem.variantId = item.variantId;
+        }
+        return orderItem;
+      });
 
       // Create order on backend
       const orderData: any = {
@@ -279,8 +286,8 @@ export default function CheckoutPage() {
 
               <div className="space-y-4">
                 {isGuestCheckout ? (
-                  /* Guest Checkout Form */
                   <div className="space-y-4">
+                    {/* Guest Checkout Form */}
                     <h3 className="text-xl font-heading text-deep-indigo mb-4">Contact Information</h3>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -384,7 +391,6 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 ) : (
-                  /* Saved Addresses for Logged-in Users */
                   <div>
                     <h3 className="text-xl font-heading text-deep-indigo mb-4">Shipping Address</h3>
                     <div className="space-y-4">

@@ -69,13 +69,19 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         billingAddress: billingAddress || shippingAddress,
         couponCode: couponCode || null,
         items: {
-          create: items.map((item: any) => ({
-            productId: item.productId,
-            variantId: item.variantId || null,
-            quantity: item.quantity,
-            price: item.price,
-            total: item.price * item.quantity,
-          })),
+          create: items.map((item: any) => {
+            const orderItem: any = {
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.price,
+              total: item.price * item.quantity,
+            };
+            // Only include variantId if provided and valid
+            if (item.variantId && item.variantId.trim() !== '') {
+              orderItem.variantId = item.variantId;
+            }
+            return orderItem;
+          }),
         },
       },
       include: {
