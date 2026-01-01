@@ -45,7 +45,12 @@ function LoginForm() {
       const hasCompleteAuth = currentUser && currentToken && currentUser.id && currentUser.role;
       
       if (hasCompleteAuth) {
-        router.push(redirect);
+        // Redirect admin/staff users to admin panel, others to their intended destination
+        if (currentUser.role === 'ADMIN' || currentUser.role === 'STAFF') {
+          router.push('/admin');
+        } else {
+          router.push(redirect);
+        }
       }
     }, 1000); // Wait 1 second to ensure Zustand hydration completes
 
@@ -86,8 +91,13 @@ function LoginForm() {
         sessionStorage.setItem('refreshToken', response.refreshToken);
       }
 
-      // Redirect
-      router.push(redirect);
+      // Redirect based on user role
+      // Admin and Staff users go to admin panel, others go to their intended destination
+      if (response.user.role === 'ADMIN' || response.user.role === 'STAFF') {
+        router.push('/admin');
+      } else {
+        router.push(redirect);
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
       setLoading(false);
