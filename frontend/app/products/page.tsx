@@ -21,6 +21,27 @@ function ProductsPageContent() {
 
   const highlights = ['All', 'Best Seller', 'New Arrivals', 'Sale'];
 
+  // Scroll to top when component mounts or URL query params change
+  useEffect(() => {
+    // Small delay to ensure Lenis is initialized
+    const timer = setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        // Try to access Lenis instance if available
+        const lenisInstance = (window as any).lenis;
+        if (lenisInstance && typeof lenisInstance.scrollTo === 'function') {
+          lenisInstance.scrollTo(0, { immediate: true });
+        } else {
+          // Fallback to regular scroll
+          window.scrollTo({ top: 0, behavior: 'auto' });
+          document.documentElement.scrollTop = 0;
+          document.body.scrollTop = 0;
+        }
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [searchParams]);
+
   useEffect(() => {
     loadCategories();
   }, []);
