@@ -46,13 +46,25 @@ export const useStore = create<AppState>()(
       wishlist: [],
       _hasHydrated: false,
       
-      setUser: (user) => set({ user }),
+      setUser: (user) => {
+        // Validate user object before setting
+        if (user && (!user.id || !user.role)) {
+          console.warn('Invalid user object provided:', user);
+          set({ user: null });
+          return;
+        }
+        set({ user });
+      },
       setToken: (token) => {
         set({ token });
-        if (token && typeof window !== 'undefined') {
-          localStorage.setItem('token', token);
-        } else if (!token && typeof window !== 'undefined') {
-          localStorage.removeItem('token');
+        // Sync with localStorage (Zustand persist handles this, but we ensure consistency)
+        if (typeof window !== 'undefined') {
+          if (token) {
+            localStorage.setItem('token', token);
+          } else {
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+          }
         }
       },
       
@@ -102,17 +114,34 @@ export const useStore = create<AppState>()(
         })),
       
       logout: () => {
-        // Clear localStorage on logout to prevent stale auth state
+        // Clear all auth-related storage completely
         if (typeof window !== 'undefined') {
           localStorage.removeItem('token');
           localStorage.removeItem('refreshToken');
-          localStorage.removeItem('morpankh-store');
+          // Don't clear the entire morpankh-store, just clear auth parts
+          // Cart and wishlist should persist across logout (for guest users)
+          const storeData = localStorage.getItem('morpankh-store');
+          if (storeData) {
+            try {
+              const parsed = JSON.parse(storeData);
+              parsed.state = {
+                ...parsed.state,
+                user: null,
+                token: null,
+              };
+              localStorage.setItem('morpankh-store', JSON.stringify(parsed));
+            } catch (e) {
+              // If parsing fails, clear everything
+              localStorage.removeItem('morpankh-store');
+            }
+          }
         }
         set({
           user: null,
           token: null,
-          cart: [],
-          wishlist: [],
+          // Keep cart and wishlist on logout (user might want to checkout as guest)
+          // cart: [],
+          // wishlist: [],
         });
       },
     }),
@@ -127,6 +156,39 @@ export const useStore = create<AppState>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
           state._hasHydrated = true;
+          
+          // Validate user state after hydration
+          // If token exists but user is missing, clear token (security)
+          // If user exists but no token, clear user (security)
+          if (typeof window !== 'undefined') {
+            const tokenFromStorage = localStorage.getItem('token');
+            
+            // If we have a token in localStorage but no user in store, token might be stale
+            // Clear it to prevent security issues
+            if (tokenFromStorage && !state.user) {
+              console.warn('Token found but no user - clearing stale token');
+              localStorage.removeItem('token');
+              localStorage.removeItem('refreshToken');
+              state.token = null;
+            }
+            
+            // If we have a user but no token, clear user (inconsistent state)
+            if (state.user && !tokenFromStorage) {
+              console.warn('User found but no token - clearing user');
+              state.user = null;
+            }
+            
+            // Validate user object structure
+            if (state.user && (!state.user.id || !state.user.role)) {
+              console.warn('Invalid user structure after hydration - clearing user');
+              state.user = null;
+              state.token = null;
+              if (tokenFromStorage) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('refreshToken');
+              }
+            }
+          }
         }
       },
     }

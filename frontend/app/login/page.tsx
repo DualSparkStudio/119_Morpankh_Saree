@@ -78,13 +78,13 @@ function LoginForm() {
         password,
       });
 
-      // Store tokens and user
+      // Store tokens and user through store (store handles localStorage sync)
       setToken(response.token);
+      setUser(response.user);
+      // Store refresh token separately (not in Zustand store)
       if (typeof window !== 'undefined') {
-        localStorage.setItem('token', response.token);
         localStorage.setItem('refreshToken', response.refreshToken);
       }
-      setUser(response.user);
 
       // Redirect
       router.push(redirect);

@@ -8,16 +8,35 @@ import { useStore } from '@/lib/store';
 
 export default function OrdersPage() {
   const router = useRouter();
-  const { user, token } = useStore();
+  const { user, token, _hasHydrated } = useStore();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!token || !user) {
-      router.push('/login?redirect=/orders');
-    } else {
-      setLoading(false);
+    // Wait for store to hydrate before checking auth
+    if (!_hasHydrated) {
+      return;
     }
-  }, [token, user, router]);
+
+    // Check if user is authenticated (user should always have token if valid)
+    if (!user || !token) {
+      router.push('/login?redirect=/orders');
+      return;
+    }
+
+    setLoading(false);
+  }, [token, user, router, _hasHydrated]);
+
+  // Show loading while store hydrates
+  if (!_hasHydrated) {
+    return (
+      <div className="min-h-screen bg-soft-cream py-16 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-deep-indigo mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

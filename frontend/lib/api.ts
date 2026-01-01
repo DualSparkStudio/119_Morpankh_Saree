@@ -35,15 +35,31 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Only redirect to login if not on checkout page (allow guest checkout)
-      if (typeof window !== 'undefined' && !window.location.pathname.includes('/checkout')) {
+      // Clear invalid token and user state
+      if (typeof window !== 'undefined') {
         const token = localStorage.getItem('token');
         // Only redirect if there was a token (meaning user was logged in but token expired)
         // Don't redirect if no token (guest user)
         if (token) {
+          // Clear all auth-related storage
           localStorage.removeItem('token');
           localStorage.removeItem('refreshToken');
-          window.location.href = '/login';
+          
+          // Clear Zustand store auth state
+          // Import store dynamically to avoid circular dependency
+          import('./store').then(({ useStore }) => {
+            const store = useStore.getState();
+            if (store.user) {
+              store.setUser(null);
+              store.setToken(null);
+            }
+          });
+          
+          // Only redirect to login if not on checkout or cart page (allow guest checkout)
+          const currentPath = window.location.pathname;
+          if (!currentPath.includes('/checkout') && !currentPath.includes('/cart')) {
+            window.location.href = '/login';
+          }
         }
       }
     }

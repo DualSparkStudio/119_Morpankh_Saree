@@ -19,18 +19,23 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { user, logout } = useStore();
+  const { user, logout, _hasHydrated } = useStore();
 
   useEffect(() => {
+    // Wait for store to hydrate before checking auth
+    if (!_hasHydrated) {
+      return;
+    }
+
     if (!user) {
       router.push('/login?redirect=/admin');
     } else if (user.role !== 'ADMIN' && user.role !== 'STAFF') {
       router.push('/');
     }
-  }, [user, router]);
+  }, [user, router, _hasHydrated]);
 
-  // Show loading state while checking auth
-  if (!user) {
+  // Show loading state while store hydrates or checking auth
+  if (!_hasHydrated || !user) {
     return (
       <div className="min-h-screen bg-[#fffef9] flex items-center justify-center">
         <div className="text-center">

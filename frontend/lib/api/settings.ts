@@ -23,34 +23,18 @@ export const settingsApi = {
 
   // Get all settings (admin only)
   getAll: async (): Promise<Setting[]> => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${API_URL}/settings`, {
-      headers: {
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-    });
-    if (!response.ok) {
-      throw new Error('Failed to fetch settings');
-    }
-    return response.json();
+    // Use the centralized API client which handles auth tokens properly
+    const { api } = await import('../api');
+    const { data } = await api.get('/settings');
+    return data;
   },
 
   // Update a setting (admin only)
   update: async (key: string, value: number | string | boolean): Promise<Setting> => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${API_URL}/settings/${key}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
-      body: JSON.stringify({ value }),
-    });
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to update setting');
-    }
-    return response.json();
+    // Use the centralized API client which handles auth tokens properly
+    const { api } = await import('../api');
+    const { data } = await api.put(`/settings/${key}`, { value });
+    return data;
   },
 };
 

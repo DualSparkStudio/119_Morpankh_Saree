@@ -39,10 +39,10 @@ interface GuestAddress {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, user, clearCart } = useStore();
+  const { cart, user, clearCart, _hasHydrated } = useStore();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string>('');
-  const [isGuestCheckout, setIsGuestCheckout] = useState(!user);
+  const [userWantsGuestCheckout, setUserWantsGuestCheckout] = useState(false); // Only for logged-in users
   const [guestAddress, setGuestAddress] = useState<GuestAddress>({
     name: '',
     phone: '',
@@ -59,23 +59,46 @@ export default function CheckoutPage() {
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = subtotal;
 
+  // Derived state: guest checkout is true if no user OR if logged-in user chose guest mode
+  // This is computed from current state, not stored in useState to avoid sync issues
+  const isGuestCheckout = !user || userWantsGuestCheckout;
+
   useEffect(() => {
+    // Wait for store to hydrate before making decisions
+    // This prevents showing incorrect UI state before we know if user is logged in
+    if (!_hasHydrated) {
+      return;
+    }
+
     if (cart.length === 0) {
       router.push('/cart');
       return;
     }
 
-    // If no user is logged in, always use guest checkout (no toggle option)
+    // Reset guest checkout preference when user logs out
+    // This ensures clean state when switching from logged-in to guest
     if (!user) {
-      setIsGuestCheckout(true);
+      setUserWantsGuestCheckout(false);
     }
 
-    // Load addresses only if user is logged in and not in guest mode
+    // Load addresses only if user is logged in and NOT using guest checkout
     if (user && !isGuestCheckout) {
       loadAddresses();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, cart.length, isGuestCheckout]);
+  }, [user, cart.length, isGuestCheckout, _hasHydrated]);
+
+  // Show loading while store hydrates
+  if (!_hasHydrated) {
+    return (
+      <div className="min-h-screen bg-soft-cream py-8 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-deep-indigo mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading checkout...</p>
+        </div>
+      </div>
+    );
+  }
 
   const loadAddresses = async () => {
     try {
@@ -285,14 +308,14 @@ export default function CheckoutPage() {
                 <div className="bg-white rounded-lg p-6 shadow-md">
                   <h2 className="text-2xl font-heading text-deep-indigo mb-6">Billing Details</h2>
                   
-                  {/* Guest/User Toggle - Only show if user is logged in */}
-                  {user && (
+                  {/* Guest/User Toggle - Only show if user is logged in AND store has hydrated */}
+                  {user && _hasHydrated && (
                     <div className="mb-6">
                       <button
-                        onClick={() => setIsGuestCheckout(!isGuestCheckout)}
+                        onClick={() => setUserWantsGuestCheckout(!userWantsGuestCheckout)}
                         className="text-sm text-deep-indigo hover:underline"
                       >
-                        {isGuestCheckout ? 'Use saved address' : 'Checkout as guest'}
+                        {userWantsGuestCheckout ? 'Use saved address' : 'Checkout as guest'}
                       </button>
                     </div>
                   )}
@@ -300,8 +323,8 @@ export default function CheckoutPage() {
                   <div className="space-y-4">
                     {isGuestCheckout ? (
                       <div className="space-y-4">
-                        {/* Guest Checkout Form - Only show heading if user is logged in (otherwise it's obvious) */}
-                        {user && (
+                        {/* Guest Checkout Form - Only show heading if user is logged in (otherwise it's obvious they're a guest) */}
+                        {user && _hasHydrated && (
                           <h3 className="text-xl font-heading text-deep-indigo mb-4">Contact Information</h3>
                         )}
                     <div>

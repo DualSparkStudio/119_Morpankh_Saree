@@ -8,7 +8,7 @@ import { usersApi } from '@/lib/api/users';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, setUser } = useStore();
+  const { user, setUser, _hasHydrated } = useStore();
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const [profile, setProfile] = useState({
@@ -19,6 +19,11 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
+    // Wait for store to hydrate before checking auth
+    if (!_hasHydrated) {
+      return;
+    }
+
     // Redirect to login if not authenticated
     if (!user) {
       router.push('/login?redirect=/profile');
@@ -49,7 +54,19 @@ export default function ProfilePage() {
     };
 
     fetchProfile();
-  }, [user, router]);
+  }, [user, router, _hasHydrated]);
+
+  // Show loading while store hydrates
+  if (!_hasHydrated) {
+    return (
+      <div className="min-h-screen bg-soft-cream py-8 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-deep-indigo mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

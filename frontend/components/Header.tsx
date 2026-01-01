@@ -8,7 +8,7 @@ import { useStore } from '@/lib/store';
 import { useState, useRef, useEffect } from 'react';
 
 export default function Header() {
-  const { cart, wishlist, user, logout } = useStore();
+  const { cart, wishlist, user, logout, _hasHydrated } = useStore();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);
@@ -136,7 +136,7 @@ export default function Header() {
                 </span>
               )}
             </Link>
-            {user ? (
+            {user && _hasHydrated ? (
               <div className="relative" ref={userDropdownRef}>
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
