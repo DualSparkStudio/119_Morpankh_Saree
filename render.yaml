@@ -6,7 +6,7 @@ services:
     region: singapore  # Closest to India (Mumbai not available)
     plan: free  # Free tier - spins down after 15 min inactivity
     buildCommand: cd frontend && npm install --include=dev && npm run build && test -d .next && echo "✅ Next.js build verified" && cd ../backend && npm install --include=dev && npm run build && npx prisma generate
-    startCommand: cd backend && (npx prisma migrate deploy 2>/dev/null || npx prisma db push 2>/dev/null) && cd ../frontend && node server.js
+    startCommand: cd backend && (npx prisma migrate deploy --skip-generate || npx prisma db push --skip-generate --accept-data-loss) && cd ../frontend && node server.js
     rootDir: .
     envVars:
       - key: NODE_ENV
