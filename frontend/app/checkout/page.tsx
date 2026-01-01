@@ -229,9 +229,9 @@ export default function CheckoutPage() {
         throw new Error(orderError?.response?.data?.message || 'Failed to create order. Please try again.');
       }
 
-      // Create Razorpay order
+      // Create Razorpay order (use order.total from backend, which is the source of truth)
       const orderResponse = await paymentApi.createRazorpayOrder({
-        amount: Math.round(total),
+        amount: Math.round(order.total), // Use backend-calculated total in rupees (backend will convert to paise)
         currency: 'INR',
         orderId: order.id,
       });
