@@ -68,6 +68,8 @@ export const productsApi = {
     minPrice?: number;
     maxPrice?: number;
     search?: string;
+    premium?: boolean;
+    trending?: boolean;
     sort?: string;
     order?: 'asc' | 'desc';
   }): Promise<ProductsResponse> => {

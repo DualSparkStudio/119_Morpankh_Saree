@@ -15,12 +15,14 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
       color,
       occasion,
       search,
+      premium,
+      trending,
       sort = 'createdAt',
       order = 'desc',
     } = req.query;
 
-    // Create cache key
-    const cacheKey = `products:${JSON.stringify({ page, limit, category, minPrice, maxPrice, search, sort, order })}`;
+    // Create cache key (include all filter params)
+    const cacheKey = `products:${JSON.stringify({ page, limit, category, minPrice, maxPrice, premium, trending, search, sort, order })}`;
 
     // Try to get from cache (only for non-search queries to keep cache simple)
     if (!search) {
@@ -48,6 +50,12 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
         { name: { contains: search as string, mode: 'insensitive' } },
         { description: { contains: search as string, mode: 'insensitive' } },
       ];
+    }
+    if (premium === 'true' || premium === true) {
+      where.showInPremium = true;
+    }
+    if (trending === 'true' || trending === true) {
+      where.showInTrending = true;
     }
 
     const [products, total] = await Promise.all([

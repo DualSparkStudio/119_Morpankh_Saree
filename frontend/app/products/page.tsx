@@ -16,6 +16,8 @@ function ProductsPageContent() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [highlight, setHighlight] = useState('all');
   const [categories, setCategories] = useState<Category[]>([]);
+  const [filterPremium, setFilterPremium] = useState(false);
+  const [filterTrending, setFilterTrending] = useState(false);
 
   const highlights = ['All', 'Best Seller', 'New Arrivals', 'Sale'];
 
@@ -32,7 +34,7 @@ function ProductsPageContent() {
     }
   };
 
-  // Initialize category filter from URL query parameter
+  // Initialize filters from URL query parameters
   useEffect(() => {
     const categoryParam = searchParams?.get('category');
     if (categoryParam) {
@@ -40,6 +42,21 @@ function ProductsPageContent() {
       if (category) {
         setSelectedCategories([category.name]);
       }
+    }
+    
+    // Check for premium and trending filters
+    const premiumParam = searchParams?.get('premium');
+    if (premiumParam === 'true') {
+      setFilterPremium(true);
+      setFilterTrending(false);
+      setHighlight('all');
+    }
+    
+    const trendingParam = searchParams?.get('trending');
+    if (trendingParam === 'true') {
+      setFilterTrending(true);
+      setFilterPremium(false);
+      setHighlight('all');
     }
   }, [searchParams, categories]);
 
@@ -56,6 +73,8 @@ function ProductsPageContent() {
         category: categoryParam,
         minPrice: priceRange.min > 0 ? priceRange.min : undefined,
         maxPrice: priceRange.max < 50000 ? priceRange.max : undefined,
+        premium: filterPremium ? true : undefined,
+        trending: filterTrending ? true : undefined,
         limit: 20,
         sort: highlight === 'new-arrivals' ? 'createdAt' : highlight === 'best-seller' ? 'basePrice' : 'createdAt',
         order: highlight === 'new-arrivals' ? 'desc' : 'desc',
@@ -77,7 +96,7 @@ function ProductsPageContent() {
 
     return () => clearTimeout(timeoutId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCategories, priceRange, highlight, categories]);
+  }, [selectedCategories, priceRange, highlight, categories, filterPremium, filterTrending]);
 
   const getImageUrl = (image: string | undefined, product?: any, index: number = 0): string => {
     if (!image || image.trim() === '') {
@@ -202,6 +221,51 @@ function ProductsPageContent() {
                 </div>
               </div>
 
+              {/* Premium/Trending Active Filters */}
+              {(filterPremium || filterTrending) && (
+                <div className="mb-8">
+                  <h3 className="font-heading text-lg font-semibold text-deep-indigo mb-4">
+                    Active Filters
+                  </h3>
+                  <div className="space-y-2">
+                    {filterPremium && (
+                      <div className="flex items-center justify-between bg-deep-indigo text-white px-3 py-2 rounded">
+                        <span className="text-sm font-medium">Premium Patterns</span>
+                        <button
+                          onClick={() => {
+                            setFilterPremium(false);
+                            const params = new URLSearchParams(window.location.search);
+                            params.delete('premium');
+                            window.history.replaceState({}, '', `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`);
+                          }}
+                          className="text-white hover:text-red-200 text-lg leading-none"
+                          aria-label="Remove premium filter"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                    {filterTrending && (
+                      <div className="flex items-center justify-between bg-deep-indigo text-white px-3 py-2 rounded">
+                        <span className="text-sm font-medium">Trending Patterns</span>
+                        <button
+                          onClick={() => {
+                            setFilterTrending(false);
+                            const params = new URLSearchParams(window.location.search);
+                            params.delete('trending');
+                            window.history.replaceState({}, '', `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`);
+                          }}
+                          className="text-white hover:text-red-200 text-lg leading-none"
+                          aria-label="Remove trending filter"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Highlight Section */}
               <div>
                 <h3 className="font-heading text-lg font-semibold text-deep-indigo mb-4">
@@ -211,7 +275,18 @@ function ProductsPageContent() {
                   {highlights.map((item) => (
                     <button
                       key={item}
-                      onClick={() => setHighlight(item.toLowerCase().replace(' ', '-'))}
+                      onClick={() => {
+                        setHighlight(item.toLowerCase().replace(' ', '-'));
+                        // Clear premium/trending filters when selecting highlight
+                        if (filterPremium || filterTrending) {
+                          setFilterPremium(false);
+                          setFilterTrending(false);
+                          const params = new URLSearchParams(window.location.search);
+                          params.delete('premium');
+                          params.delete('trending');
+                          window.history.replaceState({}, '', `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`);
+                        }
+                      }}
                       className={`block w-full text-left px-3 py-2 rounded transition-colors ${
                         highlight === item.toLowerCase().replace(' ', '-')
                           ? 'bg-royal-blue text-white'
@@ -228,6 +303,20 @@ function ProductsPageContent() {
 
           {/* Right Side - Product Grid */}
           <div className="flex-1">
+            {/* Page Title with Active Filter Indicator */}
+            <div className="mb-6">
+              <h1 className="text-3xl md:text-4xl font-heading text-deep-indigo mb-2">
+                {filterPremium ? 'Premium Patterns' : filterTrending ? 'Trending Patterns' : 'All Products'}
+              </h1>
+              {(filterPremium || filterTrending) && (
+                <p className="text-gray-600">
+                  {filterPremium 
+                    ? 'Discover our exquisite premium collection' 
+                    : 'Explore what\'s trending right now'}
+                </p>
+              )}
+            </div>
+            
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {loading ? (
                 <div className="col-span-full text-center py-12">

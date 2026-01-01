@@ -1,4 +1,7 @@
+'use client';
+
 import { Suspense } from 'react';
+import Link from 'next/link';
 import HeroCarousel from '@/components/HomePage/HeroCarousel';
 import CategorySection from '@/components/HomePage/CategorySection';
 import PremiumPatterns from '@/components/HomePage/PremiumPatterns';
@@ -33,6 +36,19 @@ export default function Home() {
       <Suspense fallback={<SectionSkeleton />}>
         <TrendingPatterns />
       </Suspense>
+      
+      {/* General See More Button */}
+      <section className="py-16 bg-gradient-to-b from-soft-cream to-white">
+        <div className="container mx-auto px-4 text-center">
+          <Link
+            href="/products"
+            className="inline-flex items-center gap-3 bg-deep-indigo hover:bg-navy-blue text-white px-8 py-4 rounded-full font-semibold text-lg transition-all shadow-xl hover:shadow-2xl hover:scale-105"
+          >
+            <span>Browse All Products</span>
+            <span className="text-xl">→</span>
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

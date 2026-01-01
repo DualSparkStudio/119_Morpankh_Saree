@@ -98,7 +98,7 @@ const TrendingPatterns = () => {
             <p className="text-gray-600 text-lg font-light">What's hot right now</p>
           </div>
           <Link
-            href="/products"
+            href="/products?trending=true"
             className="inline-flex items-center gap-2 bg-deep-indigo hover:bg-navy-blue text-white px-6 py-3 rounded-full font-medium transition-all shadow-lg hover:shadow-xl hover:scale-105"
           >
             <span>See more</span>
