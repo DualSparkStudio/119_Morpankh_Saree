@@ -201,8 +201,11 @@ model StockLog {
 
 model Order {
   id              String        @id @default(cuid())
-  userId          String
-  user            User          @relation(fields: [userId], references: [id])
+  userId          String?       // Optional for guest orders
+  user            User?         @relation(fields: [userId], references: [id])
+  guestEmail      String?       // Guest customer email
+  guestPhone      String?       // Guest customer phone
+  guestName       String?       // Guest customer name
   orderNumber     String        @unique
   status          OrderStatus   @default(PENDING)
   items           OrderItem[]

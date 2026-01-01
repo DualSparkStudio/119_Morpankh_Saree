@@ -59,3 +59,34 @@ export const requireStaff = (
   next();
 };
 
+// Optional authentication - sets userId if token is present, but doesn't require it
+export const optionalAuthenticate = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+
+    if (token) {
+      const jwtSecret = process.env.JWT_SECRET;
+      if (!jwtSecret) {
+        throw new Error('JWT_SECRET not configured');
+      }
+
+      try {
+        const decoded = jwt.verify(token, jwtSecret) as { userId: string; role: string };
+        req.userId = decoded.userId;
+        req.userRole = decoded.role;
+      } catch (error) {
+        // Invalid token, but we continue as guest
+        // Don't set userId or userRole
+      }
+    }
+    next();
+  } catch (error) {
+    // Continue as guest on any error
+    next();
+  }
+};
+

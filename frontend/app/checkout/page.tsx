@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import { usersApi } from '@/lib/api/users';
 import { paymentApi } from '@/lib/api/payment';
+import { ordersApi } from '@/lib/api/orders';
 import Script from 'next/script';
 
 declare global {
@@ -25,11 +26,33 @@ interface Address {
   isDefault: boolean;
 }
 
+interface GuestAddress {
+  name: string;
+  phone: string;
+  email: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city: string;
+  state: string;
+  pincode: string;
+}
+
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, user, clearCart } = useStore();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string>('');
+  const [isGuestCheckout, setIsGuestCheckout] = useState(!user);
+  const [guestAddress, setGuestAddress] = useState<GuestAddress>({
+    name: '',
+    phone: '',
+    email: '',
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    state: '',
+    pincode: '',
+  });
   const [loading, setLoading] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
 
@@ -37,18 +60,16 @@ export default function CheckoutPage() {
   const total = subtotal;
 
   useEffect(() => {
-    if (!user) {
-      router.push('/login?redirect=/checkout');
-      return;
-    }
-
     if (cart.length === 0) {
       router.push('/cart');
       return;
     }
 
-    loadAddresses();
-  }, [user, cart]);
+    // Load addresses only if user is logged in
+    if (user && !isGuestCheckout) {
+      loadAddresses();
+    }
+  }, [user, cart, isGuestCheckout]);
 
   const loadAddresses = async () => {
     try {
@@ -65,28 +86,111 @@ export default function CheckoutPage() {
     }
   };
 
-  const handlePayment = async () => {
-    if (!selectedAddress) {
-      alert('Please select a shipping address');
-      return;
+  const validateGuestForm = (): boolean => {
+    if (!guestAddress.name || !guestAddress.email || !guestAddress.phone) {
+      alert('Please fill in all required fields (Name, Email, Phone)');
+      return false;
     }
+    if (!guestAddress.addressLine1 || !guestAddress.city || !guestAddress.state || !guestAddress.pincode) {
+      alert('Please fill in all address fields');
+      return false;
+    }
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(guestAddress.email)) {
+      alert('Please enter a valid email address');
+      return false;
+    }
+    // Basic phone validation (10 digits)
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(guestAddress.phone)) {
+      alert('Please enter a valid 10-digit phone number');
+      return false;
+    }
+    return true;
+  };
 
+  const handlePayment = async () => {
     if (!razorpayLoaded) {
       alert('Payment gateway is loading, please wait...');
       return;
     }
 
+    // Validate guest form if guest checkout
+    if (isGuestCheckout) {
+      if (!validateGuestForm()) {
+        return;
+      }
+    } else {
+      if (!selectedAddress) {
+        alert('Please select a shipping address');
+        return;
+      }
+    }
+
     try {
       setLoading(true);
 
-      // Create order on backend first
-      const selectedAddr = addresses.find(a => a.id === selectedAddress);
-      if (!selectedAddr) return;
+      // Prepare shipping address
+      let shippingAddr: any;
+      if (isGuestCheckout) {
+        shippingAddr = {
+          name: guestAddress.name,
+          phone: guestAddress.phone,
+          addressLine1: guestAddress.addressLine1,
+          addressLine2: guestAddress.addressLine2 || '',
+          city: guestAddress.city,
+          state: guestAddress.state,
+          pincode: guestAddress.pincode,
+          country: 'India',
+        };
+      } else {
+        const selectedAddr = addresses.find(a => a.id === selectedAddress);
+        if (!selectedAddr) {
+          setLoading(false);
+          return;
+        }
+        shippingAddr = {
+          name: selectedAddr.name,
+          phone: selectedAddr.phone,
+          addressLine1: selectedAddr.addressLine1,
+          addressLine2: selectedAddr.addressLine2 || '',
+          city: selectedAddr.city,
+          state: selectedAddr.state,
+          pincode: selectedAddr.pincode,
+          country: 'India',
+        };
+      }
+
+      // Prepare order items
+      const orderItems = cart.map((item) => ({
+        productId: item.productId,
+        variantId: item.variantId || undefined,
+        quantity: item.quantity,
+        price: item.price,
+      }));
+
+      // Create order on backend
+      const orderData: any = {
+        items: orderItems,
+        shippingAddress: shippingAddr,
+        billingAddress: shippingAddr, // Using same address for billing
+      };
+
+      // Add guest information if guest checkout
+      if (isGuestCheckout) {
+        orderData.guestName = guestAddress.name;
+        orderData.guestEmail = guestAddress.email;
+        orderData.guestPhone = guestAddress.phone;
+      }
+
+      const order = await ordersApi.createOrder(orderData);
 
       // Create Razorpay order
       const orderResponse = await paymentApi.createRazorpayOrder({
         amount: Math.round(total),
         currency: 'INR',
+        orderId: order.id,
       });
 
       const options = {
@@ -114,9 +218,9 @@ export default function CheckoutPage() {
           }
         },
         prefill: {
-          name: user?.name || '',
-          email: user?.email || '',
-          contact: user?.phone || '',
+          name: isGuestCheckout ? guestAddress.name : (user?.name || ''),
+          email: isGuestCheckout ? guestAddress.email : (user?.email || ''),
+          contact: isGuestCheckout ? guestAddress.phone : (user?.phone || ''),
         },
         theme: {
           color: '#312e81',
@@ -135,14 +239,14 @@ export default function CheckoutPage() {
       });
       razorpay.open();
       setLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Payment error:', error);
-      alert('Error initiating payment. Please try again.');
+      alert(error?.response?.data?.message || 'Error initiating payment. Please try again.');
       setLoading(false);
     }
   };
 
-  if (!user || cart.length === 0) {
+  if (cart.length === 0) {
     return null;
   }
 
@@ -160,50 +264,171 @@ export default function CheckoutPage() {
             {/* Left - Billing Form */}
             <div className="bg-white rounded-lg p-6 shadow-md">
               <h2 className="text-2xl font-heading text-deep-indigo mb-6">Billing Details</h2>
-              <div className="space-y-4">
-                {/* Shipping Address */}
-                <div>
-                  <h3 className="text-xl font-heading text-deep-indigo mb-4">Shipping Address</h3>
-                <div className="space-y-4">
-                  {addresses.map((address) => (
-                    <label
-                      key={address.id}
-                      className={`block p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                        selectedAddress === address.id
-                          ? 'border-deep-indigo bg-deep-indigo/5'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="address"
-                        value={address.id}
-                        checked={selectedAddress === address.id}
-                        onChange={(e) => setSelectedAddress(e.target.value)}
-                        className="sr-only"
-                      />
-                      <div>
-                        <div className="font-semibold text-gray-800 mb-1">
-                          {address.name}
-                        </div>
-                        <div className="text-gray-600 text-sm">
-                          {address.addressLine1}
-                          {address.addressLine2 && `, ${address.addressLine2}`}
-                          <br />
-                          {address.city}, {address.state} - {address.pincode}
-                          <br />
-                          Phone: {address.phone}
-                        </div>
-                      </div>
-                    </label>
-                  ))}
+              
+              {/* Guest/User Toggle */}
+              {user && (
+                <div className="mb-6">
                   <button
-                    onClick={() => router.push('/profile?newAddress=true')}
-                    className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-deep-indigo hover:border-deep-indigo hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsGuestCheckout(!isGuestCheckout)}
+                    className="text-sm text-deep-indigo hover:underline"
                   >
-                    + Add New Address
+                    {isGuestCheckout ? 'Use saved address' : 'Checkout as guest'}
                   </button>
                 </div>
+              )}
+
+              <div className="space-y-4">
+                {isGuestCheckout ? (
+                  /* Guest Checkout Form */
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-heading text-deep-indigo mb-4">Contact Information</h3>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Full Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={guestAddress.name}
+                        onChange={(e) => setGuestAddress({ ...guestAddress, name: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-deep-indigo focus:border-transparent"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Email <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={guestAddress.email}
+                        onChange={(e) => setGuestAddress({ ...guestAddress, email: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-deep-indigo focus:border-transparent"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Phone <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        value={guestAddress.phone}
+                        onChange={(e) => setGuestAddress({ ...guestAddress, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-deep-indigo focus:border-transparent"
+                        maxLength={10}
+                        required
+                      />
+                    </div>
+                    <h3 className="text-xl font-heading text-deep-indigo mb-4 mt-6">Shipping Address</h3>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Address Line 1 <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={guestAddress.addressLine1}
+                        onChange={(e) => setGuestAddress({ ...guestAddress, addressLine1: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-deep-indigo focus:border-transparent"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Address Line 2 (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={guestAddress.addressLine2}
+                        onChange={(e) => setGuestAddress({ ...guestAddress, addressLine2: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-deep-indigo focus:border-transparent"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          City <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={guestAddress.city}
+                          onChange={(e) => setGuestAddress({ ...guestAddress, city: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-deep-indigo focus:border-transparent"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          State <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={guestAddress.state}
+                          onChange={(e) => setGuestAddress({ ...guestAddress, state: e.target.value })}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-deep-indigo focus:border-transparent"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Pincode <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={guestAddress.pincode}
+                        onChange={(e) => setGuestAddress({ ...guestAddress, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-deep-indigo focus:border-transparent"
+                        maxLength={6}
+                        required
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  /* Saved Addresses for Logged-in Users */
+                  <div>
+                    <h3 className="text-xl font-heading text-deep-indigo mb-4">Shipping Address</h3>
+                    <div className="space-y-4">
+                      {addresses.map((address) => (
+                        <label
+                          key={address.id}
+                          className={`block p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                            selectedAddress === address.id
+                              ? 'border-deep-indigo bg-deep-indigo/5'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="address"
+                            value={address.id}
+                            checked={selectedAddress === address.id}
+                            onChange={(e) => setSelectedAddress(e.target.value)}
+                            className="sr-only"
+                          />
+                          <div>
+                            <div className="font-semibold text-gray-800 mb-1">
+                              {address.name}
+                            </div>
+                            <div className="text-gray-600 text-sm">
+                              {address.addressLine1}
+                              {address.addressLine2 && `, ${address.addressLine2}`}
+                              <br />
+                              {address.city}, {address.state} - {address.pincode}
+                              <br />
+                              Phone: {address.phone}
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                      <button
+                        onClick={() => router.push('/profile?newAddress=true')}
+                        className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-deep-indigo hover:border-deep-indigo hover:bg-gray-50 transition-colors"
+                      >
+                        + Add New Address
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Payment Method */}
@@ -250,10 +475,10 @@ export default function CheckoutPage() {
 
                 <button
                   onClick={handlePayment}
-                  disabled={loading || !selectedAddress}
+                  disabled={loading || (!isGuestCheckout && !selectedAddress)}
                   className="w-full bg-royal-blue hover:bg-deep-indigo text-white px-6 py-4 rounded-lg font-semibold text-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Place Order
+                  {loading ? 'Processing...' : 'Place Order'}
                 </button>
 
                 <p className="text-xs text-gray-500 text-center mt-4">

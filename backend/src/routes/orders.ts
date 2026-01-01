@@ -1,12 +1,14 @@
 import { Router } from 'express';
 import { createOrder, getOrders, getOrder, updateOrderStatus } from '../controllers/orders';
-import { authenticate } from '../middleware/auth';
+import { authenticate, optionalAuthenticate } from '../middleware/auth';
 
 const router = Router();
 
-router.use(authenticate);
+// Guest checkout - optional authentication for order creation
+router.post('/', optionalAuthenticate, createOrder);
 
-router.post('/', createOrder);
+// Authenticated routes - require login
+router.use(authenticate);
 router.get('/', getOrders);
 router.get('/:id', getOrder);
 router.patch('/:id/status', updateOrderStatus);

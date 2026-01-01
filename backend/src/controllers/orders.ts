@@ -5,11 +5,89 @@ import { AppError } from '../middleware/errorHandler';
 
 export const createOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const userId = req.userId!;
-    const { items, shippingAddress, billingAddress, couponCode } = req.body;
+    const userId = req.userId; // Optional for guest orders
+    const { 
+      items, 
+      shippingAddress, 
+      billingAddress, 
+      couponCode,
+      guestEmail,
+      guestPhone,
+      guestName 
+    } = req.body;
 
-    // TODO: Implement order creation logic
-    res.json({ message: 'Order creation - to be implemented' });
+    // Validate required fields
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return next(new AppError('Order items are required', 400));
+    }
+
+    if (!shippingAddress) {
+      return next(new AppError('Shipping address is required', 400));
+    }
+
+    // For guest orders, validate guest information
+    if (!userId) {
+      if (!guestEmail || !guestPhone || !guestName) {
+        return next(new AppError('Guest information (name, email, phone) is required', 400));
+      }
+    }
+
+    // Generate unique order number
+    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
+
+    // Calculate totals
+    let subtotal = 0;
+    for (const item of items) {
+      subtotal += (item.price || 0) * (item.quantity || 1);
+    }
+
+    // TODO: Apply coupon discount if provided
+    let discount = 0;
+    // TODO: Calculate tax
+    const tax = 0;
+    // TODO: Calculate shipping
+    const shipping = 0;
+
+    const total = subtotal - discount + tax + shipping;
+
+    // Create order
+    const order = await prisma.order.create({
+      data: {
+        userId: userId || null,
+        guestEmail: userId ? null : guestEmail,
+        guestPhone: userId ? null : guestPhone,
+        guestName: userId ? null : guestName,
+        orderNumber,
+        status: 'PENDING',
+        subtotal,
+        discount,
+        tax,
+        shipping,
+        total,
+        paymentStatus: 'PENDING',
+        shippingAddress,
+        billingAddress: billingAddress || shippingAddress,
+        couponCode: couponCode || null,
+        items: {
+          create: items.map((item: any) => ({
+            productId: item.productId,
+            variantId: item.variantId || null,
+            quantity: item.quantity,
+            price: item.price,
+            total: item.price * item.quantity,
+          })),
+        },
+      },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+
+    res.status(201).json(order);
   } catch (error) {
     next(error);
   }
