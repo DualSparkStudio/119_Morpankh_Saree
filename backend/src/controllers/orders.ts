@@ -25,6 +25,18 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
       return next(new AppError('Shipping address is required', 400));
     }
 
+    // Validate shipping address structure
+    if (typeof shippingAddress !== 'object') {
+      return next(new AppError('Shipping address must be an object', 400));
+    }
+
+    const requiredAddressFields = ['name', 'phone', 'addressLine1', 'city', 'state', 'pincode'];
+    for (const field of requiredAddressFields) {
+      if (!shippingAddress[field]) {
+        return next(new AppError(`Shipping address ${field} is required`, 400));
+      }
+    }
+
     // Validate each item has required fields
     for (const item of items) {
       if (!item.productId) {
@@ -64,7 +76,8 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
     const total = subtotal - discount + tax + shipping;
 
     // Validate products exist and prepare order items
-    const orderItemsData = await Promise.all(
+    // Use Promise.allSettled to handle errors gracefully
+    const orderItemsResults = await Promise.allSettled(
       items.map(async (item: any) => {
         // Validate product exists
         const product = await prisma.product.findUnique({
@@ -82,9 +95,9 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
 
         const orderItem: any = {
           productId: item.productId,
-          quantity: parseInt(item.quantity) || 1,
-          price: parseFloat(item.price) || 0,
-          total: (parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1),
+          quantity: parseInt(String(item.quantity)) || 1,
+          price: parseFloat(String(item.price)) || 0,
+          total: (parseFloat(String(item.price)) || 0) * (parseInt(String(item.quantity)) || 1),
         };
 
         // Only include variantId if provided and valid (check if it exists in database)
@@ -119,6 +132,21 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
         return orderItem;
       })
     );
+
+    // Check for any rejected promises
+    const rejected = orderItemsResults.find(result => result.status === 'rejected');
+    if (rejected && rejected.status === 'rejected') {
+      const error = rejected.reason;
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(error?.message || 'Failed to validate order items', 400);
+    }
+
+    // Extract fulfilled values
+    const orderItemsData = orderItemsResults
+      .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled')
+      .map(result => result.value);
 
     // Create order
     const order = await prisma.order.create({
@@ -155,22 +183,36 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
     res.status(201).json(order);
   } catch (error: any) {
     console.error('Order creation error:', error);
-    // Log more details for debugging
-    if (error.code) {
-      console.error('Error code:', error.code);
-    }
-    if (error.meta) {
-      console.error('Error meta:', error.meta);
-    }
-    if (error.message) {
-      console.error('Error message:', error.message);
-    }
+    console.error('Error details:', {
+      code: error.code,
+      meta: error.meta,
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+    });
+    
     // If it's a known AppError, pass it through
     if (error instanceof AppError) {
       return next(error);
     }
-    // Otherwise, wrap in a generic error
-    next(error);
+    
+    // Handle Prisma errors
+    if (error.code) {
+      if (error.code === 'P2002') {
+        return next(new AppError('Duplicate order entry', 400));
+      }
+      if (error.code === 'P2025') {
+        return next(new AppError('Related record not found', 404));
+      }
+      if (error.code === 'P2003') {
+        return next(new AppError('Invalid foreign key reference', 400));
+      }
+    }
+    
+    // Otherwise, wrap in a generic error with more details
+    const errorMessage = error.message || 'Failed to create order';
+    console.error('Unexpected error during order creation:', errorMessage);
+    next(new AppError(errorMessage, 500));
   }
 };
 
