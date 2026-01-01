@@ -46,10 +46,6 @@ function ProductsPageContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadProducts();
-  }, [selectedCategories, priceRange, highlight]);
-
   const loadProducts = async () => {
     try {
       setLoading(true);
@@ -72,6 +68,16 @@ function ProductsPageContent() {
       setLoading(false);
     }
   };
+
+  // Debounce product loading to avoid too many API calls
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      loadProducts();
+    }, 300); // Wait 300ms after user stops changing filters
+
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategories, priceRange, highlight, categories]);
 
   const getImageUrl = (image: string | undefined, product?: any, index: number = 0): string => {
     if (!image || image.trim() === '') {

@@ -17,21 +17,45 @@ export default function CartPage() {
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const total = subtotal;
 
-  // Always fetch fresh product data to ensure images are up-to-date
+  // Fetch product data only for items that need it (missing slug or image)
   useEffect(() => {
     const fetchProductData = async () => {
-      const itemsToUpdate: any[] = [];
+      // Find items that need data fetching (missing slug or image)
+      const itemsNeedingData = cart.filter(item => !item.productSlug || !item.productImage);
       
-      for (const item of cart) {
-        // Always fetch product data to get latest images and slug
-        // This ensures we have the most current product information
-        try {
-          const product = await productsApi.getById(item.productId);
+      if (itemsNeedingData.length === 0) {
+        // All items have data, use cart directly
+        setCartItemsWithData(cart);
+        setLoadingImages(false);
+        return;
+      }
+
+      setLoadingImages(true);
+      
+      try {
+        // Fetch all product data in parallel for better performance
+        const productPromises = itemsNeedingData.map(item =>
+          productsApi.getById(item.productId).catch(() => null)
+        );
+        
+        const products = await Promise.all(productPromises);
+        
+        // Create a map of productId to product data for quick lookup
+        const productMap = new Map();
+        itemsNeedingData.forEach((item, index) => {
+          if (products[index]) {
+            productMap.set(item.productId, products[index]);
+          }
+        });
+        
+        // Update items with fetched data
+        const itemsToUpdate = cart.map(item => {
+          const product = productMap.get(item.productId);
+          if (!product) return item;
           
-          // Get the first valid image from the product's images array
+          // Get the first valid image
           let productImage = '';
           if (product.images && Array.isArray(product.images) && product.images.length > 0) {
-            // Find first non-empty image
             for (const img of product.images) {
               if (img && typeof img === 'string' && img.trim() !== '') {
                 productImage = img;
@@ -40,30 +64,30 @@ export default function CartPage() {
             }
           }
           
-          // Fallback to existing productImage if no valid image found
+          // Fallback to existing if no image found
           if (!productImage && item.productImage && typeof item.productImage === 'string' && item.productImage.trim() !== '') {
             productImage = item.productImage;
           }
           
-          itemsToUpdate.push({
+          return {
             ...item,
             productSlug: product.slug || item.productSlug || item.productId,
-            productImage: productImage,
+            productImage: productImage || item.productImage || '',
             productName: product.name || item.productName,
-          });
-        } catch (error) {
-          console.error('Error fetching product data for cart item:', item.productId, error);
-          // If fetch fails, use existing item data
-          itemsToUpdate.push(item);
-        }
+          };
+        });
+        
+        setCartItemsWithData(itemsToUpdate);
+      } catch (error) {
+        console.error('Error fetching product data:', error);
+        // On error, use cart data as-is
+        setCartItemsWithData(cart);
+      } finally {
+        setLoadingImages(false);
       }
-      
-      setCartItemsWithData(itemsToUpdate);
-      setLoadingImages(false);
     };
 
     if (cart.length > 0) {
-      setLoadingImages(true);
       fetchProductData();
     } else {
       setCartItemsWithData([]);
