@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { categoriesApi, Category } from '@/lib/api/categories';
 
@@ -14,6 +14,11 @@ const CategorySection = () => {
   useEffect(() => {
     loadCategories();
   }, []);
+
+  // Create a stable reference to category IDs to prevent infinite loops
+  const categoryIds = useMemo(() => {
+    return categories.map(c => c.id).join(',');
+  }, [categories]);
 
   useEffect(() => {
     if (categories.length === 0 || loading) return;
@@ -78,7 +83,7 @@ const CategorySection = () => {
         animationRef.current.cancel();
       }
     };
-  }, [categories, loading]);
+  }, [categoryIds, categories.length, loading]);
 
   const loadCategories = async () => {
     try {

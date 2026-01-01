@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight, Sparkles, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { bannersApi, Banner } from '@/lib/api/banners';
@@ -62,29 +62,54 @@ const HeroCarousel = () => {
   };
 
   const getImageUrl = (image: string): string => {
-    // Use the hero section image as default
-    if (!image) return '/images2/hero sec(main photo).jpg';
+    // Use the hero section image as default (URL encode spaces and special chars)
+    if (!image) {
+      const defaultImage = '/images2/hero sec(main photo).jpg';
+      const pathParts = defaultImage.split('/');
+      const filename = pathParts.pop() || '';
+      const encodedFilename = encodeURIComponent(filename);
+      return [...pathParts, encodedFilename].join('/');
+    }
+    
+    // If image is already a full URL, return as is
     if (image.startsWith('http://') || image.startsWith('https://')) {
       return image;
     }
+    
+    // If image path has spaces or special characters, encode only the filename part
     if (image.startsWith('/')) {
+      // Check if already encoded (contains %)
+      if (!image.includes('%')) {
+        const pathParts = image.split('/');
+        const filename = pathParts.pop() || '';
+        // Only encode if filename contains spaces or special characters
+        if (filename.includes(' ') || filename.includes('(') || filename.includes(')')) {
+          const encodedFilename = encodeURIComponent(filename);
+          image = [...pathParts, encodedFilename].join('/');
+        }
+      }
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
       const baseUrl = apiUrl.replace('/api', '');
       return `${baseUrl}${image}`;
     }
+    
     return image;
   };
 
-  const slides = banners.length > 0 ? banners.map((banner, index) => ({
-    id: banner.id,
-    image: getImageUrl(banner.image),
-    title: banner.title || 'Premium Indian Sarees',
-    subtitle: banner.description || 'Discover elegance in every thread',
-    badge: index === 0 ? 'BUY 2 GET 1 FREE' : index === 1 ? 'NEW ARRIVALS' : index === 2 ? 'EXCLUSIVE' : index === 3 ? 'BESTSELLER' : 'WEDDING SPECIAL',
-    discount: index === 0 ? 'Up to 70% OFF' : index === 1 ? 'Limited Edition' : index === 2 ? 'Premium Quality' : index === 3 ? 'Trending Now' : 'Elegant Collection',
-    link: banner.link || '/products',
-    linkText: banner.linkText || 'Shop Now',
-  })) : [];
+  // Memoize slides to prevent infinite loops in useEffect
+  const slides = useMemo(() => {
+    if (banners.length === 0) return [];
+    return banners.map((banner, index) => ({
+      id: banner.id,
+      image: getImageUrl(banner.image),
+      title: banner.title || 'Premium Indian Sarees',
+      subtitle: banner.description || 'Discover elegance in every thread',
+      badge: index === 0 ? 'BUY 2 GET 1 FREE' : index === 1 ? 'NEW ARRIVALS' : index === 2 ? 'EXCLUSIVE' : index === 3 ? 'BESTSELLER' : 'WEDDING SPECIAL',
+      discount: index === 0 ? 'Up to 70% OFF' : index === 1 ? 'Limited Edition' : index === 2 ? 'Premium Quality' : index === 3 ? 'Trending Now' : 'Elegant Collection',
+      link: banner.link || '/products',
+      linkText: banner.linkText || 'Shop Now',
+    }));
+  }, [banners]);
 
   // Auto-play functionality
   useEffect(() => {
@@ -92,11 +117,18 @@ const HeroCarousel = () => {
       intervalRef.current = setInterval(() => {
         setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
       }, 2500); // Change slide every 2.5 seconds
+    } else {
+      // Clear interval if paused or no slides
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     }
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
   }, [isPaused, slides.length]);
@@ -180,11 +212,20 @@ const HeroCarousel = () => {
                              background: 'none',
                              display: 'block'
                            }}
-                          onError={(e) => {
+                           loading={index === 0 ? 'eager' : 'lazy'}
+                           decoding="async"
+                           onError={(e) => {
                             const target = e.target as HTMLImageElement;
-                            target.src = '/images2/hero sec(main photo).jpg';
-                            target.style.backgroundColor = 'transparent';
-                            target.style.background = 'none';
+                            const fallbackImage = '/images2/hero sec(main photo).jpg';
+                            const pathParts = fallbackImage.split('/');
+                            const filename = pathParts.pop() || '';
+                            const encodedFilename = encodeURIComponent(filename);
+                            const encodedFallback = [...pathParts, encodedFilename].join('/');
+                            if (!target.src.includes(encodedFallback)) {
+                              target.src = encodedFallback;
+                              target.style.backgroundColor = 'transparent';
+                              target.style.background = 'none';
+                            }
                           }}
                         />
                       </div>
