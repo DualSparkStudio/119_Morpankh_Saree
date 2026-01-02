@@ -8,6 +8,7 @@ import { Heart, Eye, ShoppingCart } from 'lucide-react';
 import { productsApi, Product } from '@/lib/api/products';
 import { categoriesApi, Category } from '@/lib/api/categories';
 import { useStore } from '@/lib/store';
+import { getImageUrl } from '@/lib/utils/imageHelper';
 
 function ProductsPageContent() {
   const searchParams = useSearchParams();
@@ -119,62 +120,6 @@ function ProductsPageContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategories, priceRange, highlight, categories, filterPremium, filterTrending]);
 
-  const getImageUrl = (image: string | undefined, product?: any, index: number = 0): string => {
-    if (!image || image.trim() === '') {
-      return '';
-    }
-    
-    // Convert old Google Drive format to thumbnail format for better reliability
-    if (image.includes('drive.google.com/uc?export=view&id=')) {
-      const fileIdMatch = image.match(/id=([a-zA-Z0-9_-]+)/);
-      if (fileIdMatch) {
-        image = `https://drive.google.com/thumbnail?id=${fileIdMatch[1]}&sz=w1920`;
-      }
-    }
-    
-    // If it's already a full URL, return as is (but add cache busting if product was updated)
-    if (image.startsWith('http://') || image.startsWith('https://')) {
-      // Add cache busting for external URLs using product updatedAt timestamp
-      if (product?.updatedAt) {
-        const separator = image.includes('?') ? '&' : '?';
-        return `${image}${separator}v=${new Date(product.updatedAt).getTime()}`;
-      }
-      return image;
-    }
-    
-    // If it starts with /uploads, it's from the backend
-    if (image.startsWith('/uploads')) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-      let url = '';
-      if (apiUrl.startsWith('http')) {
-        // Development: extract base URL
-        const baseUrl = apiUrl.replace('/api', '');
-        url = `${baseUrl}${image}`;
-      } else {
-        // Production: same domain, use image path directly
-        url = image;
-      }
-      // Add cache busting using product updatedAt timestamp
-      if (product?.updatedAt) {
-        const separator = url.includes('?') ? '&' : '?';
-        return `${url}${separator}v=${new Date(product.updatedAt).getTime()}`;
-      }
-      return url;
-    }
-    
-    // Old hardcoded paths like /images/products/... don't exist - return empty
-    if (image.startsWith('/images/products/')) {
-      return '';
-    }
-    
-    // If it starts with /, it might be a frontend public image
-    if (image.startsWith('/')) {
-      return image;
-    }
-    
-    // Otherwise, return as is
-    return image;
-  };
 
   const toggleCategory = (category: string) => {
     setSelectedCategories((prev) =>
@@ -356,12 +301,25 @@ function ProductsPageContent() {
                   <div className="relative aspect-[7/8] bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 overflow-hidden">
                     <Link href={`/products/${product.slug}`} className="block w-full h-full">
                       {(() => {
-                        // Get image from first color if available, otherwise from product images
-                        const firstColorImage = product.colors && product.colors.length > 0 && product.colors[0].images && product.colors[0].images.length > 0
-                          ? product.colors[0].images[0]
-                          : null;
-                        const productImage = firstColorImage || product.images?.[0];
-                        const imageUrl = getImageUrl(productImage, product, products.indexOf(product));
+                        // Get image from any color that has images, otherwise from product images
+                        let productImage: string | undefined = undefined;
+                        
+                        // Find first color with images
+                        if (product.colors && product.colors.length > 0) {
+                          const colorWithImages = product.colors.find(
+                            color => color.images && color.images.length > 0 && color.images[0] && color.images[0].trim() !== ''
+                          );
+                          if (colorWithImages && colorWithImages.images && colorWithImages.images.length > 0) {
+                            productImage = colorWithImages.images[0];
+                          }
+                        }
+                        
+                        // Fallback to product images if no color images found
+                        if (!productImage) {
+                          productImage = product.images?.[0];
+                        }
+                        
+                        const imageUrl = getImageUrl(productImage, products.indexOf(product));
                         return imageUrl ? (
                           <img
                             src={imageUrl}

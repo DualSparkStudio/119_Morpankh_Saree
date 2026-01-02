@@ -6,6 +6,7 @@ import { ArrowLeft, Heart, Share2, ShoppingCart, Star, Check, Truck, Shield, Rot
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { getImageUrl } from '@/lib/utils/imageHelper';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -85,49 +86,6 @@ export default function ProductDetailPage() {
     }
   };
 
-  const getImageUrl = (image: string | undefined, product?: Product): string => {
-    if (!image || image.trim() === '') {
-      return '';
-    }
-    
-    // Convert old Google Drive format to thumbnail format for better reliability
-    if (image.includes('drive.google.com/uc?export=view&id=')) {
-      const fileIdMatch = image.match(/id=([a-zA-Z0-9_-]+)/);
-      if (fileIdMatch) {
-        image = `https://drive.google.com/thumbnail?id=${fileIdMatch[1]}&sz=w1920`;
-      }
-    }
-    
-    if (image.startsWith('http://') || image.startsWith('https://')) {
-      if (product?.updatedAt) {
-        const separator = image.includes('?') ? '&' : '?';
-        return `${image}${separator}v=${new Date(product.updatedAt).getTime()}`;
-      }
-      return image;
-    }
-    
-    if (image.startsWith('/uploads')) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-      let url = '';
-      if (apiUrl.startsWith('http')) {
-        const baseUrl = apiUrl.replace('/api', '');
-        url = `${baseUrl}${image}`;
-      } else {
-        url = image;
-      }
-      if (product?.updatedAt) {
-        const separator = url.includes('?') ? '&' : '?';
-        return `${url}${separator}v=${new Date(product.updatedAt).getTime()}`;
-      }
-      return url;
-    }
-    
-    if (image.startsWith('/')) {
-      return image;
-    }
-    
-    return image;
-  };
 
   // Get available colors
   const getAvailableColors = (): ProductColor[] => {
@@ -272,7 +230,7 @@ export default function ProductDetailPage() {
               <div className="relative aspect-square bg-gray-100">
                 {(() => {
                   const imageUrl = productImages[selectedImage] 
-                    ? getImageUrl(productImages[selectedImage], product)
+                    ? getImageUrl(productImages[selectedImage], selectedImage)
                     : '';
                   return imageUrl ? (
                     <>
@@ -332,7 +290,7 @@ export default function ProductDetailPage() {
               <div className="space-y-3">
                 <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                   {productImages.map((img, index) => {
-                    const imageUrl = getImageUrl(img, product);
+                    const imageUrl = getImageUrl(img, index);
                     return imageUrl ? (
                       <button
                         key={index}
@@ -667,7 +625,20 @@ export default function ProductDetailPage() {
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {relatedProducts.map((relatedProduct) => {
-                const relatedImageUrl = getImageUrl(relatedProduct.images?.[0], relatedProduct);
+                // Get image from any color that has images, otherwise from product images
+                let relatedProductImage: string | undefined = undefined;
+                if (relatedProduct.colors && relatedProduct.colors.length > 0) {
+                  const colorWithImages = relatedProduct.colors.find(
+                    color => color.images && color.images.length > 0 && color.images[0] && color.images[0].trim() !== ''
+                  );
+                  if (colorWithImages && colorWithImages.images && colorWithImages.images.length > 0) {
+                    relatedProductImage = colorWithImages.images[0];
+                  }
+                }
+                if (!relatedProductImage) {
+                  relatedProductImage = relatedProduct.images?.[0];
+                }
+                const relatedImageUrl = getImageUrl(relatedProductImage, 0);
                 const relatedDiscount = relatedProduct.compareAtPrice
                   ? Math.round(((relatedProduct.compareAtPrice - relatedProduct.basePrice) / relatedProduct.compareAtPrice) * 100)
                   : 0;
