@@ -87,7 +87,7 @@ export default function AdminDashboard() {
       value: stats.totalCustomers,
       icon: Users,
       color: 'bg-purple-500',
-      href: '/admin/orders', // Customers can be viewed from orders page
+      href: '/admin/orders',
     },
     {
       title: 'Total Revenue',
@@ -113,13 +113,13 @@ export default function AdminDashboard() {
         {statCards.map((stat, index) => {
           const Icon = stat.icon;
           const CardContent = (
-            <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+            <div className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow cursor-pointer h-full flex flex-col">
               <div className="flex items-center justify-between mb-4">
-                <div className={`${stat.color} p-3 rounded-lg`}>
+                <div className={`${stat.color} p-3 rounded-lg flex-shrink-0`}>
                   <Icon className="w-6 h-6 text-white" />
                 </div>
                 {stat.change !== undefined && stat.change > 0 && (
-                  <div className="flex items-center gap-1 text-green-600">
+                  <div className="flex items-center gap-1 text-green-600 flex-shrink-0">
                     <TrendingUp className="w-4 h-4" />
                     <span className="text-sm font-semibold">
                       +{stat.isRevenue ? `₹${stat.change.toLocaleString()}` : stat.change}
@@ -127,20 +127,22 @@ export default function AdminDashboard() {
                   </div>
                 )}
               </div>
-              <h3 className="text-gray-600 text-sm mb-1">{stat.title}</h3>
-              <p className="text-2xl font-bold text-[#312e81]">{stat.value}</p>
-              {stat.changeLabel && (
-                <p className="text-xs text-gray-500 mt-1">{stat.changeLabel}: {stat.change}</p>
-              )}
+              <div className="flex-grow">
+                <h3 className="text-gray-600 text-sm mb-1">{stat.title}</h3>
+                <p className="text-2xl font-bold text-[#312e81]">{stat.value}</p>
+                {stat.changeLabel && (
+                  <p className="text-xs text-gray-500 mt-1">{stat.changeLabel}: {stat.change}</p>
+                )}
+              </div>
             </div>
           );
 
           return stat.href ? (
-            <Link key={index} href={stat.href}>
+            <Link key={index} href={stat.href} className="h-full">
               {CardContent}
             </Link>
           ) : (
-            <div key={index}>{CardContent}</div>
+            <div key={index} className="h-full">{CardContent}</div>
           );
         })}
       </div>
