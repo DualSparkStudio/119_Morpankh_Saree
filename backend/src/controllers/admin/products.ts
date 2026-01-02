@@ -130,7 +130,9 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
               create: colors.map((c: any, index: number) => ({
                 color: c.color,
                 colorCode: c.colorCode || null,
-                images: c.images || [],
+                images: Array.isArray(c.images) 
+                  ? c.images.filter((img: string) => img && img.trim() !== '')
+                  : [],
                 sku: c.sku || null,
                 barcode: c.barcode || null,
                 isActive: c.isActive !== undefined ? c.isActive : true,
@@ -313,18 +315,31 @@ export const addProductColor = async (req: Request, res: Response, next: NextFun
       return next(new AppError('This color already exists for this product', 400));
     }
 
+    const filteredImages = Array.isArray(images) 
+      ? images.filter((img: string) => img && img.trim() !== '')
+      : [];
+    
+    console.log('Creating product color:', {
+      productId: id,
+      color,
+      images: filteredImages,
+      imagesCount: filteredImages.length,
+    });
+
     const productColor = await prisma.productColor.create({
       data: {
         productId: id,
         color,
         colorCode: colorCode || null,
-        images: images || [],
+        images: filteredImages,
         sku: sku || null,
         barcode: barcode || null,
         isActive: isActive !== undefined ? isActive : true,
         order: order !== undefined ? order : 0,
       },
     });
+    
+    console.log('Product color created:', productColor);
 
     // Invalidate caches
     await cache.del(`product:${id}`);
@@ -343,6 +358,15 @@ export const updateProductColor = async (req: Request, res: Response, next: Next
   try {
     const { id, colorId } = req.params;
     const { color, colorCode, images, sku, barcode, isActive, order } = req.body;
+    
+    // Debug logging
+    console.log('Updating product color:', {
+      productId: id,
+      colorId,
+      images: images,
+      imagesType: typeof images,
+      isArray: Array.isArray(images),
+    });
 
     // Check if color exists and belongs to product
     const existingColor = await prisma.productColor.findUnique({
@@ -372,16 +396,22 @@ export const updateProductColor = async (req: Request, res: Response, next: Next
     const updateData: any = {};
     if (color !== undefined) updateData.color = color;
     if (colorCode !== undefined) updateData.colorCode = colorCode;
-    if (images !== undefined) updateData.images = images;
+    if (images !== undefined) {
+      updateData.images = Array.isArray(images) 
+        ? images.filter((img: string) => img && img.trim() !== '')
+        : [];
+    }
     if (sku !== undefined) updateData.sku = sku;
     if (barcode !== undefined) updateData.barcode = barcode;
     if (isActive !== undefined) updateData.isActive = isActive;
     if (order !== undefined) updateData.order = order;
 
+    console.log('Updating color with data:', updateData);
     const productColor = await prisma.productColor.update({
       where: { id: colorId },
       data: updateData,
     });
+    console.log('Color updated successfully:', productColor);
 
     // Invalidate caches
     await cache.del(`product:${id}`);

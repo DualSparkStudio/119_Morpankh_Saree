@@ -253,11 +253,21 @@ export default function EditProductPage() {
     try {
       const updateData: any = {};
       if (field === 'images') {
-        updateData.images = value;
+        // Ensure images array is properly formatted and filtered
+        const filteredImages = Array.isArray(value) 
+          ? value.filter((img: string) => img && img.trim() !== '')
+          : [];
+        updateData.images = filteredImages;
+        console.log('Updating color images via API:', {
+          colorId: color.id,
+          colorName: color.color,
+          images: filteredImages,
+        });
       } else {
         updateData[field] = value;
       }
-      await adminApi.updateProductColor(id, color.id, updateData);
+      const response = await adminApi.updateProductColor(id, color.id, updateData);
+      console.log('Color update response:', response);
       const updatedColors = [...formData.colors];
       updatedColors[colorIndex] = { ...updatedColors[colorIndex], [field]: value };
       setFormData({ ...formData, colors: updatedColors });
@@ -311,7 +321,8 @@ export default function EditProductPage() {
   const handleColorImageSubmit = (url: string) => {
     if (currentColorIndex !== null && url.trim()) {
       const color = formData.colors[currentColorIndex];
-      const updatedImages = [...color.images, url.trim()];
+      const updatedImages = [...color.images, url.trim()].filter(img => img && img.trim() !== '');
+      console.log('Adding image to color:', color.color, 'Updated images:', updatedImages);
       updateColor(currentColorIndex, 'images', updatedImages);
     }
     setCurrentColorIndex(null);
