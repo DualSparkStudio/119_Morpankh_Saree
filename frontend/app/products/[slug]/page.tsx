@@ -338,7 +338,7 @@ export default function ProductDetailPage() {
                       'navy': '#1E3A8A',
                       'gold': '#D4AF37',
                     };
-                    const colorValue = color.colorCode || colorMap[color.color?.toLowerCase() || ''] || '#6B7280';
+                    const colorValue = colorMap[color.color?.toLowerCase() || ''] || '#6B7280';
                     
                     return (
                       <button
