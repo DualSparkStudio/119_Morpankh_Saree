@@ -8,6 +8,7 @@ import fs from 'fs';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 import { prisma } from './config/database';
+import { runMigrations } from './config/migrate';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -181,20 +182,30 @@ if (isStandalone && process.env.NODE_ENV !== 'production') {
 const isMainModule = typeof require !== 'undefined' && require.main === module;
 
 if (isMainModule) {
-  const server = app.listen(PORT, () => {
-    console.log(`🚀 Backend server running on port ${PORT}`);
-  });
+  // Run migrations automatically on startup
+  runMigrations().then(() => {
+    const server = app.listen(PORT, () => {
+      console.log(`🚀 Backend server running on port ${PORT}`);
+    });
   
-  server.on('error', (error: NodeJS.ErrnoException) => {
-    // Error handler - fires if port is already in use
-    console.error('❌ Failed to start server:', error.message);
-    if (error.code === 'EADDRINUSE') {
-      console.error(`Port ${PORT} is already in use`);
-      console.error('This usually means Render is restarting - wait a moment and try again');
-    }
+    server.on('error', (error: NodeJS.ErrnoException) => {
+      // Error handler - fires if port is already in use
+      console.error('❌ Failed to start server:', error.message);
+      if (error.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use`);
+        console.error('This usually means Render is restarting - wait a moment and try again');
+      }
+      process.exit(1);
+    });
+  }).catch((error) => {
+    console.error('❌ Failed to start server after migrations:', error);
     process.exit(1);
   });
-}
+  }).catch((error) => {
+    console.error('❌ Failed to start server after migrations:', error);
+    process.exit(1);
+  });
+  }
 
 export default app;
 
