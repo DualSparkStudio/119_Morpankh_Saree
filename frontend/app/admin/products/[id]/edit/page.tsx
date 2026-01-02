@@ -584,7 +584,7 @@ export default function EditProductPage() {
 
         {/* Colors */}
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3 mb-4">
             <label className="block text-sm font-medium text-gray-700">Product Colors</label>
             <button
               type="button"
@@ -699,7 +699,7 @@ export default function EditProductPage() {
 
         {/* Tags */}
         <div>
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3 mb-2">
             <label className="block text-sm font-medium text-gray-700">Tags</label>
             <button
               type="button"
