@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { CheckCircle, Package, ShoppingBag, MapPin, CreditCard, Calendar, Loader2 } from 'lucide-react';
 import { ordersApi } from '@/lib/api/orders';
+import { getImageUrl } from '@/lib/utils/imageHelper';
 
 interface OrderItem {
   id: string;
@@ -23,6 +24,58 @@ interface OrderItem {
     name: string;
     color?: string;
   } | null;
+}
+
+// Component for individual order item with image error handling
+function OrderItemDisplay({ item }: { item: OrderItem }) {
+  const [imageError, setImageError] = useState(false);
+  const imageUrl = item.product.images && item.product.images.length > 0 
+    ? getImageUrl(item.product.images[0]) 
+    : '';
+
+  return (
+    <div className="flex gap-4 p-4 border border-gray-200 rounded-lg">
+      <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
+        {imageUrl && !imageError ? (
+          <Image
+            src={imageUrl}
+            alt={item.product.name || 'Product image'}
+            fill
+            className="object-cover"
+            unoptimized={imageUrl.includes('drive.google.com') || imageUrl.startsWith('http')}
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400">
+            <Package className="w-8 h-8" />
+          </div>
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <Link
+          href={`/products/${item.product.slug}`}
+          className="text-lg font-semibold text-deep-indigo hover:text-royal-blue transition-colors"
+        >
+          {item.product.name}
+        </Link>
+        {item.variant && (
+          <p className="text-sm text-gray-600 mt-1">
+            Variant: {item.variant.name}
+            {item.variant.color && ` (${item.variant.color})`}
+          </p>
+        )}
+        <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
+          <span>Quantity: {item.quantity}</span>
+          <span>Price: ₹{item.price.toLocaleString()}</span>
+        </div>
+      </div>
+      <div className="text-right">
+        <p className="text-lg font-semibold text-deep-indigo">
+          ₹{item.total.toLocaleString()}
+        </p>
+      </div>
+    </div>
+  );
 }
 
 interface Order {
@@ -215,45 +268,7 @@ export default function OrderSuccessPage() {
               </h3>
               <div className="space-y-4">
                 {order.items.map((item) => (
-                  <div key={item.id} className="flex gap-4 p-4 border border-gray-200 rounded-lg">
-                    <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
-                      {item.product.images && item.product.images.length > 0 ? (
-                        <Image
-                          src={item.product.images[0]}
-                          alt={item.product.name}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          <Package className="w-8 h-8" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <Link
-                        href={`/products/${item.product.slug}`}
-                        className="text-lg font-semibold text-deep-indigo hover:text-royal-blue transition-colors"
-                      >
-                        {item.product.name}
-                      </Link>
-                      {item.variant && (
-                        <p className="text-sm text-gray-600 mt-1">
-                          Variant: {item.variant.name}
-                          {item.variant.color && ` (${item.variant.color})`}
-                        </p>
-                      )}
-                      <div className="mt-2 flex items-center gap-4 text-sm text-gray-600">
-                        <span>Quantity: {item.quantity}</span>
-                        <span>Price: ₹{item.price.toLocaleString()}</span>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-lg font-semibold text-deep-indigo">
-                        ₹{item.total.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
+                  <OrderItemDisplay key={item.id} item={item} />
                 ))}
               </div>
             </div>
