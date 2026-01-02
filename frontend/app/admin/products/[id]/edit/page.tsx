@@ -9,6 +9,7 @@ import { adminApi } from '@/lib/api/admin';
 import { categoriesApi, Category } from '@/lib/api/categories';
 import { Product } from '@/lib/api/products';
 import { PromptModal, AlertModal, ConfirmModal } from '@/components/Modal';
+import { getImageUrl as getImageUrlHelper } from '@/lib/utils/imageHelper';
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -110,11 +111,15 @@ export default function EditProductPage() {
         showInTrending: (productData as any).showInTrending ?? false,
         showInCategories: (productData as any).showInCategories ?? false,
         tags: (productData as any).tags || [],
-        colors: (productData as any).colors?.map((c: any) => ({
-          id: c.id,
-          color: c.color,
-          images: c.images || [],
-        })) || [],
+        colors: (productData as any).colors?.map((c: any) => {
+          // Debug: Log color data to see what we're getting
+          console.log('Loading color:', c.color, 'Images:', c.images);
+          return {
+            id: c.id,
+            color: c.color,
+            images: Array.isArray(c.images) ? c.images.filter((img: string) => img && img.trim() !== '') : [],
+          };
+        }) || [],
       });
       setSlugManuallyEdited(false); // Reset flag when loading product data
     } catch (error: any) {
@@ -320,37 +325,8 @@ export default function EditProductPage() {
 
   const getImageUrl = (image: string): string => {
     if (!image || image.trim() === '') return '';
-    // If it's already a full URL, return as is
-    if (image.startsWith('http://') || image.startsWith('https://')) {
-      return image;
-    }
-    // If it starts with /uploads, it's from the backend
-    if (image.startsWith('/uploads')) {
-      // In production, backend serves /uploads directly on the same domain
-      // In development, we need to prepend the backend URL
-      if (typeof window !== 'undefined') {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-        if (apiUrl.startsWith('http')) {
-          // Development: extract base URL
-          const baseUrl = apiUrl.replace('/api', '');
-          return `${baseUrl}${image}`;
-        } else {
-          // Production: same domain, backend serves /uploads directly
-          return image;
-        }
-      }
-      return image;
-    }
-    // Old hardcoded paths like /images/products/... - return empty
-    if (image.startsWith('/images/products/')) {
-      return '';
-    }
-    // If it starts with /, it might be a frontend public image
-    if (image.startsWith('/')) {
-      return image;
-    }
-    // Otherwise, assume it's a relative path
-    return image;
+    // Use the shared image helper which handles Google Drive URLs and other formats
+    return getImageUrlHelper(image, 0);
   };
 
   if (loading) {
@@ -617,16 +593,23 @@ export default function EditProductPage() {
                     </div>
                     {color.images.length > 0 && (
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                        {color.images.map((img, imgIndex) => (
-                          <div key={imgIndex} className="relative group">
-                            <img
-                              src={getImageUrl(img)}
-                              alt={`${color.color} ${imgIndex + 1}`}
-                              className="w-full h-24 object-cover rounded border border-gray-300"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = '/images/placeholder.png';
-                              }}
-                            />
+                        {color.images.map((img, imgIndex) => {
+                          const imageUrl = getImageUrl(img);
+                          console.log(`Color ${color.color} - Image ${imgIndex + 1}:`, { original: img, processed: imageUrl });
+                          return (
+                            <div key={imgIndex} className="relative group">
+                              <img
+                                src={imageUrl}
+                                alt={`${color.color} ${imgIndex + 1}`}
+                                className="w-full h-24 object-cover rounded border border-gray-300"
+                                onError={(e) => {
+                                  console.error('Image failed to load:', imageUrl);
+                                  (e.target as HTMLImageElement).src = '/images/placeholder.png';
+                                }}
+                                onLoad={() => {
+                                  console.log('Image loaded successfully:', imageUrl);
+                                }}
+                              />
                             <button
                               type="button"
                               onClick={() => removeColorImage(index, imgIndex)}
@@ -635,7 +618,8 @@ export default function EditProductPage() {
                               <X className="w-3 h-3" />
                             </button>
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                     {color.images.length === 0 && (
