@@ -14,7 +14,8 @@
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:db:push": "prisma db push",
     "prisma:studio": "prisma studio",
-    "db:sync": "npx prisma migrate deploy --skip-generate || npx prisma db push --skip-generate --accept-data-loss"
+    "db:sync": "npx prisma migrate deploy --skip-generate || npx prisma db push --skip-generate --accept-data-loss",
+    "seed": "node scripts/seed.js"
   },
   "keywords": [],
   "author": "",

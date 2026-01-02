@@ -9,20 +9,29 @@ async function checkData() {
     const productCount = await prisma.product.count();
     console.log(`✅ Products: ${productCount}`);
     
-    // Check product colors
-    const colorCount = await prisma.productColor.count();
-    console.log(`✅ Product Colors: ${colorCount}`);
+    // Check product color images
+    const productsWithColors = await prisma.product.findMany({
+      where: {
+        colorImages: { not: null }
+      },
+      select: {
+        name: true,
+        colorImages: true
+      },
+      take: 1
+    });
     
-    if (colorCount > 0) {
-      const sampleColor = await prisma.productColor.findFirst({
-        include: { product: { select: { name: true } } }
-      });
-      console.log(`\nSample Color:`, {
-        id: sampleColor.id,
-        product: sampleColor.product.name,
-        color: sampleColor.color,
-        imagesCount: sampleColor.images.length
-      });
+    if (productsWithColors.length > 0) {
+      const product = productsWithColors[0];
+      const colorImages = Array.isArray(product.colorImages) ? product.colorImages : [];
+      console.log(`✅ Products with colors: ${productCount}`);
+      if (colorImages.length > 0) {
+        console.log(`\nSample Product Color:`, {
+          product: product.name,
+          color: colorImages[0].color,
+          imagesCount: colorImages[0].images ? colorImages[0].images.length : 0
+        });
+      }
     }
     
     // Check orders
