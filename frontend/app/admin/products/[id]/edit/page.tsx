@@ -8,6 +8,7 @@ import { ArrowLeft, Save, X, Plus } from 'lucide-react';
 import { adminApi } from '@/lib/api/admin';
 import { categoriesApi, Category } from '@/lib/api/categories';
 import { Product } from '@/lib/api/products';
+import { PromptModal, AlertModal, ConfirmModal } from '@/components/Modal';
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -18,6 +19,18 @@ export default function EditProductPage() {
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+  const [showTagPrompt, setShowTagPrompt] = useState(false);
+  const [showColorPrompt, setShowColorPrompt] = useState(false);
+  const [showColorImagePrompt, setShowColorImagePrompt] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [currentColorIndex, setCurrentColorIndex] = useState<number | null>(null);
+  const [colorToDelete, setColorToDelete] = useState<number | null>(null);
+  const [alert, setAlert] = useState<{ isOpen: boolean; title: string; message: string; variant?: 'success' | 'error' | 'info' | 'warning' }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'info',
+  });
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -112,8 +125,13 @@ export default function EditProductPage() {
       setSlugManuallyEdited(false); // Reset flag when loading product data
     } catch (error: any) {
       console.error('Error loading data:', error);
-      alert('Failed to load product data');
-      router.push('/admin/products');
+      setAlert({
+        isOpen: true,
+        title: 'Error',
+        message: 'Failed to load product data',
+        variant: 'error',
+      });
+      setTimeout(() => router.push('/admin/products'), 2000);
     } finally {
       setLoading(false);
     }
@@ -157,7 +175,12 @@ export default function EditProductPage() {
     } catch (error: any) {
       console.error('Error updating product:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to update product';
-      alert(errorMessage);
+      setAlert({
+        isOpen: true,
+        title: 'Error',
+        message: errorMessage,
+        variant: 'error',
+      });
     } finally {
       setSaving(false);
     }
@@ -182,20 +205,7 @@ export default function EditProductPage() {
     return url;
   };
 
-  const addImage = () => {
-    const url = prompt('Enter image URL (Google Drive links will be auto-converted):');
-    if (url && url.trim()) {
-      const convertedUrl = convertGoogleDriveUrl(url.trim());
-      setFormData({ ...formData, images: [...formData.images, convertedUrl] });
-    }
-  };
-
-  const removeImage = (index: number) => {
-    setFormData({ ...formData, images: formData.images.filter((_, i) => i !== index) });
-  };
-
-  const addTag = () => {
-    const tag = prompt('Enter tag:');
+  const addTag = (tag: string) => {
     if (tag) {
       setFormData({ ...formData, tags: [...formData.tags, tag] });
     }
@@ -206,8 +216,7 @@ export default function EditProductPage() {
   };
 
   // Color management functions
-  const addColor = async () => {
-    const colorName = prompt('Enter color name:');
+  const addColor = async (colorName: string) => {
     if (!colorName || !colorName.trim()) return;
 
     try {
@@ -225,7 +234,12 @@ export default function EditProductPage() {
       });
     } catch (error: any) {
       console.error('Error adding color:', error);
-      alert(error.response?.data?.message || 'Failed to add color');
+      setAlert({
+        isOpen: true,
+        title: 'Error',
+        message: error.response?.data?.message || 'Failed to add color',
+        variant: 'error',
+      });
     }
   };
 
@@ -253,37 +267,58 @@ export default function EditProductPage() {
       setFormData({ ...formData, colors: updatedColors });
     } catch (error: any) {
       console.error('Error updating color:', error);
-      alert(error.response?.data?.message || 'Failed to update color');
+      setAlert({
+        isOpen: true,
+        title: 'Error',
+        message: error.response?.data?.message || 'Failed to update color',
+        variant: 'error',
+      });
     }
   };
 
-  const removeColor = async (colorIndex: number) => {
-    const color = formData.colors[colorIndex];
-    if (!confirm(`Are you sure you want to remove the color "${color.color}"?`)) return;
+  const handleRemoveColor = (colorIndex: number) => {
+    setColorToDelete(colorIndex);
+    setShowDeleteConfirm(true);
+  };
+
+  const removeColor = async () => {
+    if (colorToDelete === null) return;
+    const color = formData.colors[colorToDelete];
 
     if (color.id) {
       try {
         await adminApi.deleteProductColor(id, color.id);
       } catch (error: any) {
         console.error('Error deleting color:', error);
-        alert(error.response?.data?.message || 'Failed to delete color');
+        setAlert({
+          isOpen: true,
+          title: 'Error',
+          message: error.response?.data?.message || 'Failed to delete color',
+          variant: 'error',
+        });
         return;
       }
     }
 
     setFormData({
       ...formData,
-      colors: formData.colors.filter((_, i) => i !== colorIndex),
+      colors: formData.colors.filter((_, i) => i !== colorToDelete),
     });
+    setColorToDelete(null);
   };
 
   const addColorImage = (colorIndex: number) => {
-    const url = prompt('Enter image URL:');
-    if (url && url.trim()) {
-      const color = formData.colors[colorIndex];
+    setCurrentColorIndex(colorIndex);
+    setShowColorImagePrompt(true);
+  };
+
+  const handleColorImageSubmit = (url: string) => {
+    if (currentColorIndex !== null && url.trim()) {
+      const color = formData.colors[currentColorIndex];
       const updatedImages = [...color.images, url.trim()];
-      updateColor(colorIndex, 'images', updatedImages);
+      updateColor(currentColorIndex, 'images', updatedImages);
     }
+    setCurrentColorIndex(null);
   };
 
   const removeColorImage = (colorIndex: number, imageIndex: number) => {
@@ -547,70 +582,13 @@ export default function EditProductPage() {
           </div>
         </div>
 
-        {/* Images */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-gray-700">Images</label>
-            <button
-              type="button"
-              onClick={addImage}
-              className="text-sm text-[#312e81] hover:text-[#1e3a8a]"
-            >
-              + Add Image URL
-            </button>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {formData.images.length === 0 ? (
-              <div className="col-span-full text-center py-8 text-gray-500">
-                <p>No images added. Click "+ Add Image URL" to add images.</p>
-              </div>
-            ) : (
-              formData.images.map((image, index) => {
-                const imageUrl = getImageUrl(image);
-                // Use regular img tag for all images to avoid Next.js Image optimization issues
-                // This ensures images from backend, frontend public folder, or external URLs all work
-                return (
-                  <div key={index} className="relative group">
-                    <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                      <img
-                        src={imageUrl}
-                        alt={`Product image ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          // Hide image if it fails to load
-                          target.style.display = 'none';
-                        }}
-                        onLoad={(e) => {
-                          // Image loaded successfully
-                          const target = e.target as HTMLImageElement;
-                          target.style.opacity = '1';
-                        }}
-                        style={{ opacity: 0, transition: 'opacity 0.3s' }}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                      title="Remove image"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
         {/* Colors */}
         <div>
           <div className="flex items-center justify-between mb-4">
             <label className="block text-sm font-medium text-gray-700">Product Colors</label>
             <button
               type="button"
-              onClick={addColor}
+              onClick={() => setShowColorPrompt(true)}
               className="inline-flex items-center gap-2 text-sm text-[#312e81] hover:text-[#1e3a8a]"
             >
               <Plus className="w-4 h-4" />
@@ -707,7 +685,7 @@ export default function EditProductPage() {
                   <div className="flex justify-end">
                     <button
                       type="button"
-                      onClick={() => removeColor(index)}
+                      onClick={() => handleRemoveColor(index)}
                       className="text-red-500 hover:text-red-700 text-sm"
                     >
                       Remove Color
@@ -725,7 +703,7 @@ export default function EditProductPage() {
             <label className="block text-sm font-medium text-gray-700">Tags</label>
             <button
               type="button"
-              onClick={addTag}
+              onClick={() => setShowTagPrompt(true)}
               className="text-sm text-[#312e81] hover:text-[#1e3a8a]"
             >
               + Add Tag
@@ -825,6 +803,59 @@ export default function EditProductPage() {
           </button>
         </div>
       </form>
+
+      {/* Modals */}
+      <PromptModal
+        isOpen={showTagPrompt}
+        onClose={() => setShowTagPrompt(false)}
+        title="Add Tag"
+        label="Tag Name"
+        placeholder="Enter tag name"
+        onSubmit={addTag}
+      />
+
+      <PromptModal
+        isOpen={showColorPrompt}
+        onClose={() => setShowColorPrompt(false)}
+        title="Add Color"
+        label="Color Name"
+        placeholder="Enter color name (e.g., Green, Red, Blue)"
+        onSubmit={addColor}
+      />
+
+      <PromptModal
+        isOpen={showColorImagePrompt}
+        onClose={() => {
+          setShowColorImagePrompt(false);
+          setCurrentColorIndex(null);
+        }}
+        title="Add Image URL"
+        label="Image URL"
+        placeholder="Enter image URL (Google Drive links will be auto-converted)"
+        onSubmit={handleColorImageSubmit}
+      />
+
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setColorToDelete(null);
+        }}
+        title="Delete Color"
+        message={colorToDelete !== null ? `Are you sure you want to remove the color "${formData.colors[colorToDelete]?.color}"?` : ''}
+        onConfirm={removeColor}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
+
+      <AlertModal
+        isOpen={alert.isOpen}
+        onClose={() => setAlert({ ...alert, isOpen: false })}
+        title={alert.title}
+        message={alert.message}
+        variant={alert.variant}
+      />
     </div>
   );
 }

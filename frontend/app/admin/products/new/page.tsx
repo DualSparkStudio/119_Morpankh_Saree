@@ -6,12 +6,22 @@ import Link from 'next/link';
 import { ArrowLeft, Save, X, Plus } from 'lucide-react';
 import { adminApi } from '@/lib/api/admin';
 import { categoriesApi, Category } from '@/lib/api/categories';
+import { PromptModal, AlertModal } from '@/components/Modal';
 
 export default function NewProductPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+  const [showTagPrompt, setShowTagPrompt] = useState(false);
+  const [showColorImagePrompt, setShowColorImagePrompt] = useState(false);
+  const [currentColorIndex, setCurrentColorIndex] = useState<number | null>(null);
+  const [alert, setAlert] = useState<{ isOpen: boolean; title: string; message: string; variant?: 'success' | 'error' | 'info' | 'warning' }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'info',
+  });
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
@@ -81,7 +91,7 @@ export default function NewProductPage() {
         basePrice: parseFloat(formData.basePrice),
         compareAtPrice: formData.compareAtPrice ? parseFloat(formData.compareAtPrice) : null,
         costPrice: formData.costPrice ? parseFloat(formData.costPrice) : null,
-        images: formData.images.filter(img => img && img.trim() !== ''),
+        images: [],
         fabricType: formData.fabricType || null,
         sareeLength: formData.sareeLength ? parseFloat(formData.sareeLength) : null,
         blouseIncluded: formData.blouseIncluded,
@@ -106,28 +116,18 @@ export default function NewProductPage() {
     } catch (error: any) {
       console.error('Error creating product:', error);
       const errorMessage = error.response?.data?.message || error.message || 'Failed to create product';
-      alert(errorMessage);
+      setAlert({
+        isOpen: true,
+        title: 'Error',
+        message: errorMessage,
+        variant: 'error',
+      });
     } finally {
       setSaving(false);
     }
   };
 
-  const addImage = () => {
-    const url = prompt('Enter image URL:');
-    if (url && url.trim()) {
-      setFormData({ ...formData, images: [...formData.images, url.trim()] });
-    }
-  };
-
-  const removeImage = (index: number) => {
-    setFormData({
-      ...formData,
-      images: formData.images.filter((_, i) => i !== index),
-    });
-  };
-
-  const addTag = () => {
-    const tag = prompt('Enter tag:');
+  const addTag = (tag: string) => {
     if (tag && tag.trim()) {
       setFormData({ ...formData, tags: [...formData.tags, tag.trim()] });
     }
@@ -167,12 +167,17 @@ export default function NewProductPage() {
   };
 
   const addColorImage = (colorIndex: number) => {
-    const url = prompt('Enter image URL:');
-    if (url && url.trim()) {
+    setCurrentColorIndex(colorIndex);
+    setShowColorImagePrompt(true);
+  };
+
+  const handleColorImageSubmit = (url: string) => {
+    if (currentColorIndex !== null) {
       const updatedColors = [...formData.colors];
-      updatedColors[colorIndex].images = [...updatedColors[colorIndex].images, url.trim()];
+      updatedColors[currentColorIndex].images = [...updatedColors[currentColorIndex].images, url];
       setFormData({ ...formData, colors: updatedColors });
     }
+    setCurrentColorIndex(null);
   };
 
   const removeColorImage = (colorIndex: number, imageIndex: number) => {
@@ -414,66 +419,13 @@ export default function NewProductPage() {
           </div>
         </div>
 
-        {/* Images */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-gray-700">Images</label>
-            <button
-              type="button"
-              onClick={addImage}
-              className="text-sm text-[#312e81] hover:text-[#1e3a8a]"
-            >
-              + Add Image URL
-            </button>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {formData.images.length === 0 ? (
-              <div className="col-span-full text-center py-8 text-gray-500">
-                <p>No images added. Click "+ Add Image URL" to add images.</p>
-              </div>
-            ) : (
-              formData.images.map((image, index) => {
-                const imageUrl = getImageUrl(image);
-                return (
-                  <div key={index} className="relative group">
-                    <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
-                      <img
-                        src={imageUrl}
-                        alt={`Product image ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                        }}
-                        onLoad={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.style.opacity = '1';
-                        }}
-                        style={{ opacity: 0, transition: 'opacity 0.3s' }}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => removeImage(index)}
-                      className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                      title="Remove image"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
         {/* Tags */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <label className="block text-sm font-medium text-gray-700">Tags</label>
             <button
               type="button"
-              onClick={addTag}
+              onClick={() => setShowTagPrompt(true)}
               className="text-sm text-[#312e81] hover:text-[#1e3a8a]"
             >
               + Add Tag
@@ -688,6 +640,36 @@ export default function NewProductPage() {
           </button>
         </div>
       </form>
+
+      {/* Modals */}
+      <PromptModal
+        isOpen={showTagPrompt}
+        onClose={() => setShowTagPrompt(false)}
+        title="Add Tag"
+        label="Tag Name"
+        placeholder="Enter tag name"
+        onSubmit={addTag}
+      />
+
+      <PromptModal
+        isOpen={showColorImagePrompt}
+        onClose={() => {
+          setShowColorImagePrompt(false);
+          setCurrentColorIndex(null);
+        }}
+        title="Add Image URL"
+        label="Image URL"
+        placeholder="Enter image URL (Google Drive links will be auto-converted)"
+        onSubmit={handleColorImageSubmit}
+      />
+
+      <AlertModal
+        isOpen={alert.isOpen}
+        onClose={() => setAlert({ ...alert, isOpen: false })}
+        title={alert.title}
+        message={alert.message}
+        variant={alert.variant}
+      />
     </div>
   );
 }

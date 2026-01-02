@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
 import { adminApi } from '@/lib/api/admin';
+import { ConfirmModal, AlertModal } from '@/components/Modal';
 import { Product } from '@/lib/api/products';
 
 export default function AdminProductsPage() {
@@ -16,6 +17,14 @@ export default function AdminProductsPage() {
     limit: 20,
     total: 0,
     pages: 0,
+  });
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{ isOpen: boolean; title: string; message: string; variant?: 'success' | 'error' | 'info' | 'warning' }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    variant: 'info',
   });
 
   useEffect(() => {
@@ -54,15 +63,26 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+  const handleDeleteClick = (id: string) => {
+    setProductToDelete(id);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDelete = async () => {
+    if (!productToDelete) return;
 
     try {
-      await adminApi.deleteProduct(id);
+      await adminApi.deleteProduct(productToDelete);
       loadProducts();
+      setProductToDelete(null);
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Failed to delete product');
+      setAlert({
+        isOpen: true,
+        title: 'Error',
+        message: 'Failed to delete product',
+        variant: 'error',
+      });
     }
   };
 
@@ -249,7 +269,7 @@ export default function AdminProductsPage() {
                           <Edit className="w-4 h-4" />
                         </Link>
                         <button
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => handleDeleteClick(product.id)}
                           className="text-red-600 hover:text-red-900"
                           title="Delete"
                         >
@@ -297,6 +317,29 @@ export default function AdminProductsPage() {
           )}
         </>
       )}
+
+      {/* Modals */}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          setShowDeleteConfirm(false);
+          setProductToDelete(null);
+        }}
+        title="Delete Product"
+        message="Are you sure you want to delete this product? This action cannot be undone."
+        onConfirm={handleDelete}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
+
+      <AlertModal
+        isOpen={alert.isOpen}
+        onClose={() => setAlert({ ...alert, isOpen: false })}
+        title={alert.title}
+        message={alert.message}
+        variant={alert.variant}
+      />
     </div>
   );
 }
