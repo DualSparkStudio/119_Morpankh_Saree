@@ -13,10 +13,7 @@ export interface ProductVariant {
 export interface ProductColor {
   id: string;
   color: string;
-  colorCode?: string;
   images: string[];
-  sku?: string;
-  barcode?: string;
   isActive?: boolean;
   order?: number;
 }

@@ -129,12 +129,9 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
           ? {
               create: colors.map((c: any, index: number) => ({
                 color: c.color,
-                colorCode: c.colorCode || null,
                 images: Array.isArray(c.images) 
                   ? c.images.filter((img: string) => img && img.trim() !== '')
                   : [],
-                sku: c.sku || null,
-                barcode: c.barcode || null,
                 isActive: c.isActive !== undefined ? c.isActive : true,
                 order: c.order !== undefined ? c.order : index,
               })),
@@ -289,7 +286,7 @@ export const deleteProduct = async (req: Request, res: Response, next: NextFunct
 export const addProductColor = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { color, colorCode, images, sku, barcode, isActive, order } = req.body;
+    const { color, images, isActive, order } = req.body;
 
     // Check if product exists
     const product = await prisma.product.findUnique({
@@ -330,10 +327,7 @@ export const addProductColor = async (req: Request, res: Response, next: NextFun
       data: {
         productId: id,
         color,
-        colorCode: colorCode || null,
         images: filteredImages,
-        sku: sku || null,
-        barcode: barcode || null,
         isActive: isActive !== undefined ? isActive : true,
         order: order !== undefined ? order : 0,
       },
@@ -357,7 +351,7 @@ export const addProductColor = async (req: Request, res: Response, next: NextFun
 export const updateProductColor = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id, colorId } = req.params;
-    const { color, colorCode, images, sku, barcode, isActive, order } = req.body;
+    const { color, images, isActive, order } = req.body;
     
     // Debug logging
     console.log('Updating product color:', {
@@ -395,14 +389,11 @@ export const updateProductColor = async (req: Request, res: Response, next: Next
 
     const updateData: any = {};
     if (color !== undefined) updateData.color = color;
-    if (colorCode !== undefined) updateData.colorCode = colorCode;
     if (images !== undefined) {
       updateData.images = Array.isArray(images) 
         ? images.filter((img: string) => img && img.trim() !== '')
         : [];
     }
-    if (sku !== undefined) updateData.sku = sku;
-    if (barcode !== undefined) updateData.barcode = barcode;
     if (isActive !== undefined) updateData.isActive = isActive;
     if (order !== undefined) updateData.order = order;
 

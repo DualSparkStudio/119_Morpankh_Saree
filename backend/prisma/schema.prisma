@@ -171,10 +171,7 @@ model ProductColor {
   productId   String
   product     Product       @relation(fields: [productId], references: [id], onDelete: Cascade)
   color       String        // Color name (e.g., "Green", "Red", "Blue")
-  colorCode   String?       // Hex color code (e.g., "#22c55e")
   images      String[]      // Array of image URLs for this color (3-4 images)
-  sku         String?       // Optional SKU for this color variant
-  barcode     String?       // Optional barcode for this color
   isActive    Boolean       @default(true)
   order       Int           @default(0) // Display order
   inventory   Inventory[]

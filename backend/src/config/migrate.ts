@@ -20,7 +20,7 @@ export async function runMigrations() {
       // If migrate deploy fails (no migrations), try db push
       console.log('⚠️  No migrations found, pushing schema...');
       try {
-        execSync('npx prisma db push --skip-generate --accept-data-loss', { 
+        execSync('npx prisma db push --skip-generate', { 
           stdio: 'inherit',
           cwd: backendDir,
           env: { ...process.env }
