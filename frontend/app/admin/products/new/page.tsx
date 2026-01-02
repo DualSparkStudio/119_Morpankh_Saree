@@ -45,10 +45,7 @@ export default function NewProductPage() {
     tags: [] as string[],
     colors: [] as Array<{
       color: string;
-      colorCode?: string;
       images: string[];
-      sku?: string;
-      barcode?: string;
     }>,
   });
 
@@ -103,10 +100,7 @@ export default function NewProductPage() {
         tags: formData.tags,
         colors: formData.colors.length > 0 ? formData.colors.map((c, index) => ({
           color: c.color,
-          colorCode: c.colorCode || null,
           images: c.images.filter(img => img && img.trim() !== ''),
-          sku: c.sku || null,
-          barcode: c.barcode || null,
           order: index,
         })) : undefined,
       };
@@ -144,10 +138,7 @@ export default function NewProductPage() {
         ...formData.colors,
         {
           color: '',
-          colorCode: '',
           images: [],
-          sku: '',
-          barcode: '',
         },
       ],
     });
@@ -467,46 +458,16 @@ export default function NewProductPage() {
             <div className="space-y-4 border border-gray-200 rounded-lg p-4">
               {formData.colors.map((color, index) => (
                 <div key={index} className="p-4 bg-gray-50 rounded-lg space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Color Name *</label>
-                      <input
-                        type="text"
-                        value={color.color}
-                        onChange={(e) => updateColor(index, 'color', e.target.value)}
-                        placeholder="e.g., Green, Red, Blue"
-                        required
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Color Code (Hex)</label>
-                      <input
-                        type="text"
-                        value={color.colorCode || ''}
-                        onChange={(e) => updateColor(index, 'colorCode', e.target.value)}
-                        placeholder="#22c55e"
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">SKU (Optional)</label>
-                      <input
-                        type="text"
-                        value={color.sku || ''}
-                        onChange={(e) => updateColor(index, 'sku', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Barcode (Optional)</label>
-                      <input
-                        type="text"
-                        value={color.barcode || ''}
-                        onChange={(e) => updateColor(index, 'barcode', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Color Name *</label>
+                    <input
+                      type="text"
+                      value={color.color}
+                      onChange={(e) => updateColor(index, 'color', e.target.value)}
+                      placeholder="e.g., Green, Red, Blue"
+                      required
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                    />
                   </div>
                   
                   {/* Color Images */}

@@ -55,10 +55,7 @@ export default function EditProductPage() {
     colors: [] as Array<{
       id?: string;
       color: string;
-      colorCode?: string;
       images: string[];
-      sku?: string;
-      barcode?: string;
     }>,
   });
 
@@ -116,10 +113,7 @@ export default function EditProductPage() {
         colors: (productData as any).colors?.map((c: any) => ({
           id: c.id,
           color: c.color,
-          colorCode: c.colorCode || '',
           images: c.images || [],
-          sku: c.sku || '',
-          barcode: c.barcode || '',
         })) || [],
       });
       setSlugManuallyEdited(false); // Reset flag when loading product data
@@ -222,10 +216,7 @@ export default function EditProductPage() {
     try {
       const colorData = {
         color: colorName.trim(),
-        colorCode: '',
         images: [],
-        sku: '',
-        barcode: '',
       };
       const newColor = await adminApi.addProductColor(id, colorData);
       setFormData({
@@ -599,46 +590,16 @@ export default function EditProductPage() {
             <div className="space-y-4 border border-gray-200 rounded-lg p-4">
               {formData.colors.map((color, index) => (
                 <div key={color.id || index} className="p-4 bg-gray-50 rounded-lg space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Color Name *</label>
-                      <input
-                        type="text"
-                        value={color.color}
-                        onChange={(e) => updateColor(index, 'color', e.target.value)}
-                        placeholder="e.g., Green, Red, Blue"
-                        required
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Color Code (Hex)</label>
-                      <input
-                        type="text"
-                        value={color.colorCode || ''}
-                        onChange={(e) => updateColor(index, 'colorCode', e.target.value)}
-                        placeholder="#22c55e"
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">SKU (Optional)</label>
-                      <input
-                        type="text"
-                        value={color.sku || ''}
-                        onChange={(e) => updateColor(index, 'sku', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Barcode (Optional)</label>
-                      <input
-                        type="text"
-                        value={color.barcode || ''}
-                        onChange={(e) => updateColor(index, 'barcode', e.target.value)}
-                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Color Name *</label>
+                    <input
+                      type="text"
+                      value={color.color}
+                      onChange={(e) => updateColor(index, 'color', e.target.value)}
+                      placeholder="e.g., Green, Red, Blue"
+                      required
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                    />
                   </div>
                   
                   {/* Color Images */}
