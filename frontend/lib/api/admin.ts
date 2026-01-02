@@ -53,6 +53,11 @@ export const adminApi = {
     return data;
   },
 
+  getOrder: async (id: string): Promise<any> => {
+    const { data } = await api.get(`/admin/orders/${id}`);
+    return data;
+  },
+
   updateOrderStatus: async (id: string, status: string): Promise<any> => {
     const { data } = await api.patch(`/admin/orders/${id}/status`, { status });
     return data;
