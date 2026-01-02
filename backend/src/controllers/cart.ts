@@ -65,6 +65,14 @@ const getOrCreateCart = async (userId: string) => {
                 price: true,
               },
             },
+            color: {
+              select: {
+                id: true,
+                color: true,
+                colorCode: true,
+                images: true,
+              },
+            },
           },
         },
       },
@@ -79,6 +87,10 @@ export const getCart = async (req: AuthRequest, res: Response, next: NextFunctio
     const userId = req.userId!;
     const cart = await getOrCreateCart(userId);
 
+    if (!cart) {
+      return next(new AppError('Failed to get or create cart', 500));
+    }
+
     // Calculate totals
     const items = cart.items.map(item => {
       const price = item.variant?.price || item.product.basePrice;
@@ -86,8 +98,11 @@ export const getCart = async (req: AuthRequest, res: Response, next: NextFunctio
         id: item.id,
         productId: item.productId,
         variantId: item.variantId,
+        colorId: item.colorId,
+        selectedColor: item.selectedColor,
         product: item.product,
         variant: item.variant,
+        color: item.color,
         quantity: item.quantity,
         price,
         total: price * item.quantity,
@@ -134,11 +149,15 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
       return next(new AppError('Product variant not found', 404));
     }
 
-    if (colorId && !product.colors.find(c => c.id === colorId)) {
+    if (colorId && product.colors && !product.colors.find(c => c.id === colorId)) {
       return next(new AppError('Product color not found', 404));
     }
 
     const cart = await getOrCreateCart(userId);
+
+    if (!cart) {
+      return next(new AppError('Failed to get or create cart', 500));
+    }
 
     // Check if item already exists in cart
     const existingItem = await prisma.cartItem.findUnique({
@@ -189,7 +208,7 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
       });
     } else {
       // Create new cart item
-      const selectedColor = colorId ? product.colors.find(c => c.id === colorId)?.color : null;
+      const selectedColor = colorId && product.colors ? product.colors.find(c => c.id === colorId)?.color : null;
       cartItem = await prisma.cartItem.create({
         data: {
           cartId: cart.id,
