@@ -201,11 +201,7 @@ if (isMainModule) {
     console.error('❌ Failed to start server after migrations:', error);
     process.exit(1);
   });
-  }).catch((error) => {
-    console.error('❌ Failed to start server after migrations:', error);
-    process.exit(1);
-  });
-  }
+}
 
 export default app;
 
