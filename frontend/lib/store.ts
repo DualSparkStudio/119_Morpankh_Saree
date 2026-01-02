@@ -14,6 +14,8 @@ interface CartItem {
   productId: string;
   productSlug?: string; // Optional for backward compatibility, will be fetched if missing
   variantId?: string;
+  colorId?: string;
+  selectedColor?: string; // Color name for display
   quantity: number;
   price: number;
   productName?: string;
@@ -71,7 +73,9 @@ export const useStore = create<AppState>()(
       addToCart: (item) =>
         set((state) => {
           const existingItem = state.cart.find(
-            (i) => i.productId === item.productId && i.variantId === item.variantId
+            (i) => i.productId === item.productId && 
+                   i.variantId === item.variantId && 
+                   i.colorId === item.colorId
           );
           if (existingItem) {
             return {

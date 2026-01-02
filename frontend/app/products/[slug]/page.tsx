@@ -1,6 +1,6 @@
 'use client';
 
-import { Product, ProductVariant, productsApi } from '@/lib/api/products';
+import { Product, ProductVariant, ProductColor, productsApi } from '@/lib/api/products';
 import { useStore } from '@/lib/store';
 import { ArrowLeft, Heart, Share2, ShoppingCart, Star, Check, Truck, Shield, RotateCcw, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
@@ -12,8 +12,8 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const slug = (params?.slug as string) || '';
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null);
-  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
+  const [selectedColorId, setSelectedColorId] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<ProductColor | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,13 +55,11 @@ export default function ProductDetailPage() {
       
       setProduct(productData);
       
-      // Set default color if variants exist
-      if (productData.variants && productData.variants.length > 0) {
-        const firstVariant = productData.variants[0];
-        if (firstVariant.color) {
-          setSelectedColor(firstVariant.color);
-          setSelectedVariant(firstVariant.id);
-        }
+      // Set default color if colors exist
+      if (productData.colors && productData.colors.length > 0) {
+        const firstColor = productData.colors[0];
+        setSelectedColor(firstColor);
+        setSelectedColorId(firstColor.id);
       }
       
       // Load related products from the same category
@@ -130,39 +128,26 @@ export default function ProductDetailPage() {
     return image;
   };
 
-  // Get available colors from variants
-  const getAvailableColors = () => {
-    if (!product?.variants) return [];
-    const colors = new Map<string, { variant: ProductVariant; count: number }>();
-    product.variants.forEach(variant => {
-      if (variant.color) {
-        const existing = colors.get(variant.color);
-        if (existing) {
-          colors.set(variant.color, { variant: existing.variant, count: existing.count + 1 });
-        } else {
-          colors.set(variant.color, { variant, count: 1 });
-        }
-      }
-    });
-    return Array.from(colors.values()).map(item => item.variant);
+  // Get available colors
+  const getAvailableColors = (): ProductColor[] => {
+    if (!product?.colors) return [];
+    return product.colors.filter(c => c.isActive !== false);
   };
 
-  // Get images for selected color variant
-  const getDisplayImages = () => {
+  // Get images for selected color
+  const getDisplayImages = (): string[] => {
     if (!product) return [];
     
-    // If color is selected, try to get variant-specific images
-    if (selectedColor && product.variants) {
-      const variant = product.variants.find(v => v.color === selectedColor);
-      // If variant has images, use them; otherwise use product images
+    // If color is selected, use color-specific images
+    if (selectedColor && selectedColor.images && selectedColor.images.length > 0) {
+      return selectedColor.images.filter(img => img && img.trim() !== '');
     }
     
-    // Use product images from database - no hardcoded fallbacks
+    // Fallback to product images
     if (product.images && product.images.length > 0) {
       return product.images.filter(img => img && img.trim() !== '');
     }
     
-    // Return empty array if no images - let the UI handle the display
     return [];
   };
 
@@ -181,22 +166,20 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!product) return;
-    const variant = selectedVariant 
-      ? product.variants?.find(v => v.id === selectedVariant)
-      : null;
     
-    // Get the actual product image from the product data
-    const productImage = product.images && product.images.length > 0 
-      ? product.images[0] 
-      : '';
+    // Get the image from selected color or product
+    const productImage = selectedColor && selectedColor.images && selectedColor.images.length > 0
+      ? selectedColor.images[0]
+      : (product.images && product.images.length > 0 ? product.images[0] : '');
     
     addToCart({
-      id: `product-${product.id}${variant ? `-${variant.id}` : ''}`,
+      id: `product-${product.id}${selectedColorId ? `-color-${selectedColorId}` : ''}`,
       productId: product.id,
       productSlug: product.slug,
-      variantId: variant?.id || undefined,
+      colorId: selectedColorId || undefined,
+      selectedColor: selectedColor?.color || undefined,
       quantity: quantity,
-      price: variant?.price || product.basePrice,
+      price: product.basePrice,
       productName: product.name,
       productImage: productImage,
     });
@@ -209,10 +192,6 @@ export default function ProductDetailPage() {
 
   const getCurrentPrice = () => {
     if (!product) return 0;
-    if (selectedVariant) {
-      const variant = product.variants?.find(v => v.id === selectedVariant);
-      return variant?.price || product.basePrice;
-    }
     return product.basePrice;
   };
 
@@ -380,12 +359,12 @@ export default function ProductDetailPage() {
               <div className="space-y-3 pt-2">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-semibold text-gray-900">Color:</span>
-                  <span className="text-sm text-gray-600">{selectedColor || 'Select a color'}</span>
+                  <span className="text-sm text-gray-600">{selectedColor?.color || 'Select a color'}</span>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  {availableColors.map((variant) => {
-                    const isSelected = selectedColor === variant.color;
-                    // Color mapping for common colors
+                  {availableColors.map((color) => {
+                    const isSelected = selectedColorId === color.id;
+                    // Use colorCode if available, otherwise map from color name
                     const colorMap: { [key: string]: string } = {
                       'red': '#EF4444',
                       'blue': '#3B82F6',
@@ -400,14 +379,15 @@ export default function ProductDetailPage() {
                       'navy': '#1E3A8A',
                       'gold': '#D4AF37',
                     };
-                    const colorValue = colorMap[variant.color?.toLowerCase() || ''] || '#6B7280';
+                    const colorValue = color.colorCode || colorMap[color.color?.toLowerCase() || ''] || '#6B7280';
                     
                     return (
                       <button
-                        key={variant.id}
+                        key={color.id}
                         onClick={() => {
-                          setSelectedColor(variant.color || null);
-                          setSelectedVariant(variant.id);
+                          setSelectedColor(color);
+                          setSelectedColorId(color.id);
+                          setSelectedImage(0); // Reset to first image when color changes
                         }}
                         className={`relative w-12 h-12 rounded-full border-2 transition-all ${
                           isSelected
@@ -415,7 +395,7 @@ export default function ProductDetailPage() {
                             : 'border-gray-300 hover:border-gray-400'
                         }`}
                         style={{ backgroundColor: colorValue }}
-                        title={variant.color}
+                        title={color.color}
                       >
                         {isSelected && (
                           <Check className="absolute inset-0 m-auto w-5 h-5 text-white drop-shadow-lg" />

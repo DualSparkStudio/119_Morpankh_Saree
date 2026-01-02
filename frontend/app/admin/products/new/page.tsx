@@ -33,15 +33,12 @@ export default function NewProductPage() {
     showInTrending: false,
     showInCategories: false,
     tags: [] as string[],
-    variants: [] as Array<{
-      name: string;
-      color?: string;
-      fabric?: string;
-      occasion?: string;
-      price: string;
-      sku: string;
+    colors: [] as Array<{
+      color: string;
+      colorCode?: string;
+      images: string[];
+      sku?: string;
       barcode?: string;
-      variantCode?: string;
     }>,
   });
 
@@ -94,15 +91,13 @@ export default function NewProductPage() {
         showInTrending: formData.showInTrending,
         showInCategories: formData.showInCategories,
         tags: formData.tags,
-        variants: formData.variants.length > 0 ? formData.variants.map(v => ({
-          name: v.name,
-          color: v.color || null,
-          fabric: v.fabric || null,
-          occasion: v.occasion || null,
-          price: v.price ? parseFloat(v.price) : null,
-          sku: v.sku,
-          barcode: v.barcode || null,
-          variantCode: v.variantCode || null,
+        colors: formData.colors.length > 0 ? formData.colors.map((c, index) => ({
+          color: c.color,
+          colorCode: c.colorCode || null,
+          images: c.images.filter(img => img && img.trim() !== ''),
+          sku: c.sku || null,
+          barcode: c.barcode || null,
+          order: index,
         })) : undefined,
       };
 
@@ -142,36 +137,48 @@ export default function NewProductPage() {
     setFormData({ ...formData, tags: formData.tags.filter(t => t !== tag) });
   };
 
-  const addVariant = () => {
+  const addColor = () => {
     setFormData({
       ...formData,
-      variants: [
-        ...formData.variants,
+      colors: [
+        ...formData.colors,
         {
-          name: '',
           color: '',
-          fabric: '',
-          occasion: '',
-          price: '',
+          colorCode: '',
+          images: [],
           sku: '',
           barcode: '',
-          variantCode: '',
         },
       ],
     });
   };
 
-  const removeVariant = (index: number) => {
+  const removeColor = (index: number) => {
     setFormData({
       ...formData,
-      variants: formData.variants.filter((_, i) => i !== index),
+      colors: formData.colors.filter((_, i) => i !== index),
     });
   };
 
-  const updateVariant = (index: number, field: string, value: string) => {
-    const updatedVariants = [...formData.variants];
-    updatedVariants[index] = { ...updatedVariants[index], [field]: value };
-    setFormData({ ...formData, variants: updatedVariants });
+  const updateColor = (index: number, field: string, value: any) => {
+    const updatedColors = [...formData.colors];
+    updatedColors[index] = { ...updatedColors[index], [field]: value };
+    setFormData({ ...formData, colors: updatedColors });
+  };
+
+  const addColorImage = (colorIndex: number) => {
+    const url = prompt('Enter image URL:');
+    if (url && url.trim()) {
+      const updatedColors = [...formData.colors];
+      updatedColors[colorIndex].images = [...updatedColors[colorIndex].images, url.trim()];
+      setFormData({ ...formData, colors: updatedColors });
+    }
+  };
+
+  const removeColorImage = (colorIndex: number, imageIndex: number) => {
+    const updatedColors = [...formData.colors];
+    updatedColors[colorIndex].images = updatedColors[colorIndex].images.filter((_, i) => i !== imageIndex);
+    setFormData({ ...formData, colors: updatedColors });
   };
 
   const getImageUrl = (image: string): string => {
@@ -491,89 +498,113 @@ export default function NewProductPage() {
           </div>
         </div>
 
-        {/* Variants */}
+        {/* Colors */}
         <div>
           <div className="flex items-center justify-between mb-4">
-            <label className="block text-sm font-medium text-gray-700">Product Variants (Optional)</label>
+            <label className="block text-sm font-medium text-gray-700">Product Colors</label>
             <button
               type="button"
-              onClick={addVariant}
+              onClick={addColor}
               className="inline-flex items-center gap-2 text-sm text-[#312e81] hover:text-[#1e3a8a]"
             >
               <Plus className="w-4 h-4" />
-              Add Variant
+              Add Color
             </button>
           </div>
-          {formData.variants.length > 0 && (
+          {formData.colors.length > 0 && (
             <div className="space-y-4 border border-gray-200 rounded-lg p-4">
-              {formData.variants.map((variant, index) => (
-                <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Variant Name *</label>
-                    <input
-                      type="text"
-                      value={variant.name}
-                      onChange={(e) => updateVariant(index, 'name', e.target.value)}
-                      placeholder="e.g., Color: Red, Size: M"
-                      required
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                    />
+              {formData.colors.map((color, index) => (
+                <div key={index} className="p-4 bg-gray-50 rounded-lg space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Color Name *</label>
+                      <input
+                        type="text"
+                        value={color.color}
+                        onChange={(e) => updateColor(index, 'color', e.target.value)}
+                        placeholder="e.g., Green, Red, Blue"
+                        required
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Color Code (Hex)</label>
+                      <input
+                        type="text"
+                        value={color.colorCode || ''}
+                        onChange={(e) => updateColor(index, 'colorCode', e.target.value)}
+                        placeholder="#22c55e"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">SKU (Optional)</label>
+                      <input
+                        type="text"
+                        value={color.sku || ''}
+                        onChange={(e) => updateColor(index, 'sku', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Barcode (Optional)</label>
+                      <input
+                        type="text"
+                        value={color.barcode || ''}
+                        onChange={(e) => updateColor(index, 'barcode', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      />
+                    </div>
                   </div>
+                  
+                  {/* Color Images */}
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Variant SKU *</label>
-                    <input
-                      type="text"
-                      value={variant.sku}
-                      onChange={(e) => updateVariant(index, 'sku', e.target.value)}
-                      required
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                    />
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-xs font-medium text-gray-700">Images (3-4 images recommended) *</label>
+                      <button
+                        type="button"
+                        onClick={() => addColorImage(index)}
+                        className="text-xs text-[#312e81] hover:text-[#1e3a8a]"
+                      >
+                        <Plus className="w-3 h-3 inline mr-1" />
+                        Add Image
+                      </button>
+                    </div>
+                    {color.images.length > 0 && (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {color.images.map((img, imgIndex) => (
+                          <div key={imgIndex} className="relative group">
+                            <img
+                              src={getImageUrl(img)}
+                              alt={`${color.color} ${imgIndex + 1}`}
+                              className="w-full h-24 object-cover rounded border border-gray-300"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/images/placeholder.png';
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeColorImage(index, imgIndex)}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {color.images.length === 0 && (
+                      <p className="text-xs text-gray-500">No images added. Click "Add Image" to add images for this color.</p>
+                    )}
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Color</label>
-                    <input
-                      type="text"
-                      value={variant.color || ''}
-                      onChange={(e) => updateVariant(index, 'color', e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Price Override (₹)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={variant.price || ''}
-                      onChange={(e) => updateVariant(index, 'price', e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Barcode</label>
-                    <input
-                      type="text"
-                      value={variant.barcode || ''}
-                      onChange={(e) => updateVariant(index, 'barcode', e.target.value)}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Variant Code (QR)</label>
-                    <input
-                      type="text"
-                      value={variant.variantCode || ''}
-                      onChange={(e) => updateVariant(index, 'variantCode', e.target.value)}
-                      placeholder="e.g., SR-SILK-RED-001"
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
-                    />
-                  </div>
-                  <div className="md:col-span-2 flex justify-end">
+                  
+                  <div className="flex justify-end">
                     <button
                       type="button"
-                      onClick={() => removeVariant(index)}
+                      onClick={() => removeColor(index)}
                       className="text-red-500 hover:text-red-700 text-sm"
                     >
-                      Remove Variant
+                      Remove Color
                     </button>
                   </div>
                 </div>

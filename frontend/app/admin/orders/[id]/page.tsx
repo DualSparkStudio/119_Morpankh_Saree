@@ -24,6 +24,12 @@ interface OrderItem {
     name: string;
     color?: string;
   } | null;
+  color?: {
+    id: string;
+    color: string;
+    colorCode?: string;
+  } | null;
+  selectedColor?: string;
 }
 
 interface Order {
@@ -263,6 +269,11 @@ export default function AdminOrderDetailPage() {
                       >
                         {item.product.name}
                       </Link>
+                      {item.selectedColor && (
+                        <p className="text-sm text-gray-600 mt-1">
+                          Color: <span className="font-medium">{item.selectedColor}</span>
+                        </p>
+                      )}
                       {item.variant && (
                         <p className="text-sm text-gray-600 mt-1">
                           Variant: {item.variant.name}

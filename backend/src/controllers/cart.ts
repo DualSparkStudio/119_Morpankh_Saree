@@ -28,6 +28,14 @@ const getOrCreateCart = async (userId: string) => {
               price: true,
             },
           },
+          color: {
+            select: {
+              id: true,
+              color: true,
+              colorCode: true,
+              images: true,
+            },
+          },
         },
       },
     },
@@ -103,7 +111,7 @@ export const getCart = async (req: AuthRequest, res: Response, next: NextFunctio
 export const addToCart = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.userId!;
-    const { productId, variantId, quantity = 1 } = req.body;
+    const { productId, variantId, colorId, quantity = 1 } = req.body;
 
     if (!productId) {
       return next(new AppError('Product ID is required', 400));
@@ -112,7 +120,10 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
     // Verify product exists
     const product = await prisma.product.findUnique({
       where: { id: productId },
-      include: { variants: variantId ? { where: { id: variantId } } : false },
+      include: { 
+        variants: variantId ? { where: { id: variantId } } : false,
+        colors: colorId ? { where: { id: colorId } } : false,
+      },
     });
 
     if (!product) {
@@ -123,15 +134,20 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
       return next(new AppError('Product variant not found', 404));
     }
 
+    if (colorId && !product.colors.find(c => c.id === colorId)) {
+      return next(new AppError('Product color not found', 404));
+    }
+
     const cart = await getOrCreateCart(userId);
 
     // Check if item already exists in cart
     const existingItem = await prisma.cartItem.findUnique({
       where: {
-        cartId_productId_variantId: {
+        cartId_productId_variantId_colorId: {
           cartId: cart.id,
           productId,
           variantId: variantId || null,
+          colorId: colorId || null,
         },
       },
     });
@@ -161,15 +177,26 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
               price: true,
             },
           },
+          color: {
+            select: {
+              id: true,
+              color: true,
+              colorCode: true,
+              images: true,
+            },
+          },
         },
       });
     } else {
       // Create new cart item
+      const selectedColor = colorId ? product.colors.find(c => c.id === colorId)?.color : null;
       cartItem = await prisma.cartItem.create({
         data: {
           cartId: cart.id,
           productId,
           variantId: variantId || null,
+          colorId: colorId || null,
+          selectedColor: selectedColor || null,
           quantity: parseInt(quantity),
         },
         include: {
@@ -189,6 +216,14 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
               name: true,
               color: true,
               price: true,
+            },
+          },
+          color: {
+            select: {
+              id: true,
+              color: true,
+              colorCode: true,
+              images: true,
             },
           },
         },

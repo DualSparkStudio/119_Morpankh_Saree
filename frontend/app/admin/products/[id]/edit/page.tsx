@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, Save, X } from 'lucide-react';
+import { ArrowLeft, Save, X, Plus } from 'lucide-react';
 import { adminApi } from '@/lib/api/admin';
 import { categoriesApi, Category } from '@/lib/api/categories';
 import { Product } from '@/lib/api/products';
@@ -39,14 +39,13 @@ export default function EditProductPage() {
     showInTrending: false,
     showInCategories: false,
     tags: [] as string[],
-    variants: [] as Array<{
+    colors: [] as Array<{
       id?: string;
-      name: string;
-      color?: string;
-      fabric?: string;
-      occasion?: string;
-      price: string;
-      sku: string;
+      color: string;
+      colorCode?: string;
+      images: string[];
+      sku?: string;
+      barcode?: string;
     }>,
   });
 
@@ -101,9 +100,13 @@ export default function EditProductPage() {
         showInTrending: (productData as any).showInTrending ?? false,
         showInCategories: (productData as any).showInCategories ?? false,
         tags: (productData as any).tags || [],
-        variants: productData.variants?.map(v => ({
-          ...v,
-          price: v.price?.toString() || '',
+        colors: (productData as any).colors?.map((c: any) => ({
+          id: c.id,
+          color: c.color,
+          colorCode: c.colorCode || '',
+          images: c.images || [],
+          sku: c.sku || '',
+          barcode: c.barcode || '',
         })) || [],
       });
       setSlugManuallyEdited(false); // Reset flag when loading product data
@@ -200,6 +203,93 @@ export default function EditProductPage() {
 
   const removeTag = (tag: string) => {
     setFormData({ ...formData, tags: formData.tags.filter(t => t !== tag) });
+  };
+
+  // Color management functions
+  const addColor = async () => {
+    const colorName = prompt('Enter color name:');
+    if (!colorName || !colorName.trim()) return;
+
+    try {
+      const colorData = {
+        color: colorName.trim(),
+        colorCode: '',
+        images: [],
+        sku: '',
+        barcode: '',
+      };
+      const newColor = await adminApi.addProductColor(id, colorData);
+      setFormData({
+        ...formData,
+        colors: [...formData.colors, { ...colorData, id: newColor.id }],
+      });
+    } catch (error: any) {
+      console.error('Error adding color:', error);
+      alert(error.response?.data?.message || 'Failed to add color');
+    }
+  };
+
+  const updateColor = async (colorIndex: number, field: string, value: any) => {
+    const color = formData.colors[colorIndex];
+    if (!color.id) {
+      // Local update for new colors
+      const updatedColors = [...formData.colors];
+      updatedColors[colorIndex] = { ...updatedColors[colorIndex], [field]: value };
+      setFormData({ ...formData, colors: updatedColors });
+      return;
+    }
+
+    // Update via API
+    try {
+      const updateData: any = {};
+      if (field === 'images') {
+        updateData.images = value;
+      } else {
+        updateData[field] = value;
+      }
+      await adminApi.updateProductColor(id, color.id, updateData);
+      const updatedColors = [...formData.colors];
+      updatedColors[colorIndex] = { ...updatedColors[colorIndex], [field]: value };
+      setFormData({ ...formData, colors: updatedColors });
+    } catch (error: any) {
+      console.error('Error updating color:', error);
+      alert(error.response?.data?.message || 'Failed to update color');
+    }
+  };
+
+  const removeColor = async (colorIndex: number) => {
+    const color = formData.colors[colorIndex];
+    if (!confirm(`Are you sure you want to remove the color "${color.color}"?`)) return;
+
+    if (color.id) {
+      try {
+        await adminApi.deleteProductColor(id, color.id);
+      } catch (error: any) {
+        console.error('Error deleting color:', error);
+        alert(error.response?.data?.message || 'Failed to delete color');
+        return;
+      }
+    }
+
+    setFormData({
+      ...formData,
+      colors: formData.colors.filter((_, i) => i !== colorIndex),
+    });
+  };
+
+  const addColorImage = (colorIndex: number) => {
+    const url = prompt('Enter image URL:');
+    if (url && url.trim()) {
+      const color = formData.colors[colorIndex];
+      const updatedImages = [...color.images, url.trim()];
+      updateColor(colorIndex, 'images', updatedImages);
+    }
+  };
+
+  const removeColorImage = (colorIndex: number, imageIndex: number) => {
+    const color = formData.colors[colorIndex];
+    const updatedImages = color.images.filter((_, i) => i !== imageIndex);
+    updateColor(colorIndex, 'images', updatedImages);
   };
 
   const getImageUrl = (image: string): string => {
@@ -512,6 +602,121 @@ export default function EditProductPage() {
               })
             )}
           </div>
+        </div>
+
+        {/* Colors */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <label className="block text-sm font-medium text-gray-700">Product Colors</label>
+            <button
+              type="button"
+              onClick={addColor}
+              className="inline-flex items-center gap-2 text-sm text-[#312e81] hover:text-[#1e3a8a]"
+            >
+              <Plus className="w-4 h-4" />
+              Add Color
+            </button>
+          </div>
+          {formData.colors.length > 0 && (
+            <div className="space-y-4 border border-gray-200 rounded-lg p-4">
+              {formData.colors.map((color, index) => (
+                <div key={color.id || index} className="p-4 bg-gray-50 rounded-lg space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Color Name *</label>
+                      <input
+                        type="text"
+                        value={color.color}
+                        onChange={(e) => updateColor(index, 'color', e.target.value)}
+                        placeholder="e.g., Green, Red, Blue"
+                        required
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Color Code (Hex)</label>
+                      <input
+                        type="text"
+                        value={color.colorCode || ''}
+                        onChange={(e) => updateColor(index, 'colorCode', e.target.value)}
+                        placeholder="#22c55e"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">SKU (Optional)</label>
+                      <input
+                        type="text"
+                        value={color.sku || ''}
+                        onChange={(e) => updateColor(index, 'sku', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Barcode (Optional)</label>
+                      <input
+                        type="text"
+                        value={color.barcode || ''}
+                        onChange={(e) => updateColor(index, 'barcode', e.target.value)}
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1e3a8a] focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Color Images */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-xs font-medium text-gray-700">Images (3-4 images recommended) *</label>
+                      <button
+                        type="button"
+                        onClick={() => addColorImage(index)}
+                        className="text-xs text-[#312e81] hover:text-[#1e3a8a]"
+                      >
+                        <Plus className="w-3 h-3 inline mr-1" />
+                        Add Image
+                      </button>
+                    </div>
+                    {color.images.length > 0 && (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {color.images.map((img, imgIndex) => (
+                          <div key={imgIndex} className="relative group">
+                            <img
+                              src={getImageUrl(img)}
+                              alt={`${color.color} ${imgIndex + 1}`}
+                              className="w-full h-24 object-cover rounded border border-gray-300"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = '/images/placeholder.png';
+                              }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeColorImage(index, imgIndex)}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {color.images.length === 0 && (
+                      <p className="text-xs text-gray-500">No images added. Click "Add Image" to add images for this color.</p>
+                    )}
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => removeColor(index)}
+                      className="text-red-500 hover:text-red-700 text-sm"
+                    >
+                      Remove Color
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Tags */}

@@ -20,13 +20,16 @@ export const getAdminProducts = async (req: Request, res: Response, next: NextFu
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
-        include: {
-          category: true,
-          inventory: true,
-          _count: {
-            select: { orderItems: true, reviews: true },
-          },
+      include: {
+        category: true,
+        colors: {
+          orderBy: { order: 'asc' },
         },
+        inventory: true,
+        _count: {
+          select: { orderItems: true, reviews: true },
+        },
+      },
         skip,
         take,
         orderBy: { createdAt: 'desc' },
@@ -57,6 +60,9 @@ export const getProductById = async (req: Request, res: Response, next: NextFunc
       include: {
         category: true,
         variants: true,
+        colors: {
+          orderBy: { order: 'asc' },
+        },
         inventory: true,
       },
     });
@@ -94,7 +100,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
       showInTrending,
       showInCategories,
       tags,
-      variants,
+      colors,
     } = req.body;
 
     // Generate slug if not provided
@@ -119,17 +125,16 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         showInTrending: showInTrending || false,
         showInCategories: showInCategories || false,
         tags: tags || [],
-        variants: variants
+        colors: colors && Array.isArray(colors)
           ? {
-              create: variants.map((v: any) => ({
-                name: v.name,
-                color: v.color,
-                fabric: v.fabric,
-                occasion: v.occasion,
-                price: v.price ? parseFloat(v.price) : null,
-                sku: v.sku,
-                barcode: v.barcode,
-                isActive: v.isActive !== undefined ? v.isActive : true,
+              create: colors.map((c: any, index: number) => ({
+                color: c.color,
+                colorCode: c.colorCode || null,
+                images: c.images || [],
+                sku: c.sku || null,
+                barcode: c.barcode || null,
+                isActive: c.isActive !== undefined ? c.isActive : true,
+                order: c.order !== undefined ? c.order : index,
               })),
             }
           : undefined,
@@ -142,7 +147,9 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
       },
       include: {
         category: true,
-        variants: true,
+        colors: {
+          orderBy: { order: 'asc' },
+        },
         inventory: true,
       },
     });
@@ -168,9 +175,9 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     const { id } = req.params;
     const updateData = { ...req.body };
 
-    // Remove variants from updateData - variants should be managed separately
+    // Remove colors from updateData - colors should be managed separately
     // to avoid creating duplicates
-    delete updateData.variants;
+    delete updateData.colors;
 
     // Convert numeric strings to numbers
     if (updateData.basePrice) updateData.basePrice = parseFloat(updateData.basePrice);
@@ -215,7 +222,9 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
       data: updateData,
       include: {
         category: true,
-        variants: true,
+        colors: {
+          orderBy: { order: 'asc' },
+        },
         inventory: true,
       },
     });
@@ -269,6 +278,153 @@ export const deleteProduct = async (req: Request, res: Response, next: NextFunct
   } catch (error: any) {
     if (error.code === 'P2025') {
       return next(new AppError('Product not found', 404));
+    }
+    next(error);
+  }
+};
+
+// Color management functions
+export const addProductColor = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { color, colorCode, images, sku, barcode, isActive, order } = req.body;
+
+    // Check if product exists
+    const product = await prisma.product.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+
+    if (!product) {
+      return next(new AppError('Product not found', 404));
+    }
+
+    // Check if color already exists for this product
+    const existingColor = await prisma.productColor.findUnique({
+      where: {
+        productId_color: {
+          productId: id,
+          color: color,
+        },
+      },
+    });
+
+    if (existingColor) {
+      return next(new AppError('This color already exists for this product', 400));
+    }
+
+    const productColor = await prisma.productColor.create({
+      data: {
+        productId: id,
+        color,
+        colorCode: colorCode || null,
+        images: images || [],
+        sku: sku || null,
+        barcode: barcode || null,
+        isActive: isActive !== undefined ? isActive : true,
+        order: order !== undefined ? order : 0,
+      },
+    });
+
+    // Invalidate caches
+    await cache.del(`product:${id}`);
+    await cache.delPattern('products:*');
+
+    res.status(201).json(productColor);
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return next(new AppError('This color already exists for this product', 400));
+    }
+    next(error);
+  }
+};
+
+export const updateProductColor = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id, colorId } = req.params;
+    const { color, colorCode, images, sku, barcode, isActive, order } = req.body;
+
+    // Check if color exists and belongs to product
+    const existingColor = await prisma.productColor.findUnique({
+      where: { id: colorId },
+      select: { productId: true, color: true },
+    });
+
+    if (!existingColor || existingColor.productId !== id) {
+      return next(new AppError('Color not found', 404));
+    }
+
+    // If color name is being changed, check for uniqueness
+    if (color && color !== existingColor.color) {
+      const colorExists = await prisma.productColor.findUnique({
+        where: {
+          productId_color: {
+            productId: id,
+            color: color,
+          },
+        },
+      });
+      if (colorExists) {
+        return next(new AppError('This color already exists for this product', 400));
+      }
+    }
+
+    const updateData: any = {};
+    if (color !== undefined) updateData.color = color;
+    if (colorCode !== undefined) updateData.colorCode = colorCode;
+    if (images !== undefined) updateData.images = images;
+    if (sku !== undefined) updateData.sku = sku;
+    if (barcode !== undefined) updateData.barcode = barcode;
+    if (isActive !== undefined) updateData.isActive = isActive;
+    if (order !== undefined) updateData.order = order;
+
+    const productColor = await prisma.productColor.update({
+      where: { id: colorId },
+      data: updateData,
+    });
+
+    // Invalidate caches
+    await cache.del(`product:${id}`);
+    await cache.delPattern('products:*');
+
+    res.json(productColor);
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return next(new AppError('This color already exists for this product', 400));
+    }
+    if (error.code === 'P2025') {
+      return next(new AppError('Color not found', 404));
+    }
+    next(error);
+  }
+};
+
+export const deleteProductColor = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id, colorId } = req.params;
+
+    // Check if color exists and belongs to product
+    const existingColor = await prisma.productColor.findUnique({
+      where: { id: colorId },
+      select: { productId: true },
+    });
+
+    if (!existingColor || existingColor.productId !== id) {
+      return next(new AppError('Color not found', 404));
+    }
+
+    await prisma.productColor.delete({
+      where: { id: colorId },
+    });
+
+    // Invalidate caches
+    await cache.del(`product:${id}`);
+    await cache.delPattern('products:*');
+
+    res.json({ message: 'Color deleted successfully' });
+  } catch (error: any) {
+    if (error.code === 'P2025') {
+      return next(new AppError('Color not found', 404));
     }
     next(error);
   }

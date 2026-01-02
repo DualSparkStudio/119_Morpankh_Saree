@@ -62,5 +62,20 @@ export const adminApi = {
     const { data } = await api.patch(`/admin/orders/${id}/status`, { status });
     return data;
   },
+
+  // Color management
+  addProductColor: async (productId: string, colorData: any): Promise<any> => {
+    const { data } = await api.post(`/admin/products/${productId}/colors`, colorData);
+    return data;
+  },
+
+  updateProductColor: async (productId: string, colorId: string, colorData: any): Promise<any> => {
+    const { data } = await api.put(`/admin/products/${productId}/colors/${colorId}`, colorData);
+    return data;
+  },
+
+  deleteProductColor: async (productId: string, colorId: string): Promise<void> => {
+    await api.delete(`/admin/products/${productId}/colors/${colorId}`);
+  },
 };
 

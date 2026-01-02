@@ -129,6 +129,35 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
           }
         }
 
+        // Handle colorId if provided
+        if (item.colorId !== null && item.colorId !== undefined && item.colorId !== '') {
+          const colorIdStr = String(item.colorId).trim();
+          if (colorIdStr !== '' && colorIdStr !== 'null' && colorIdStr !== 'undefined') {
+            try {
+              // Validate color exists and belongs to the product
+              const color = await prisma.productColor.findFirst({
+                where: {
+                  id: colorIdStr,
+                  productId: item.productId,
+                  isActive: true,
+                },
+              });
+
+              if (!color) {
+                console.warn(`Color with ID ${colorIdStr} not found for product ${item.productId}. Proceeding without color.`);
+              } else {
+                orderItem.colorId = colorIdStr;
+                orderItem.selectedColor = color.color; // Store color name for display
+              }
+            } catch (colorError) {
+              console.warn(`Error validating color ${colorIdStr} for product ${item.productId}:`, colorError);
+            }
+          }
+        } else if (item.selectedColor) {
+          // If colorId is not provided but selectedColor is, store it for display
+          orderItem.selectedColor = item.selectedColor;
+        }
+
         return orderItem;
       })
     );
@@ -175,6 +204,7 @@ export const createOrder = async (req: AuthRequest, res: Response, next: NextFun
           include: {
             product: true,
             variant: true,
+            color: true,
           },
         },
       },
@@ -274,6 +304,7 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
           include: {
             product: true,
             variant: true,
+            color: true,
           },
         },
         payments: {
@@ -312,6 +343,7 @@ export const getOrderByNumber = async (req: AuthRequest, res: Response, next: Ne
           include: {
             product: true,
             variant: true,
+            color: true,
           },
         },
         payments: {

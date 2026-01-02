@@ -10,6 +10,17 @@ export interface ProductVariant {
   sku: string;
 }
 
+export interface ProductColor {
+  id: string;
+  color: string;
+  colorCode?: string;
+  images: string[];
+  sku?: string;
+  barcode?: string;
+  isActive?: boolean;
+  order?: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -32,6 +43,7 @@ export interface Product {
     slug: string;
   };
   variants?: ProductVariant[];
+  colors?: ProductColor[];
   isFeatured?: boolean;
   isActive?: boolean;
   showInPremium?: boolean;
