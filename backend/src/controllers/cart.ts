@@ -68,14 +68,13 @@ const getOrCreateCart = async (userId: string) => {
               select: {
                 id: true,
                 color: true,
-                colorCode: true,
                 images: true,
               },
             },
           },
         },
       },
-    });
+    }) as any;
   }
 
   return cart;
