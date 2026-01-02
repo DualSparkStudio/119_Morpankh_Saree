@@ -257,11 +257,18 @@ export const getOrders = async (req: AuthRequest, res: Response, next: NextFunct
 
 export const getOrder = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const userId = req.userId!;
+    const userId = req.userId; // Optional - can be undefined for guest orders
     const { id } = req.params;
 
+    // Build where clause - if user is authenticated, only return their orders
+    // If not authenticated, return any order by ID (for guest checkout success page)
+    const whereClause: any = { id };
+    if (userId) {
+      whereClause.userId = userId;
+    }
+
     const order = await prisma.order.findFirst({
-      where: { id, userId },
+      where: whereClause,
       include: {
         items: {
           include: {
@@ -269,7 +276,47 @@ export const getOrder = async (req: AuthRequest, res: Response, next: NextFuncti
             variant: true,
           },
         },
-        payments: true,
+        payments: {
+          orderBy: { createdAt: 'desc' },
+        },
+      },
+    });
+
+    if (!order) {
+      return next(new AppError('Order not found', 404));
+    }
+
+    res.json(order);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Get order by order number (supports guest checkout)
+export const getOrderByNumber = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { orderNumber } = req.params;
+    const userId = req.userId; // Optional - can be undefined for guest orders
+
+    // Build where clause - if user is authenticated, only return their orders
+    // If not authenticated, return any order by order number (for guest checkout)
+    const whereClause: any = { orderNumber };
+    if (userId) {
+      whereClause.userId = userId;
+    }
+
+    const order = await prisma.order.findFirst({
+      where: whereClause,
+      include: {
+        items: {
+          include: {
+            product: true,
+            variant: true,
+          },
+        },
+        payments: {
+          orderBy: { createdAt: 'desc' },
+        },
       },
     });
 

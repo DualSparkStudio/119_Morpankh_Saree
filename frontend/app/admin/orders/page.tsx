@@ -15,7 +15,9 @@ interface Order {
   user: {
     name?: string;
     email?: string;
-  };
+  } | null;
+  guestName?: string;
+  guestEmail?: string;
   items: Array<{
     quantity: number;
     price: number;
@@ -144,8 +146,12 @@ export default function AdminOrdersPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{order.user.name || 'N/A'}</div>
-                      <div className="text-sm text-gray-500">{order.user.email}</div>
+                      <div className="text-sm text-gray-900">
+                        {order.user?.name || order.guestName || 'Guest Customer'}
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {order.user?.email || order.guestEmail || 'N/A'}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       ₹{order.total.toLocaleString()}

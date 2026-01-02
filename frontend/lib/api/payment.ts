@@ -7,6 +7,7 @@ export interface RazorpayOrderResponse {
 }
 
 export interface PaymentVerificationRequest {
+  orderId: string;
   razorpayOrderId: string;
   razorpayPaymentId: string;
   razorpaySignature: string;

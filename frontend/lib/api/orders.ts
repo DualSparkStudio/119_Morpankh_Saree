@@ -28,11 +28,29 @@ export interface CreateOrderRequest {
   guestName?: string;
 }
 
+export interface OrderItem {
+  id: string;
+  quantity: number;
+  price: number;
+  total: number;
+  product: {
+    id: string;
+    name: string;
+    slug: string;
+    images: string[];
+  };
+  variant?: {
+    id: string;
+    name: string;
+    color?: string;
+  } | null;
+}
+
 export interface Order {
   id: string;
   orderNumber: string;
   status: string;
-  items: any[];
+  items: OrderItem[];
   subtotal: number;
   discount: number;
   tax: number;
@@ -41,6 +59,13 @@ export interface Order {
   paymentStatus: string;
   shippingAddress: ShippingAddress;
   billingAddress: ShippingAddress;
+  payments?: Array<{
+    id: string;
+    amount: number;
+    method: string;
+    status: string;
+    createdAt: string;
+  }>;
   createdAt: string;
 }
 
@@ -57,6 +82,11 @@ export const ordersApi = {
 
   getOrder: async (id: string): Promise<Order> => {
     const { data } = await api.get(`/orders/${id}`);
+    return data;
+  },
+
+  getOrderByNumber: async (orderNumber: string): Promise<Order> => {
+    const { data } = await api.get(`/orders/number/${orderNumber}`);
     return data;
   },
 };

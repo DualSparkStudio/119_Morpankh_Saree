@@ -245,19 +245,41 @@ export default function CheckoutPage() {
         order_id: orderResponse.orderId,
         handler: async function (response: any) {
           try {
-            // Verify payment on backend
-            await paymentApi.verifyPayment({
+            console.log('Payment successful, verifying with backend...', {
+              orderId: order.id,
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+            });
+
+            // Verify payment on backend (include orderId so backend can update order status)
+            const verificationResult = await paymentApi.verifyPayment({
+              orderId: order.id,
               razorpayOrderId: response.razorpay_order_id,
               razorpayPaymentId: response.razorpay_payment_id,
               razorpaySignature: response.razorpay_signature,
             });
 
-            // Clear cart and redirect to success page
+            console.log('Payment verified successfully:', verificationResult);
+
+            // Clear cart and redirect to success page with order ID
             clearCart();
-            router.push('/order-success');
-          } catch (error) {
+            router.push(`/order-success?orderId=${order.id}`);
+          } catch (error: any) {
             console.error('Payment verification failed:', error);
-            alert('Payment verification failed. Please contact support.');
+            console.error('Error details:', {
+              message: error?.message,
+              response: error?.response?.data,
+              status: error?.response?.status,
+            });
+            
+            // Show detailed error message
+            const errorMessage = error?.response?.data?.message || error?.message || 'Payment verification failed';
+            alert(`Payment verification failed: ${errorMessage}\n\nYour payment was successful, but we couldn't verify it. Please contact support with order ID: ${order.id}`);
+            
+            // Still redirect to success page since payment was made
+            // The webhook will eventually update the order status
+            clearCart();
+            router.push(`/order-success?orderId=${order.id}`);
           }
         },
         prefill: {
