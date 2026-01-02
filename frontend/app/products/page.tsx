@@ -356,7 +356,12 @@ function ProductsPageContent() {
                   <div className="relative aspect-[7/8] bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 overflow-hidden">
                     <Link href={`/products/${product.slug}`} className="block w-full h-full">
                       {(() => {
-                        const imageUrl = getImageUrl(product.images?.[0], product, products.indexOf(product));
+                        // Get image from first color if available, otherwise from product images
+                        const firstColorImage = product.colors && product.colors.length > 0 && product.colors[0].images && product.colors[0].images.length > 0
+                          ? product.colors[0].images[0]
+                          : null;
+                        const productImage = firstColorImage || product.images?.[0];
+                        const imageUrl = getImageUrl(productImage, product, products.indexOf(product));
                         return imageUrl ? (
                           <img
                             src={imageUrl}
@@ -417,7 +422,9 @@ function ProductsPageContent() {
                             quantity: 1,
                             price: product.basePrice,
                             productName: product.name,
-                            productImage: product.images?.[0] || '',
+                            productImage: (product.colors && product.colors.length > 0 && product.colors[0].images && product.colors[0].images.length > 0)
+                              ? product.colors[0].images[0]
+                              : (product.images?.[0] || ''),
                           });
                         }}
                         className="bg-white p-2 rounded-full hover:bg-gray-100 transition-colors pointer-events-auto z-30"

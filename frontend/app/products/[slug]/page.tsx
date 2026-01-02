@@ -60,6 +60,7 @@ export default function ProductDetailPage() {
         const firstColor = productData.colors[0];
         setSelectedColor(firstColor);
         setSelectedColorId(firstColor.id);
+        setSelectedImage(0); // Reset to first image of the color
       }
       
       // Load related products from the same category
