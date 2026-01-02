@@ -7,6 +7,7 @@ import { Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
 import { adminApi } from '@/lib/api/admin';
 import { ConfirmModal, AlertModal } from '@/components/Modal';
 import { Product } from '@/lib/api/products';
+import { getImageUrl } from '@/lib/utils/imageHelper';
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -40,19 +41,6 @@ export default function AdminProductsPage() {
         search: search || undefined,
       });
       
-      // Debug: Log product images to see what's in the database
-      response.products.forEach((product) => {
-        const imageCount = product.images?.length || 0;
-        const firstImageUrl = product.images?.[0] || '';
-        const processedUrl = firstImageUrl ? getImageUrl(firstImageUrl) : '';
-        console.log(`Product: ${product.name} (${product.sku})`, {
-          'Number of Images in Database': imageCount,
-          'Raw Images Array': product.images,
-          'First Image URL (Raw from DB)': firstImageUrl || 'NO IMAGE',
-          'First Image URL (Processed)': processedUrl || 'EMPTY AFTER PROCESSING',
-          'Status': imageCount === 0 ? '⚠️ NO IMAGES - Add images via admin panel' : processedUrl ? `✅ Image URL ready` : '⚠️ Image URL is empty after processing',
-        });
-      });
       
       setProducts(response.products);
       setPagination(response.pagination);
@@ -86,49 +74,6 @@ export default function AdminProductsPage() {
     }
   };
 
-  const getImageUrl = (image: string | undefined): string => {
-    if (!image || image.trim() === '') return '';
-    
-    // Convert old Google Drive format to thumbnail format for better reliability
-    if (image.includes('drive.google.com/uc?export=view&id=')) {
-      const fileIdMatch = image.match(/id=([a-zA-Z0-9_-]+)/);
-      if (fileIdMatch) {
-        image = `https://drive.google.com/thumbnail?id=${fileIdMatch[1]}&sz=w1920`;
-      }
-    }
-    
-    // If it's already a full URL, return as is
-    if (image.startsWith('http://') || image.startsWith('https://')) {
-      return image;
-    }
-    // If it starts with /uploads, it's from the backend
-    if (image.startsWith('/uploads')) {
-      // In production, backend serves /uploads directly on the same domain
-      // In development, we need to prepend the backend URL
-      if (typeof window !== 'undefined') {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-        if (apiUrl.startsWith('http')) {
-          // Development: extract base URL
-          const baseUrl = apiUrl.replace('/api', '');
-          return `${baseUrl}${image}`;
-        } else {
-          // Production: same domain, backend serves /uploads directly
-          return image;
-        }
-      }
-      return image;
-    }
-    // Old hardcoded paths like /images/products/... don't exist - return empty
-    if (image.startsWith('/images/products/')) {
-      return '';
-    }
-    // If it starts with /, it might be a frontend public image
-    if (image.startsWith('/')) {
-      return image;
-    }
-    // Otherwise, assume it's a relative path
-    return image;
-  };
 
   return (
     <div>
@@ -204,26 +149,48 @@ export default function AdminProductsPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="relative w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden mr-4 border border-gray-200">
-                          {product.images && product.images.length > 0 ? (
-                            <img
-                              src={getImageUrl(product.images[0])}
-                              alt={product.name}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                              }}
-                              onLoad={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.opacity = '1';
-                              }}
-                              style={{ opacity: 0, transition: 'opacity 0.3s' }}
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs">
-                              No Image
-                            </div>
-                          )}
+                          {(() => {
+                            // Get image from any color that has images, otherwise from product images
+                            let productImage: string | undefined = undefined;
+                            
+                            // Find first color with images
+                            if (product.colors && product.colors.length > 0) {
+                              const colorWithImages = product.colors.find(
+                                color => color.images && color.images.length > 0 && color.images[0] && color.images[0].trim() !== ''
+                              );
+                              if (colorWithImages && colorWithImages.images && colorWithImages.images.length > 0) {
+                                productImage = colorWithImages.images[0];
+                              }
+                            }
+                            
+                            // Fallback to product images if no color images found
+                            if (!productImage) {
+                              productImage = product.images?.[0];
+                            }
+                            
+                            const imageUrl = getImageUrl(productImage, 0);
+                            
+                            return imageUrl ? (
+                              <img
+                                src={imageUrl}
+                                alt={product.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                }}
+                                onLoad={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.opacity = '1';
+                                }}
+                                style={{ opacity: 0, transition: 'opacity 0.3s' }}
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs">
+                                No Image
+                              </div>
+                            );
+                          })()}
                         </div>
                         <div>
                           <div className="text-sm font-medium text-gray-900">{product.name}</div>
