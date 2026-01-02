@@ -32,7 +32,6 @@ const getOrCreateCart = async (userId: string) => {
             select: {
               id: true,
               color: true,
-              colorCode: true,
               images: true,
             },
           },
@@ -92,7 +91,7 @@ export const getCart = async (req: AuthRequest, res: Response, next: NextFunctio
     }
 
     // Calculate totals
-    const items = cart.items.map(item => {
+    const items = (cart.items || []).map((item: any) => {
       const price = item.variant?.price || item.product.basePrice;
       return {
         id: item.id,
@@ -109,7 +108,7 @@ export const getCart = async (req: AuthRequest, res: Response, next: NextFunctio
       };
     });
 
-    const subtotal = items.reduce((sum, item) => sum + item.total, 0);
+    const subtotal = items.reduce((sum: number, item: any) => sum + item.total, 0);
 
     res.json({
       cartId: cart.id,
@@ -200,7 +199,6 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
             select: {
               id: true,
               color: true,
-              colorCode: true,
               images: true,
             },
           },
@@ -241,7 +239,6 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
             select: {
               id: true,
               color: true,
-              colorCode: true,
               images: true,
             },
           },
