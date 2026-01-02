@@ -150,16 +150,28 @@ export default function AdminProductsPage() {
                       <div className="flex items-center">
                         <div className="relative w-12 h-12 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden mr-4 border border-gray-200">
                           {(() => {
-                            // Get image from any color that has images, otherwise from product images
+                            // Get random image from any color that has images, otherwise from product images
                             let productImage: string | undefined = undefined;
                             
-                            // Find first color with images
-                            if (product.colors && product.colors.length > 0) {
-                              const colorWithImages = product.colors.find(
-                                color => color.images && color.images.length > 0 && color.images[0] && color.images[0].trim() !== ''
-                              );
-                              if (colorWithImages && colorWithImages.images && colorWithImages.images.length > 0) {
-                                productImage = colorWithImages.images[0];
+                            // Get colorImages (new structure) or colors (legacy)
+                            const colorImages = (product as any).colorImages || product.colors || [];
+                            
+                            if (colorImages.length > 0) {
+                              // Collect all images from all active colors
+                              const allImages: string[] = [];
+                              colorImages.forEach((color: any) => {
+                                if (color.isActive !== false && color.images && Array.isArray(color.images)) {
+                                  color.images.forEach((img: string) => {
+                                    if (img && img.trim() !== '') {
+                                      allImages.push(img);
+                                    }
+                                  });
+                                }
+                              });
+                              
+                              // Pick a random image
+                              if (allImages.length > 0) {
+                                productImage = allImages[Math.floor(Math.random() * allImages.length)];
                               }
                             }
                             

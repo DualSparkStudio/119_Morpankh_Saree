@@ -13,7 +13,7 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const slug = (params?.slug as string) || '';
   const [selectedImage, setSelectedImage] = useState(0);
-  const [selectedColorId, setSelectedColorId] = useState<string | null>(null);
+  const [selectedColorIndex, setSelectedColorIndex] = useState<number | null>(null);
   const [selectedColor, setSelectedColor] = useState<ProductColor | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [product, setProduct] = useState<Product | null>(null);
@@ -56,11 +56,12 @@ export default function ProductDetailPage() {
       
       setProduct(productData);
       
-      // Set default color if colors exist
-      if (productData.colors && productData.colors.length > 0) {
-        const firstColor = productData.colors[0];
+      // Set default color if colorImages exist (new structure) or colors (legacy)
+      const colorImages = productData.colorImages || productData.colors || [];
+      if (colorImages.length > 0) {
+        const firstColor = colorImages[0];
         setSelectedColor(firstColor);
-        setSelectedColorId(firstColor.id);
+        setSelectedColorIndex(0); // Using index instead of ID
         setSelectedImage(0); // Reset to first image of the color
       }
       
@@ -132,11 +133,10 @@ export default function ProductDetailPage() {
       : (product.images && product.images.length > 0 ? product.images[0] : '');
     
     addToCart({
-      id: `product-${product.id}${selectedColorId ? `-color-${selectedColorId}` : ''}`,
+      id: `product-${product.id}${selectedColor ? `-color-${selectedColor.color}` : ''}`,
       productId: product.id,
       productSlug: product.slug,
-      colorId: selectedColorId || undefined,
-      selectedColor: selectedColor?.color || undefined,
+      colorName: selectedColor?.color || undefined,
       quantity: quantity,
       price: product.basePrice,
       productName: product.name,
@@ -322,8 +322,9 @@ export default function ProductDetailPage() {
                 </div>
                 <div className="flex flex-wrap gap-3">
                   {availableColors.map((color) => {
-                    const isSelected = selectedColorId === color.id;
-                    // Use colorCode if available, otherwise map from color name
+                    const colorIndex = availableColors.indexOf(color);
+                    const isSelected = selectedColorIndex === colorIndex;
+                    // Map from color name
                     const colorMap: { [key: string]: string } = {
                       'red': '#EF4444',
                       'blue': '#3B82F6',
@@ -342,10 +343,10 @@ export default function ProductDetailPage() {
                     
                     return (
                       <button
-                        key={color.id}
+                        key={colorIndex}
                         onClick={() => {
                           setSelectedColor(color);
-                          setSelectedColorId(color.id);
+                          setSelectedColorIndex(colorIndex);
                           setSelectedImage(0); // Reset to first image when color changes
                         }}
                         className={`relative w-12 h-12 rounded-full border-2 transition-all ${
@@ -625,14 +626,22 @@ export default function ProductDetailPage() {
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {relatedProducts.map((relatedProduct) => {
-                // Get image from any color that has images, otherwise from product images
+                // Get random image from any color that has images, otherwise from product images
                 let relatedProductImage: string | undefined = undefined;
-                if (relatedProduct.colors && relatedProduct.colors.length > 0) {
-                  const colorWithImages = relatedProduct.colors.find(
-                    color => color.images && color.images.length > 0 && color.images[0] && color.images[0].trim() !== ''
-                  );
-                  if (colorWithImages && colorWithImages.images && colorWithImages.images.length > 0) {
-                    relatedProductImage = colorWithImages.images[0];
+                const colorImages = relatedProduct.colorImages || relatedProduct.colors || [];
+                if (colorImages.length > 0) {
+                  const allImages: string[] = [];
+                  colorImages.forEach((color: any) => {
+                    if (color.isActive !== false && color.images && Array.isArray(color.images)) {
+                      color.images.forEach((img: string) => {
+                        if (img && img.trim() !== '') {
+                          allImages.push(img);
+                        }
+                      });
+                    }
+                  });
+                  if (allImages.length > 0) {
+                    relatedProductImage = allImages[Math.floor(Math.random() * allImages.length)];
                   }
                 }
                 if (!relatedProductImage) {

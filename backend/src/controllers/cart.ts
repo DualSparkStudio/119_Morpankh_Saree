@@ -28,13 +28,6 @@ const getOrCreateCart = async (userId: string) => {
               price: true,
             },
           },
-          color: {
-            select: {
-              id: true,
-              color: true,
-              images: true,
-            },
-          },
         },
       },
     },
@@ -96,11 +89,9 @@ export const getCart = async (req: AuthRequest, res: Response, next: NextFunctio
         id: item.id,
         productId: item.productId,
         variantId: item.variantId,
-        colorId: item.colorId,
-        selectedColor: item.selectedColor,
+        colorName: item.colorName,
         product: item.product,
         variant: item.variant,
-        color: item.color,
         quantity: item.quantity,
         price,
         total: price * item.quantity,
@@ -124,7 +115,7 @@ export const getCart = async (req: AuthRequest, res: Response, next: NextFunctio
 export const addToCart = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const userId = req.userId!;
-    const { productId, variantId, colorId, quantity = 1 } = req.body;
+    const { productId, variantId, colorName, quantity = 1 } = req.body;
 
     if (!productId) {
       return next(new AppError('Product ID is required', 400));
@@ -135,7 +126,6 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
       where: { id: productId },
       include: { 
         variants: variantId ? { where: { id: variantId } } : false,
-        colors: colorId ? { where: { id: colorId } } : false,
       },
     });
 
@@ -147,8 +137,12 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
       return next(new AppError('Product variant not found', 404));
     }
 
-    if (colorId && product.colors && !product.colors.find(c => c.id === colorId)) {
-      return next(new AppError('Product color not found', 404));
+    // Check if colorName exists in colorImages
+    if (colorName) {
+      const colorImages = (product.colorImages as any[]) || [];
+      if (!colorImages.some((c: any) => c.color === colorName)) {
+        return next(new AppError('Product color not found', 404));
+      }
     }
 
     const cart = await getOrCreateCart(userId);
@@ -160,11 +154,11 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
     // Check if item already exists in cart
     const existingItem = await prisma.cartItem.findUnique({
       where: {
-        cartId_productId_variantId_colorId: {
+        cartId_productId_variantId_colorName: {
           cartId: cart.id,
           productId,
           variantId: variantId || null,
-          colorId: colorId || null,
+          colorName: colorName || null,
         },
       },
     });
@@ -194,25 +188,16 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
               price: true,
             },
           },
-          color: {
-            select: {
-              id: true,
-              color: true,
-              images: true,
-            },
-          },
         },
       });
     } else {
       // Create new cart item
-      const selectedColor = colorId && product.colors ? product.colors.find(c => c.id === colorId)?.color : null;
       cartItem = await prisma.cartItem.create({
         data: {
           cartId: cart.id,
           productId,
           variantId: variantId || null,
-          colorId: colorId || null,
-          selectedColor: selectedColor || null,
+          colorName: colorName || null,
           quantity: parseInt(quantity),
         },
         include: {
@@ -232,13 +217,6 @@ export const addToCart = async (req: AuthRequest, res: Response, next: NextFunct
               name: true,
               color: true,
               price: true,
-            },
-          },
-          color: {
-            select: {
-              id: true,
-              color: true,
-              images: true,
             },
           },
         },

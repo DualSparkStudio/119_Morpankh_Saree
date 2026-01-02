@@ -65,10 +65,6 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
         where,
         include: {
           category: true,
-          colors: {
-            where: { isActive: true },
-            orderBy: { order: 'asc' },
-          },
           inventory: true,
           _count: {
             select: { reviews: true },
@@ -120,10 +116,6 @@ export const getProduct = async (req: Request, res: Response, next: NextFunction
         variants: {
           where: { isActive: true },
         },
-        colors: {
-          where: { isActive: true },
-          orderBy: { order: 'asc' },
-        },
         inventory: true,
         reviews: {
           where: { isApproved: true },
@@ -170,10 +162,6 @@ export const getProductBySlug = async (req: Request, res: Response, next: NextFu
         category: true,
         variants: {
           where: { isActive: true },
-        },
-        colors: {
-          where: { isActive: true },
-          orderBy: { order: 'asc' },
         },
         inventory: true,
         reviews: {

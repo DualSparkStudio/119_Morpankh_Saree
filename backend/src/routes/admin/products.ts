@@ -22,10 +22,10 @@ router.get('/:id', getProductById);
 router.put('/:id', updateProduct);
 router.delete('/:id', deleteProduct);
 
-// Color management routes
+// Color management routes (using colorIndex instead of colorId)
 router.post('/:id/colors', addProductColor);
-router.put('/:id/colors/:colorId', updateProductColor);
-router.delete('/:id/colors/:colorId', deleteProductColor);
+router.put('/:id/colors/:colorIndex', updateProductColor);
+router.delete('/:id/colors/:colorIndex', deleteProductColor);
 
 export default router;
 

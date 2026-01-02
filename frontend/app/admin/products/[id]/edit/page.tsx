@@ -111,15 +111,17 @@ export default function EditProductPage() {
         showInTrending: (productData as any).showInTrending ?? false,
         showInCategories: (productData as any).showInCategories ?? false,
         tags: (productData as any).tags || [],
-        colors: (productData as any).colors?.map((c: any) => {
+        colors: ((productData as any).colorImages || (productData as any).colors || []).map((c: any, index: number) => {
           // Debug: Log color data to see what we're getting
           console.log('Loading color:', c.color, 'Images:', c.images);
           return {
-            id: c.id,
+            id: index, // Use index as temporary ID
             color: c.color,
             images: Array.isArray(c.images) ? c.images.filter((img: string) => img && img.trim() !== '') : [],
+            isActive: c.isActive !== undefined ? c.isActive : true,
+            order: c.order !== undefined ? c.order : index,
           };
-        }) || [],
+        }),
       });
       setSlugManuallyEdited(false); // Reset flag when loading product data
     } catch (error: any) {
@@ -226,7 +228,7 @@ export default function EditProductPage() {
       const newColor = await adminApi.addProductColor(id, colorData);
       setFormData({
         ...formData,
-        colors: [...formData.colors, { ...colorData, id: newColor.id }],
+        colors: [...formData.colors, { ...newColor, id: formData.colors.length }],
       });
     } catch (error: any) {
       console.error('Error adding color:', error);
@@ -240,17 +242,14 @@ export default function EditProductPage() {
   };
 
   const updateColor = async (colorIndex: number, field: string, value: any) => {
-    const color = formData.colors[colorIndex];
-    if (!color.id) {
-      // Local update for new colors
-      const updatedColors = [...formData.colors];
-      updatedColors[colorIndex] = { ...updatedColors[colorIndex], [field]: value };
-      setFormData({ ...formData, colors: updatedColors });
-      return;
-    }
+    // Update locally first
+    const updatedColors = [...formData.colors];
+    updatedColors[colorIndex] = { ...updatedColors[colorIndex], [field]: value };
+    setFormData({ ...formData, colors: updatedColors });
 
     // Update via API
     try {
+      const color = formData.colors[colorIndex];
       const updateData: any = {};
       if (field === 'images') {
         // Ensure images array is properly formatted and filtered
@@ -259,18 +258,15 @@ export default function EditProductPage() {
           : [];
         updateData.images = filteredImages;
         console.log('Updating color images via API:', {
-          colorId: color.id,
+          colorIndex,
           colorName: color.color,
           images: filteredImages,
         });
       } else {
         updateData[field] = value;
       }
-      const response = await adminApi.updateProductColor(id, color.id, updateData);
+      const response = await adminApi.updateProductColor(id, colorIndex.toString(), updateData);
       console.log('Color update response:', response);
-      const updatedColors = [...formData.colors];
-      updatedColors[colorIndex] = { ...updatedColors[colorIndex], [field]: value };
-      setFormData({ ...formData, colors: updatedColors });
     } catch (error: any) {
       console.error('Error updating color:', error);
       setAlert({
@@ -289,28 +285,23 @@ export default function EditProductPage() {
 
   const removeColor = async () => {
     if (colorToDelete === null) return;
-    const color = formData.colors[colorToDelete];
-
-    if (color.id) {
-      try {
-        await adminApi.deleteProductColor(id, color.id);
-      } catch (error: any) {
-        console.error('Error deleting color:', error);
-        setAlert({
-          isOpen: true,
-          title: 'Error',
-          message: error.response?.data?.message || 'Failed to delete color',
-          variant: 'error',
-        });
-        return;
-      }
+    
+    try {
+      await adminApi.deleteProductColor(id, colorToDelete.toString());
+      setFormData({
+        ...formData,
+        colors: formData.colors.filter((_, i) => i !== colorToDelete),
+      });
+      setColorToDelete(null);
+    } catch (error: any) {
+      console.error('Error deleting color:', error);
+      setAlert({
+        isOpen: true,
+        title: 'Error',
+        message: error.response?.data?.message || 'Failed to delete color',
+        variant: 'error',
+      });
     }
-
-    setFormData({
-      ...formData,
-      colors: formData.colors.filter((_, i) => i !== colorToDelete),
-    });
-    setColorToDelete(null);
   };
 
   const addColorImage = (colorIndex: number) => {

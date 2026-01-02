@@ -69,13 +69,13 @@ export const adminApi = {
     return data;
   },
 
-  updateProductColor: async (productId: string, colorId: string, colorData: any): Promise<any> => {
-    const { data } = await api.put(`/admin/products/${productId}/colors/${colorId}`, colorData);
+  updateProductColor: async (productId: string, colorIndex: string, colorData: any): Promise<any> => {
+    const { data } = await api.put(`/admin/products/${productId}/colors/${colorIndex}`, colorData);
     return data;
   },
 
-  deleteProductColor: async (productId: string, colorId: string): Promise<void> => {
-    await api.delete(`/admin/products/${productId}/colors/${colorId}`);
+  deleteProductColor: async (productId: string, colorIndex: string): Promise<void> => {
+    await api.delete(`/admin/products/${productId}/colors/${colorIndex}`);
   },
 };
 

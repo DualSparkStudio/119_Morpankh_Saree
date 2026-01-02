@@ -22,9 +22,6 @@ export const getAdminProducts = async (req: Request, res: Response, next: NextFu
         where,
       include: {
         category: true,
-        colors: {
-          orderBy: { order: 'asc' },
-        },
         inventory: true,
         _count: {
           select: { orderItems: true, reviews: true },
@@ -60,9 +57,6 @@ export const getProductById = async (req: Request, res: Response, next: NextFunc
       include: {
         category: true,
         variants: true,
-        colors: {
-          orderBy: { order: 'asc' },
-        },
         inventory: true,
       },
     });
@@ -119,24 +113,22 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
         costPrice: costPrice ? parseFloat(costPrice) : null,
         images: images || [],
+        colorImages: colors && Array.isArray(colors)
+          ? colors.map((c: any, index: number) => ({
+              color: c.color,
+              images: Array.isArray(c.images) 
+                ? c.images.filter((img: string) => img && img.trim() !== '')
+                : [],
+              isActive: c.isActive !== undefined ? c.isActive : true,
+              order: c.order !== undefined ? c.order : index,
+            }))
+          : null,
         isActive: isActive !== undefined ? isActive : true,
         isFeatured: isFeatured || false,
         showInPremium: showInPremium || false,
         showInTrending: showInTrending || false,
         showInCategories: showInCategories || false,
         tags: tags || [],
-        colors: colors && Array.isArray(colors)
-          ? {
-              create: colors.map((c: any, index: number) => ({
-                color: c.color,
-                images: Array.isArray(c.images) 
-                  ? c.images.filter((img: string) => img && img.trim() !== '')
-                  : [],
-                isActive: c.isActive !== undefined ? c.isActive : true,
-                order: c.order !== undefined ? c.order : index,
-              })),
-            }
-          : undefined,
         inventory: {
           create: {
             type: 'ONLINE',
@@ -146,9 +138,6 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
       },
       include: {
         category: true,
-        colors: {
-          orderBy: { order: 'asc' },
-        },
         inventory: true,
       },
     });
@@ -174,9 +163,20 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     const { id } = req.params;
     const updateData = { ...req.body };
 
-    // Remove colors from updateData - colors should be managed separately
-    // to avoid creating duplicates
-    delete updateData.colors;
+    // Handle colorImages if provided
+    if (updateData.colors !== undefined) {
+      updateData.colorImages = Array.isArray(updateData.colors)
+        ? updateData.colors.map((c: any, index: number) => ({
+            color: c.color,
+            images: Array.isArray(c.images) 
+              ? c.images.filter((img: string) => img && img.trim() !== '')
+              : [],
+            isActive: c.isActive !== undefined ? c.isActive : true,
+            order: c.order !== undefined ? c.order : index,
+          }))
+        : null;
+      delete updateData.colors;
+    }
 
     // Convert numeric strings to numbers
     if (updateData.basePrice) updateData.basePrice = parseFloat(updateData.basePrice);
@@ -221,9 +221,6 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
       data: updateData,
       include: {
         category: true,
-        colors: {
-          orderBy: { order: 'asc' },
-        },
         inventory: true,
       },
     });
@@ -282,7 +279,7 @@ export const deleteProduct = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-// Color management functions
+// Color management functions - now working with colorImages JSON field
 export const addProductColor = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
@@ -291,24 +288,18 @@ export const addProductColor = async (req: Request, res: Response, next: NextFun
     // Check if product exists
     const product = await prisma.product.findUnique({
       where: { id },
-      select: { id: true },
+      select: { id: true, colorImages: true },
     });
 
     if (!product) {
       return next(new AppError('Product not found', 404));
     }
 
-    // Check if color already exists for this product
-    const existingColor = await prisma.productColor.findUnique({
-      where: {
-        productId_color: {
-          productId: id,
-          color: color,
-        },
-      },
-    });
+    // Get existing colorImages or initialize empty array
+    const colorImages: any[] = (product.colorImages as any[]) || [];
 
-    if (existingColor) {
+    // Check if color already exists
+    if (colorImages.some((c: any) => c.color === color)) {
       return next(new AppError('This color already exists for this product', 400));
     }
 
@@ -316,126 +307,117 @@ export const addProductColor = async (req: Request, res: Response, next: NextFun
       ? images.filter((img: string) => img && img.trim() !== '')
       : [];
     
-    console.log('Creating product color:', {
-      productId: id,
+    // Add new color
+    const newColor = {
       color,
       images: filteredImages,
-      imagesCount: filteredImages.length,
-    });
+      isActive: isActive !== undefined ? isActive : true,
+      order: order !== undefined ? order : colorImages.length,
+    };
 
-    const productColor = await prisma.productColor.create({
-      data: {
-        productId: id,
-        color,
-        images: filteredImages,
-        isActive: isActive !== undefined ? isActive : true,
-        order: order !== undefined ? order : 0,
-      },
+    colorImages.push(newColor);
+
+    // Update product
+    const updatedProduct = await prisma.product.update({
+      where: { id },
+      data: { colorImages },
+      include: { category: true, inventory: true },
     });
-    
-    console.log('Product color created:', productColor);
 
     // Invalidate caches
     await cache.del(`product:${id}`);
     await cache.delPattern('products:*');
 
-    res.status(201).json(productColor);
+    res.status(201).json(newColor);
   } catch (error: any) {
-    if (error.code === 'P2002') {
-      return next(new AppError('This color already exists for this product', 400));
-    }
     next(error);
   }
 };
 
 export const updateProductColor = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id, colorId } = req.params;
+    const { id, colorIndex } = req.params;
     const { color, images, isActive, order } = req.body;
     
-    // Debug logging
-    console.log('Updating product color:', {
-      productId: id,
-      colorId,
-      images: images,
-      imagesType: typeof images,
-      isArray: Array.isArray(images),
+    const index = parseInt(colorIndex);
+    if (isNaN(index)) {
+      return next(new AppError('Invalid color index', 400));
+    }
+
+    // Get product
+    const product = await prisma.product.findUnique({
+      where: { id },
+      select: { id: true, colorImages: true },
     });
 
-    // Check if color exists and belongs to product
-    const existingColor = await prisma.productColor.findUnique({
-      where: { id: colorId },
-      select: { productId: true, color: true },
-    });
+    if (!product) {
+      return next(new AppError('Product not found', 404));
+    }
 
-    if (!existingColor || existingColor.productId !== id) {
+    const colorImages: any[] = (product.colorImages as any[]) || [];
+    
+    if (index < 0 || index >= colorImages.length) {
       return next(new AppError('Color not found', 404));
     }
 
-    // If color name is being changed, check for uniqueness
-    if (color && color !== existingColor.color) {
-      const colorExists = await prisma.productColor.findUnique({
-        where: {
-          productId_color: {
-            productId: id,
-            color: color,
-          },
-        },
-      });
-      if (colorExists) {
-        return next(new AppError('This color already exists for this product', 400));
-      }
-    }
-
-    const updateData: any = {};
-    if (color !== undefined) updateData.color = color;
+    // Update color
+    if (color !== undefined) colorImages[index].color = color;
     if (images !== undefined) {
-      updateData.images = Array.isArray(images) 
+      colorImages[index].images = Array.isArray(images) 
         ? images.filter((img: string) => img && img.trim() !== '')
         : [];
     }
-    if (isActive !== undefined) updateData.isActive = isActive;
-    if (order !== undefined) updateData.order = order;
+    if (isActive !== undefined) colorImages[index].isActive = isActive;
+    if (order !== undefined) colorImages[index].order = order;
 
-    console.log('Updating color with data:', updateData);
-    const productColor = await prisma.productColor.update({
-      where: { id: colorId },
-      data: updateData,
+    // Update product
+    await prisma.product.update({
+      where: { id },
+      data: { colorImages },
     });
-    console.log('Color updated successfully:', productColor);
 
     // Invalidate caches
     await cache.del(`product:${id}`);
     await cache.delPattern('products:*');
 
-    res.json(productColor);
+    res.json(colorImages[index]);
   } catch (error: any) {
-    if (error.code === 'P2002') {
-      return next(new AppError('This color already exists for this product', 400));
-    }
-    if (error.code === 'P2025') {
-      return next(new AppError('Color not found', 404));
-    }
     next(error);
   }
 };
 
 export const deleteProductColor = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id, colorId } = req.params;
+    const { id, colorIndex } = req.params;
 
-    // Check if color exists and belongs to product
-    const existingColor = await prisma.productColor.findUnique({
-      where: { id: colorId },
-      select: { productId: true },
+    const index = parseInt(colorIndex);
+    if (isNaN(index)) {
+      return next(new AppError('Invalid color index', 400));
+    }
+
+    // Get product
+    const product = await prisma.product.findUnique({
+      where: { id },
+      select: { id: true, colorImages: true },
     });
 
-    if (!existingColor || existingColor.productId !== id) {
+    if (!product) {
+      return next(new AppError('Product not found', 404));
+    }
+
+    const colorImages: any[] = (product.colorImages as any[]) || [];
+    
+    if (index < 0 || index >= colorImages.length) {
       return next(new AppError('Color not found', 404));
     }
 
-    await prisma.productColor.delete({
-      where: { id: colorId },
+    // Remove color
+    colorImages.splice(index, 1);
+
+    // Update product
+    await prisma.product.update({
+      where: { id },
+      data: { colorImages },
     });
 
     // Invalidate caches
@@ -444,9 +426,6 @@ export const deleteProductColor = async (req: Request, res: Response, next: Next
 
     res.json({ message: 'Color deleted successfully' });
   } catch (error: any) {
-    if (error.code === 'P2025') {
-      return next(new AppError('Color not found', 404));
-    }
     next(error);
   }
 };

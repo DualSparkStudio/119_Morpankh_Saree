@@ -11,7 +11,6 @@ export interface ProductVariant {
 }
 
 export interface ProductColor {
-  id: string;
   color: string;
   images: string[];
   isActive?: boolean;
@@ -30,6 +29,7 @@ export interface Product {
   compareAtPrice?: number;
   costPrice?: number;
   images: string[];
+  colorImages?: ProductColor[]; // Array of { color: string, images: string[] }
   fabricType?: string;
   sareeLength?: number;
   blouseIncluded?: boolean;
@@ -40,7 +40,7 @@ export interface Product {
     slug: string;
   };
   variants?: ProductVariant[];
-  colors?: ProductColor[];
+  colors?: ProductColor[]; // Legacy - for backward compatibility
   isFeatured?: boolean;
   isActive?: boolean;
   showInPremium?: boolean;

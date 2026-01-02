@@ -100,8 +100,9 @@ export default function NewProductPage() {
         tags: formData.tags,
         colors: formData.colors.length > 0 ? formData.colors.map((c, index) => ({
           color: c.color,
-          images: c.images.filter(img => img && img.trim() !== ''),
-          order: index,
+          images: c.images.filter((img: string) => img && img.trim() !== ''),
+          isActive: c.isActive !== undefined ? c.isActive : true,
+          order: c.order !== undefined ? c.order : index,
         })) : undefined,
       };
 
