@@ -261,9 +261,15 @@ export default function CheckoutPage() {
 
             console.log('Payment verified successfully:', verificationResult);
 
-            // Clear cart and redirect to success page with order ID
+            // Clear cart
             clearCart();
-            router.push(`/order-success?orderId=${order.id}`);
+            
+            // Use window.location for a hard redirect to ensure it works after Razorpay modal closes
+            console.log('Redirecting to order success page with orderId:', order.id);
+            // Small delay to ensure Razorpay modal is fully closed
+            setTimeout(() => {
+              window.location.href = `/order-success?orderId=${order.id}`;
+            }, 300);
           } catch (error: any) {
             console.error('Payment verification failed:', error);
             console.error('Error details:', {
@@ -279,7 +285,10 @@ export default function CheckoutPage() {
             // Still redirect to success page since payment was made
             // The webhook will eventually update the order status
             clearCart();
-            router.push(`/order-success?orderId=${order.id}`);
+            console.log('Redirecting to order success page (payment made but verification failed) with orderId:', order.id);
+            setTimeout(() => {
+              window.location.href = `/order-success?orderId=${order.id}`;
+            }, 300);
           }
         },
         prefill: {
@@ -298,10 +307,20 @@ export default function CheckoutPage() {
       };
 
       const razorpay = new window.Razorpay(options);
+      
+      // Handle payment failure
       razorpay.on('payment.failed', function (response: any) {
+        console.error('Payment failed:', response);
         alert('Payment failed. Please try again.');
         setLoading(false);
       });
+      
+      // Handle modal close (user closes without paying)
+      razorpay.on('modal.close', function () {
+        console.log('Razorpay modal closed');
+        setLoading(false);
+      });
+      
       razorpay.open();
       setLoading(false);
     } catch (error: any) {
