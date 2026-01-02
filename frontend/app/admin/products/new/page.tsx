@@ -46,6 +46,8 @@ export default function NewProductPage() {
     colors: [] as Array<{
       color: string;
       images: string[];
+      isActive?: boolean;
+      order?: number;
     }>,
   });
 

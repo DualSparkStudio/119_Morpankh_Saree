@@ -54,9 +54,11 @@ export default function EditProductPage() {
     showInCategories: false,
     tags: [] as string[],
     colors: [] as Array<{
-      id?: string;
+      id?: string | number;
       color: string;
       images: string[];
+      isActive?: boolean;
+      order?: number;
     }>,
   });
 

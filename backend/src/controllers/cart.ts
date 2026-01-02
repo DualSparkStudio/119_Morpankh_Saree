@@ -57,13 +57,6 @@ const getOrCreateCart = async (userId: string) => {
                 price: true,
               },
             },
-            color: {
-              select: {
-                id: true,
-                color: true,
-                images: true,
-              },
-            },
           },
         },
       },

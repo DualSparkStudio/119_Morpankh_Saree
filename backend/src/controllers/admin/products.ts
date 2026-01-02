@@ -113,7 +113,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
         costPrice: costPrice ? parseFloat(costPrice) : null,
         images: images || [],
-        colorImages: colors && Array.isArray(colors)
+        colorImages: colors && Array.isArray(colors) && colors.length > 0
           ? colors.map((c: any, index: number) => ({
               color: c.color,
               images: Array.isArray(c.images) 
@@ -122,7 +122,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
               isActive: c.isActive !== undefined ? c.isActive : true,
               order: c.order !== undefined ? c.order : index,
             }))
-          : null,
+          : undefined,
         isActive: isActive !== undefined ? isActive : true,
         isFeatured: isFeatured || false,
         showInPremium: showInPremium || false,

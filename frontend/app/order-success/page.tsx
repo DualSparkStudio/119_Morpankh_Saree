@@ -24,12 +24,7 @@ interface OrderItem {
     name: string;
     color?: string;
   } | null;
-  color?: {
-    id: string;
-    color: string;
-    colorCode?: string;
-  } | null;
-  selectedColor?: string;
+  colorName?: string;
 }
 
 // Component for individual order item with image error handling
@@ -64,9 +59,9 @@ function OrderItemDisplay({ item }: { item: OrderItem }) {
         >
           {item.product.name}
         </Link>
-        {item.selectedColor && (
+        {item.colorName && (
           <p className="text-sm text-gray-600 mt-1">
-            Color: <span className="font-medium">{item.selectedColor}</span>
+            Color: <span className="font-medium">{item.colorName}</span>
           </p>
         )}
         {item.variant && (

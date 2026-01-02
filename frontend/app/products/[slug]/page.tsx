@@ -90,8 +90,9 @@ export default function ProductDetailPage() {
 
   // Get available colors
   const getAvailableColors = (): ProductColor[] => {
-    if (!product?.colors) return [];
-    return product.colors.filter(c => c.isActive !== false);
+    if (!product) return [];
+    const colorImages = product.colorImages || product.colors || [];
+    return colorImages.filter((c: any) => c.isActive !== false);
   };
 
   // Get images for selected color
