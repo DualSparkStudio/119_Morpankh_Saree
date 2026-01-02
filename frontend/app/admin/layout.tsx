@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useStore } from '@/lib/store';
 import {
   LayoutDashboard,
@@ -73,10 +74,19 @@ export default function AdminLayout({
     <div className="min-h-screen bg-[#fffef9]">
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 h-full w-64 bg-[#312e81] text-white">
-        <div className="p-6 border-b border-[#1e3a8a]">
-          <Link href="/" className="block">
-            <h1 className="font-heading text-2xl font-bold hover:text-[#d4af37] transition-colors cursor-pointer">Admin Panel</h1>
-            <p className="text-sm text-gray-300 mt-1 hover:text-white transition-colors cursor-pointer">Morpankh Saree</p>
+        <div className="p-4 border-b border-[#1e3a8a]">
+          <Link href="/" className="block hover:opacity-80 transition-opacity">
+            <div className="flex items-center justify-center mb-3">
+              <Image
+                src="/images/Moprpankh-Sarees-Logo.png"
+                alt="Morpankh Saree Logo"
+                width={200}
+                height={80}
+                className="h-16 w-auto object-contain"
+                priority
+              />
+            </div>
+            <h1 className="font-heading text-xl font-bold text-center hover:text-[#d4af37] transition-colors">Admin Panel</h1>
           </Link>
         </div>
         
