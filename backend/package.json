@@ -15,7 +15,8 @@
     "prisma:db:push": "prisma db push",
     "prisma:studio": "prisma studio",
     "db:sync": "npx prisma migrate deploy --skip-generate || npx prisma db push --skip-generate --accept-data-loss",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "create-admin": "node create-admin.js"
   },
   "keywords": [],
   "author": "",

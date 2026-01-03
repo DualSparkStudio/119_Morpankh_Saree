@@ -87,7 +87,6 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
       basePrice,
       compareAtPrice,
       costPrice,
-      images,
       isActive,
       isFeatured,
       showInPremium,
@@ -99,6 +98,20 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
 
     // Generate slug if not provided
     const productSlug = slug || name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+    // Extract all images from colorImages for the legacy images field (for backward compatibility)
+    const allImages: string[] = [];
+    if (colors && Array.isArray(colors) && colors.length > 0) {
+      colors.forEach((c: any) => {
+        if (Array.isArray(c.images)) {
+          c.images.forEach((img: string) => {
+            if (img && img.trim() !== '' && !allImages.includes(img)) {
+              allImages.push(img);
+            }
+          });
+        }
+      });
+    }
 
     const product = await prisma.product.create({
       data: {
@@ -112,7 +125,7 @@ export const createProduct = async (req: Request, res: Response, next: NextFunct
         basePrice: parseFloat(basePrice),
         compareAtPrice: compareAtPrice ? parseFloat(compareAtPrice) : null,
         costPrice: costPrice ? parseFloat(costPrice) : null,
-        images: images || [],
+        images: allImages, // Auto-populated from colorImages for backward compatibility
         colorImages: colors && Array.isArray(colors) && colors.length > 0
           ? colors.map((c: any, index: number) => ({
               color: c.color,
@@ -163,9 +176,15 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     const { id } = req.params;
     const updateData = { ...req.body };
 
+    // Check if product exists first (we need this for colorImages sync)
+    const existingProduct = await prisma.product.findUnique({
+      where: { id },
+      select: { id: true, slug: true, sku: true, colorImages: true },
+    });
+
     // Handle colorImages if provided
     if (updateData.colors !== undefined) {
-      updateData.colorImages = Array.isArray(updateData.colors)
+      const colorImages = Array.isArray(updateData.colors)
         ? updateData.colors.map((c: any, index: number) => ({
             color: c.color,
             images: Array.isArray(c.images) 
@@ -175,7 +194,44 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
             order: c.order !== undefined ? c.order : index,
           }))
         : null;
+      
+      updateData.colorImages = colorImages;
+      
+      // Auto-populate images field from colorImages for backward compatibility
+      const allImages: string[] = [];
+      if (colorImages && Array.isArray(colorImages) && colorImages.length > 0) {
+        colorImages.forEach((c: any) => {
+          if (Array.isArray(c.images)) {
+            c.images.forEach((img: string) => {
+              if (img && img.trim() !== '' && !allImages.includes(img)) {
+                allImages.push(img);
+              }
+            });
+          }
+        });
+      }
+      updateData.images = allImages;
+      
       delete updateData.colors;
+    } else if (existingProduct && existingProduct.colorImages) {
+      // If colors not provided but product has existing colorImages, sync images field
+      const colorImages = existingProduct.colorImages as any[];
+      const allImages: string[] = [];
+      if (Array.isArray(colorImages) && colorImages.length > 0) {
+        colorImages.forEach((c: any) => {
+          if (Array.isArray(c.images)) {
+            c.images.forEach((img: string) => {
+              if (img && img.trim() !== '' && !allImages.includes(img)) {
+                allImages.push(img);
+              }
+            });
+          }
+        });
+      }
+      updateData.images = allImages;
+    } else if (existingProduct && (!existingProduct.colorImages || (Array.isArray(existingProduct.colorImages) && existingProduct.colorImages.length === 0))) {
+      // If no colorImages exist, set images to empty array
+      updateData.images = [];
     }
 
     // Convert numeric strings to numbers
@@ -183,12 +239,6 @@ export const updateProduct = async (req: Request, res: Response, next: NextFunct
     if (updateData.compareAtPrice) updateData.compareAtPrice = updateData.compareAtPrice ? parseFloat(updateData.compareAtPrice) : null;
     if (updateData.costPrice) updateData.costPrice = updateData.costPrice ? parseFloat(updateData.costPrice) : null;
     if (updateData.sareeLength) updateData.sareeLength = updateData.sareeLength ? parseFloat(updateData.sareeLength) : null;
-
-    // Check if product exists first
-    const existingProduct = await prisma.product.findUnique({
-      where: { id },
-      select: { id: true, slug: true, sku: true },
-    });
 
     if (!existingProduct) {
       return next(new AppError('Product not found', 404));
@@ -317,10 +367,25 @@ export const addProductColor = async (req: Request, res: Response, next: NextFun
 
     colorImages.push(newColor);
 
+    // Auto-populate images field from colorImages for backward compatibility
+    const allImages: string[] = [];
+    colorImages.forEach((c: any) => {
+      if (Array.isArray(c.images)) {
+        c.images.forEach((img: string) => {
+          if (img && img.trim() !== '' && !allImages.includes(img)) {
+            allImages.push(img);
+          }
+        });
+      }
+    });
+
     // Update product
     const updatedProduct = await prisma.product.update({
       where: { id },
-      data: { colorImages },
+      data: { 
+        colorImages,
+        images: allImages, // Auto-update images field
+      },
       include: { category: true, inventory: true },
     });
 
@@ -370,10 +435,25 @@ export const updateProductColor = async (req: Request, res: Response, next: Next
     if (isActive !== undefined) colorImages[index].isActive = isActive;
     if (order !== undefined) colorImages[index].order = order;
 
+    // Auto-populate images field from colorImages for backward compatibility
+    const allImages: string[] = [];
+    colorImages.forEach((c: any) => {
+      if (Array.isArray(c.images)) {
+        c.images.forEach((img: string) => {
+          if (img && img.trim() !== '' && !allImages.includes(img)) {
+            allImages.push(img);
+          }
+        });
+      }
+    });
+
     // Update product
     await prisma.product.update({
       where: { id },
-      data: { colorImages },
+      data: { 
+        colorImages,
+        images: allImages, // Auto-update images field
+      },
     });
 
     // Invalidate caches
@@ -414,10 +494,25 @@ export const deleteProductColor = async (req: Request, res: Response, next: Next
     // Remove color
     colorImages.splice(index, 1);
 
+    // Auto-populate images field from colorImages for backward compatibility
+    const allImages: string[] = [];
+    colorImages.forEach((c: any) => {
+      if (Array.isArray(c.images)) {
+        c.images.forEach((img: string) => {
+          if (img && img.trim() !== '' && !allImages.includes(img)) {
+            allImages.push(img);
+          }
+        });
+      }
+    });
+
     // Update product
     await prisma.product.update({
       where: { id },
-      data: { colorImages },
+      data: { 
+        colorImages,
+        images: allImages, // Auto-update images field
+      },
     });
 
     // Invalidate caches
