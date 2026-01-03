@@ -22,9 +22,6 @@ export default function Footer() {
                 className="h-12 md:h-16 w-auto object-contain filter brightness-0 invert"
               />
             </Link>
-            <p className="text-sm md:text-base text-white/90 leading-relaxed mb-3">
-              Premium quality sarees with elegant designs. Experience luxury in every thread.
-            </p>
             {/* Marathi Tagline */}
             <p 
               className="text-xs md:text-sm font-sahitya text-white/80 leading-relaxed"
@@ -76,14 +73,8 @@ export default function Footer() {
           {/* About Us Section */}
           <div>
             <h3 className="text-white font-semibold mb-4 text-lg">About Us</h3>
-            <p className="text-sm md:text-base text-white/90 leading-relaxed mb-3">
+            <p className="text-sm md:text-base text-white/90 leading-relaxed">
               We are dedicated to bringing you the finest collection of traditional and contemporary sarees, crafted with attention to detail and quality.
-            </p>
-            <p 
-              className="text-xs md:text-sm font-sahitya text-white/80 leading-relaxed"
-              style={{ fontFamily: 'var(--font-sahitya), serif' }}
-            >
-              मोरपंखासारखी नजाकत, प्रत्येक साडीमध्ये
             </p>
           </div>
 
