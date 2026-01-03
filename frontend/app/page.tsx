@@ -44,7 +44,7 @@ export default function Home() {
       </Suspense>
       
       {/* General See More Button */}
-      <section className="py-16 bg-gradient-to-b from-soft-cream to-white">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4 text-center">
           <Link
             href="/products"

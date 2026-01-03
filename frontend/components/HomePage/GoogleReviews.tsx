@@ -80,7 +80,7 @@ export default function GoogleReviews() {
   };
 
   return (
-    <section className="py-16 md:py-20 bg-gradient-to-b from-white to-soft-cream">
+    <section className="py-16 md:py-20 bg-gray-100">
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
         <div className="relative mb-12">
           <div className="text-center w-full">
