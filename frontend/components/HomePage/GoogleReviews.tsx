@@ -253,17 +253,6 @@ export default function GoogleReviews() {
             </a>
           </div>
         </div>
-
-        {/* API Setup Note */}
-        {(!placeId || !apiKey) && (
-          <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-            <p className="text-sm text-blue-800">
-              <strong>Note:</strong> To display live Google reviews, add{' '}
-              <code className="bg-blue-100 px-1 rounded">NEXT_PUBLIC_GOOGLE_PLACE_ID</code> and{' '}
-              <code className="bg-blue-100 px-1 rounded">NEXT_PUBLIC_GOOGLE_PLACES_API_KEY</code> to your .env file.
-            </p>
-          </div>
-        )}
       </div>
     </section>
   );

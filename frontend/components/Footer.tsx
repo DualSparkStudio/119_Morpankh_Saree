@@ -9,7 +9,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#1e3a8a] text-white mt-20">
       <div className="container mx-auto px-4 md:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12">
           {/* Brand Description - Left Section */}
           <div className="lg:col-span-1">
             <p className="text-sm md:text-base text-white/90 leading-relaxed">
@@ -93,7 +93,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Social Media Icons - Right Section */}
+          {/* Social Media Icons - Fourth Section */}
           <div className="flex items-start">
             <div className="flex space-x-4">
               <a
@@ -132,6 +132,23 @@ export default function Footer() {
               >
                 <MessageCircle className="w-6 h-6 stroke-2" />
               </a>
+            </div>
+          </div>
+
+          {/* Google Maps - Fifth Section */}
+          <div className="lg:col-span-1">
+            <h3 className="text-white font-semibold mb-4 text-lg">Find Us</h3>
+            <div className="relative w-full rounded-lg overflow-hidden" style={{ height: '200px' }}>
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3654.225488826108!2d73.93144819999999!3d18.5618115!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc2c10075547f01%3A0x3f3c947c85c0923e!2sMorpankh%20Saree!5e1!3m2!1sen!2sin!4v1767457061823!5m2!1sen!2sin"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="w-full h-full"
+              />
             </div>
           </div>
         </div>
