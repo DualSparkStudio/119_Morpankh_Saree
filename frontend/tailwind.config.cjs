@@ -22,6 +22,7 @@ module.exports = {
         heading: ['Cormorant Garamond', 'serif'],
         script: ['Dancing Script', 'cursive'],
         body: ['Poppins', 'sans-serif'],
+        sahitya: ['var(--font-sahitya)', 'serif'],
       },
     },
   },

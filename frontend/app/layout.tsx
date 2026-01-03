@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Poppins, Dancing_Script } from "next/font/google";
+import { Cormorant_Garamond, Poppins, Dancing_Script, Sahitya } from "next/font/google";
 import "./globals.css";
 import LayoutWrapper from "@/components/LayoutWrapper";
 import Providers from "@/components/Providers";
@@ -25,6 +25,13 @@ const dancingScript = Dancing_Script({
   display: "swap",
 });
 
+const sahitya = Sahitya({
+  variable: "--font-sahitya",
+  subsets: ["latin", "devanagari"],
+  weight: ["400", "700"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Morpankh Saree - Premium Indian Fashion",
   description: "Discover premium quality sarees at Morpankh Saree. Elegant, luxurious, and timeless Indian fashion.",
@@ -43,7 +50,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body
-        className={`${cormorant.variable} ${poppins.variable} ${dancingScript.variable} font-sans antialiased`}
+        className={`${cormorant.variable} ${poppins.variable} ${dancingScript.variable} ${sahitya.variable} font-sans antialiased`}
       >
         <Providers>
           <LayoutWrapper>{children}</LayoutWrapper>

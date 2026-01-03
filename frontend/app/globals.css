@@ -15,6 +15,7 @@
   --font-heading: var(--font-cormorant);
   --font-body: var(--font-poppins);
   --font-script: var(--font-dancing);
+  --font-sahitya: var(--font-sahitya);
   
   /* Spacing & Sizing */
   --container-max-width: 1280px;
@@ -36,11 +37,13 @@
   --font-heading: var(--font-cormorant);
   --font-body: var(--font-poppins);
   --font-script: var(--font-dancing);
+  --font-sahitya: var(--font-sahitya);
   --font-sans: var(--font-poppins);
   
   --font-family-heading: var(--font-cormorant), serif;
   --font-family-body: var(--font-poppins), sans-serif;
   --font-family-script: var(--font-dancing), cursive;
+  --font-family-sahitya: var(--font-sahitya), serif;
 }
 
 * {

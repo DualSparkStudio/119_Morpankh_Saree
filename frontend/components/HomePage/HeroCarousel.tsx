@@ -200,20 +200,20 @@ const HeroCarousel = () => {
                 <div className="container mx-auto px-4 md:px-6 lg:px-8 w-full bg-transparent">
                   <div className="grid grid-cols-2 gap-3 md:gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
                     {/* Text Content - Left on All Screens */}
-                    <div className="text-white space-y-1 md:space-y-4 lg:space-y-6 z-20 text-left">
-                      {/* Small Script Text */}
-                      <p className="text-sm md:text-2xl lg:text-3xl font-script text-white/90 mb-0.5 md:mb-2">
-                        Amazing
+                    <div className="text-white space-y-2 md:space-y-4 lg:space-y-6 z-20 text-left">
+                      {/* Marathi Tagline 1 */}
+                      <p className="text-sm md:text-xl lg:text-2xl font-sahitya text-white/95 mb-1 md:mb-2 leading-relaxed">
+                        परंपरेचा मोरपंखी स्पर्श, सौंदर्याची नवी ओळख
                       </p>
                       
-                      {/* Main Title - Large White with Heading Font (same as Categories) */}
-                      <h1 className="text-lg md:text-3xl lg:text-4xl xl:text-5xl font-heading font-bold leading-tight text-white">
-                        {slide.title || 'Premium Indian Sarees'}
-                      </h1>
+                      {/* Marathi Tagline 2 */}
+                      <p className="text-xs md:text-lg lg:text-xl font-sahitya text-white/90 mb-1 md:mb-2 leading-relaxed">
+                        मोरपंखासारखी नजाकत, प्रत्येक साडीमध्ये
+                      </p>
                       
-                      {/* Modern Stunning Tagline */}
-                      <p className="text-xs md:text-lg lg:text-xl xl:text-2xl text-white/90 font-light max-w-lg leading-relaxed hidden md:block">
-                        Where Tradition Meets Elegance, Every Thread Tells a Story
+                      {/* Marathi Tagline 3 */}
+                      <p className="text-xs md:text-base lg:text-lg font-sahitya text-white/85 leading-relaxed hidden md:block">
+                        सौंदर्य, सुसंस्कृती आणि साडी – मोरपंखची खासियत
                       </p>
                       
                       {/* CTA Button - White with Dark Blue Text */}
