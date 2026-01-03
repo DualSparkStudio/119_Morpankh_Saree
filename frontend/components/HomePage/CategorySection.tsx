@@ -139,7 +139,7 @@ const CategorySection = () => {
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-12">
           <div className="text-center md:text-left w-full md:w-auto">
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-heading text-deep-indigo mb-2">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-deep-indigo mb-2">
               Categories
             </h2>
             <p className="text-gray-600 text-lg font-light">Explore our exquisite collection</p>
