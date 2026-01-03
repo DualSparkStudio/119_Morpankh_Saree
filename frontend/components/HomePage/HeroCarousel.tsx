@@ -209,48 +209,46 @@ const HeroCarousel = () => {
                 <div className="container mx-auto px-4 md:px-6 lg:px-8 w-full bg-transparent">
                   <div className="grid grid-cols-2 gap-3 md:gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
                     {/* Text Content - Left on All Screens */}
-                    <div className="text-white space-y-2 md:space-y-3 lg:space-y-4 z-20 text-left">
-                      {/* Marathi Tagline 1 - Mobile/Tablet: Normal, Desktop: Large & Bold */}
-                      <p 
-                        className="text-sm md:text-base lg:text-3xl xl:text-4xl font-sahitya lg:font-bold text-white leading-relaxed transition-all duration-300 hover:scale-[1.02]"
-                        style={{ 
-                          fontFamily: 'var(--font-sahitya), serif',
-                          textShadow: '0 2px 8px rgba(0,0,0,0.4), 0 0 20px rgba(212,175,55,0.3)',
-                          filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.2))'
-                        }}
+                    <div className="text-white z-20 text-left">
+                      {/* Professional Modern Tagline */}
+                      <div 
+                        className="space-y-3 lg:space-y-4"
                         data-aos="fade-right"
                         data-aos-delay="100"
                       >
-                        परंपरेचा मोरपंखी स्पर्श, सौंदर्याची नवी ओळख
-                      </p>
-                      
-                      {/* Marathi Tagline 2 - Mobile/Tablet: Normal, Desktop: Large & Bold */}
-                      <p 
-                        className="text-sm md:text-base lg:text-3xl xl:text-4xl font-sahitya lg:font-bold text-white leading-relaxed transition-all duration-300 hover:scale-[1.02]"
-                        style={{ 
-                          fontFamily: 'var(--font-sahitya), serif',
-                          textShadow: '0 2px 8px rgba(0,0,0,0.4), 0 0 20px rgba(212,175,55,0.3)',
-                          filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.2))'
-                        }}
-                        data-aos="fade-right"
-                        data-aos-delay="200"
-                      >
-                        मोरपंखासारखी नजाकत, प्रत्येक साडीमध्ये
-                      </p>
-                      
-                      {/* Marathi Tagline 3 - Mobile/Tablet: Normal, Desktop: Large & Bold */}
-                      <p 
-                        className="text-sm md:text-base lg:text-3xl xl:text-4xl font-sahitya lg:font-bold text-white leading-relaxed transition-all duration-300 hover:scale-[1.02]"
-                        style={{ 
-                          fontFamily: 'var(--font-sahitya), serif',
-                          textShadow: '0 2px 8px rgba(0,0,0,0.4), 0 0 20px rgba(212,175,55,0.3)',
-                          filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.2))'
-                        }}
-                        data-aos="fade-right"
-                        data-aos-delay="300"
-                      >
-                        सौंदर्य, सुसंस्कृती आणि साडी – मोरपंखची खासियत
-                      </p>
+                        <div className="flex items-center gap-3 mb-4 lg:mb-6">
+                          <div className="hidden lg:block w-12 h-0.5 bg-gradient-to-r from-yellow-300 to-transparent"></div>
+                          <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
+                          <div className="w-24 h-0.5 bg-gradient-to-r from-yellow-300 to-transparent lg:w-32"></div>
+                        </div>
+                        
+                        <h1 
+                          className="text-lg md:text-xl lg:text-4xl xl:text-5xl font-sahitya font-bold text-white leading-tight lg:leading-tight"
+                          style={{ 
+                            fontFamily: 'var(--font-sahitya), serif',
+                            textShadow: '0 4px 12px rgba(0,0,0,0.5), 0 0 30px rgba(212,175,55,0.4)',
+                            letterSpacing: '0.02em'
+                          }}
+                        >
+                          परंपरेचा मोरपंखी स्पर्श, सौंदर्याची नवी ओळख
+                        </h1>
+                        
+                        <p 
+                          className="text-xs md:text-sm lg:text-xl xl:text-2xl font-sahitya text-white/90 lg:text-white/95 leading-relaxed max-w-lg"
+                          style={{ 
+                            fontFamily: 'var(--font-sahitya), serif',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.4)'
+                          }}
+                        >
+                          मोरपंखासारखी नजाकत, प्रत्येक साडीमध्ये • सौंदर्य, सुसंस्कृती आणि साडी – मोरपंखची खासियत
+                        </p>
+                        
+                        <div className="flex items-center gap-3 mt-4 lg:mt-6">
+                          <div className="w-24 h-0.5 bg-gradient-to-r from-transparent to-yellow-300 lg:w-32"></div>
+                          <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
+                          <div className="hidden lg:block w-12 h-0.5 bg-gradient-to-r from-transparent to-yellow-300"></div>
+                        </div>
+                      </div>
                       
                       {/* CTA Button - White with Dark Blue Text */}
                       <div className="pt-1 md:pt-4">
@@ -264,7 +262,11 @@ const HeroCarousel = () => {
                     </div>
                     
                     {/* Image - Right on All Screens */}
-                    <div className="relative z-20 bg-transparent w-full">
+                    <div 
+                      className="relative z-20 bg-transparent w-full"
+                      data-aos="fade-left"
+                      data-aos-delay="200"
+                    >
                       <div className="relative w-full flex items-center justify-center bg-transparent" style={{ backgroundColor: 'transparent', background: 'none' }}>
                          <img
                            src={slide.image}

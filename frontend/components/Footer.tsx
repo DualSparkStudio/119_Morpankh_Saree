@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Facebook, Instagram, Youtube, MessageCircle } from 'lucide-react';
 
 export default function Footer() {
@@ -9,17 +10,33 @@ export default function Footer() {
   return (
     <footer className="bg-[#1e3a8a] text-white mt-20">
       <div className="container mx-auto px-4 md:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
-          {/* Brand Description - Left Section */}
-          <div className="lg:col-span-1">
-            <p className="text-sm md:text-base text-white/90 leading-relaxed">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12">
+          {/* Logo and Tagline - Left Section */}
+          <div className="lg:col-span-1 space-y-4">
+            <Link href="/" className="block mb-4">
+              <Image
+                src="/images/Moprpankh-Sarees-Logo.png"
+                alt="Morpankh Saree Logo"
+                width={200}
+                height={80}
+                className="h-12 md:h-16 w-auto object-contain filter brightness-0 invert"
+              />
+            </Link>
+            <p className="text-sm md:text-base text-white/90 leading-relaxed mb-3">
               Premium quality sarees with elegant designs. Experience luxury in every thread.
+            </p>
+            {/* Marathi Tagline */}
+            <p 
+              className="text-xs md:text-sm font-sahitya text-white/80 leading-relaxed"
+              style={{ fontFamily: 'var(--font-sahitya), serif' }}
+            >
+              परंपरेचा मोरपंखी स्पर्श, सौंदर्याची नवी ओळख
             </p>
           </div>
 
-          {/* About Us & Support Links - Second Section */}
+          {/* Quick Links Section */}
           <div>
-            <h3 className="text-white font-semibold mb-4 text-lg">About Us</h3>
+            <h3 className="text-white font-semibold mb-4 text-lg">Quick Links</h3>
             <ul className="space-y-3 text-sm md:text-base list-disc list-inside">
               <li>
                 <Link 
@@ -56,7 +73,21 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Social Media Icons - Third Section */}
+          {/* About Us Section */}
+          <div>
+            <h3 className="text-white font-semibold mb-4 text-lg">About Us</h3>
+            <p className="text-sm md:text-base text-white/90 leading-relaxed mb-3">
+              We are dedicated to bringing you the finest collection of traditional and contemporary sarees, crafted with attention to detail and quality.
+            </p>
+            <p 
+              className="text-xs md:text-sm font-sahitya text-white/80 leading-relaxed"
+              style={{ fontFamily: 'var(--font-sahitya), serif' }}
+            >
+              मोरपंखासारखी नजाकत, प्रत्येक साडीमध्ये
+            </p>
+          </div>
+
+          {/* Social Media Icons - Fourth Section */}
           <div className="flex items-start">
             <div className="flex space-x-4">
               <a
@@ -98,7 +129,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Google Maps - Fourth Section */}
+          {/* Google Maps - Fifth Section */}
           <div className="lg:col-span-1">
             <h3 className="text-white font-semibold mb-4 text-lg">Find Us</h3>
             <div className="relative w-full rounded-lg overflow-hidden" style={{ height: '200px' }}>

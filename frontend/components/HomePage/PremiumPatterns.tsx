@@ -125,10 +125,12 @@ const PremiumPatterns = () => {
               return (
                 <div
                   key={product.id}
-                  className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-deep-indigo/30 relative"
+                  className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-500 border border-gray-100 hover:border-deep-indigo/50 relative transform hover:-translate-y-2 hover:scale-[1.02]"
                 >
                   {/* Image Container */}
                   <div className="relative aspect-[7/8] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
+                    {/* Hover Overlay Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-deep-indigo/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none"></div>
                     <Link href={`/products/${product.slug}`} className="block w-full h-full">
                       {(() => {
                         // Get random image from any color that has images, otherwise from product images
@@ -170,7 +172,7 @@ const PremiumPatterns = () => {
                           <img
                             src={imageUrl}
                             alt={product.name}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                            className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-700 ease-out"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.style.display = 'none';
