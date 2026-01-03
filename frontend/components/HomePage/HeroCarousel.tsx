@@ -4,6 +4,8 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight, Sparkles, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { bannersApi, Banner } from '@/lib/api/banners';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 
 const HeroCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -14,6 +16,13 @@ const HeroCarousel = () => {
   
   useEffect(() => {
     loadBanners();
+    // Initialize AOS
+    AOS.init({
+      duration: 1000,
+      easing: 'ease-in-out',
+      once: true,
+      offset: 100,
+    });
   }, []);
 
   const loadBanners = async () => {
@@ -200,19 +209,46 @@ const HeroCarousel = () => {
                 <div className="container mx-auto px-4 md:px-6 lg:px-8 w-full bg-transparent">
                   <div className="grid grid-cols-2 gap-3 md:gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
                     {/* Text Content - Left on All Screens */}
-                    <div className="text-white space-y-3 md:space-y-4 lg:space-y-5 z-20 text-left">
-                      {/* Marathi Tagline 1 */}
-                      <p className="text-lg md:text-2xl lg:text-3xl xl:text-4xl font-sahitya font-bold text-white leading-relaxed" style={{ fontFamily: 'var(--font-sahitya), serif' }}>
+                    <div className="text-white space-y-2 md:space-y-3 lg:space-y-4 z-20 text-left">
+                      {/* Marathi Tagline 1 - Mobile/Tablet: Normal, Desktop: Large & Bold */}
+                      <p 
+                        className="text-sm md:text-base lg:text-3xl xl:text-4xl font-sahitya lg:font-bold text-white leading-relaxed transition-all duration-300 hover:scale-[1.02]"
+                        style={{ 
+                          fontFamily: 'var(--font-sahitya), serif',
+                          textShadow: '0 2px 8px rgba(0,0,0,0.4), 0 0 20px rgba(212,175,55,0.3)',
+                          filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.2))'
+                        }}
+                        data-aos="fade-right"
+                        data-aos-delay="100"
+                      >
                         परंपरेचा मोरपंखी स्पर्श, सौंदर्याची नवी ओळख
                       </p>
                       
-                      {/* Marathi Tagline 2 */}
-                      <p className="text-lg md:text-2xl lg:text-3xl xl:text-4xl font-sahitya font-bold text-white leading-relaxed" style={{ fontFamily: 'var(--font-sahitya), serif' }}>
+                      {/* Marathi Tagline 2 - Mobile/Tablet: Normal, Desktop: Large & Bold */}
+                      <p 
+                        className="text-sm md:text-base lg:text-3xl xl:text-4xl font-sahitya lg:font-bold text-white leading-relaxed transition-all duration-300 hover:scale-[1.02]"
+                        style={{ 
+                          fontFamily: 'var(--font-sahitya), serif',
+                          textShadow: '0 2px 8px rgba(0,0,0,0.4), 0 0 20px rgba(212,175,55,0.3)',
+                          filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.2))'
+                        }}
+                        data-aos="fade-right"
+                        data-aos-delay="200"
+                      >
                         मोरपंखासारखी नजाकत, प्रत्येक साडीमध्ये
                       </p>
                       
-                      {/* Marathi Tagline 3 */}
-                      <p className="text-lg md:text-2xl lg:text-3xl xl:text-4xl font-sahitya font-bold text-white leading-relaxed" style={{ fontFamily: 'var(--font-sahitya), serif' }}>
+                      {/* Marathi Tagline 3 - Mobile/Tablet: Normal, Desktop: Large & Bold */}
+                      <p 
+                        className="text-sm md:text-base lg:text-3xl xl:text-4xl font-sahitya lg:font-bold text-white leading-relaxed transition-all duration-300 hover:scale-[1.02]"
+                        style={{ 
+                          fontFamily: 'var(--font-sahitya), serif',
+                          textShadow: '0 2px 8px rgba(0,0,0,0.4), 0 0 20px rgba(212,175,55,0.3)',
+                          filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.2))'
+                        }}
+                        data-aos="fade-right"
+                        data-aos-delay="300"
+                      >
                         सौंदर्य, सुसंस्कृती आणि साडी – मोरपंखची खासियत
                       </p>
                       
