@@ -19,11 +19,12 @@ export default function Footer() {
 
           {/* About Us & Support Links - Second Section */}
           <div>
-            <ul className="space-y-3 text-sm md:text-base">
+            <h3 className="text-white font-semibold mb-4 text-lg">About Us</h3>
+            <ul className="space-y-3 text-sm md:text-base list-disc list-inside">
               <li>
                 <Link 
                   href="/about" 
-                  className="text-white/90 hover:text-white transition-colors inline-block"
+                  className="text-white/90 hover:text-white transition-colors"
                 >
                   About Us
                 </Link>
@@ -31,7 +32,7 @@ export default function Footer() {
               <li>
                 <Link 
                   href="/contact" 
-                  className="text-white/90 hover:text-white transition-colors inline-block"
+                  className="text-white/90 hover:text-white transition-colors"
                 >
                   Contact
                 </Link>
@@ -39,7 +40,7 @@ export default function Footer() {
               <li>
                 <Link 
                   href="/shipping" 
-                  className="text-white/90 hover:text-white transition-colors inline-block"
+                  className="text-white/90 hover:text-white transition-colors"
                 >
                   Shipping & Returns
                 </Link>
@@ -47,7 +48,7 @@ export default function Footer() {
               <li>
                 <Link 
                   href="/faq" 
-                  className="text-white/90 hover:text-white transition-colors inline-block"
+                  className="text-white/90 hover:text-white transition-colors"
                 >
                   FAQ
                 </Link>
@@ -57,11 +58,12 @@ export default function Footer() {
 
           {/* Order & Policy Links - Third Section */}
           <div>
-            <ul className="space-y-3 text-sm md:text-base">
+            <h3 className="text-white font-semibold mb-4 text-lg">Track Order</h3>
+            <ul className="space-y-3 text-sm md:text-base list-disc list-inside">
               <li>
                 <Link 
                   href="/orders" 
-                  className="text-white/90 hover:text-white transition-colors inline-block"
+                  className="text-white/90 hover:text-white transition-colors"
                 >
                   Track Order
                 </Link>
@@ -69,7 +71,7 @@ export default function Footer() {
               <li>
                 <Link 
                   href="/returns" 
-                  className="text-white/90 hover:text-white transition-colors inline-block"
+                  className="text-white/90 hover:text-white transition-colors"
                 >
                   Returns
                 </Link>
@@ -77,7 +79,7 @@ export default function Footer() {
               <li>
                 <Link 
                   href="/terms" 
-                  className="text-white/90 hover:text-white transition-colors inline-block"
+                  className="text-white/90 hover:text-white transition-colors"
                 >
                   Terms & Conditions
                 </Link>
@@ -85,7 +87,7 @@ export default function Footer() {
               <li>
                 <Link 
                   href="/privacy" 
-                  className="text-white/90 hover:text-white transition-colors inline-block"
+                  className="text-white/90 hover:text-white transition-colors"
                 >
                   Privacy Policy
                 </Link>
