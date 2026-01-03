@@ -45,18 +45,18 @@ const TrendingPatterns = () => {
     <section className="py-16 md:py-20 bg-gradient-to-b from-soft-cream to-white">
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
         <div className="relative mb-12">
-          <div className="text-center w-full mb-4 md:mb-0">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading text-deep-indigo mb-3">
+          <div className="text-center w-full">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading text-deep-indigo mb-2">
               Trending Patterns
             </h2>
             <p className="text-gray-600 text-lg font-light">What's hot right now</p>
           </div>
           <Link
             href="/products?trending=true"
-            className="absolute top-0 right-0 inline-flex items-center gap-2 bg-deep-indigo hover:bg-navy-blue text-white px-6 py-3 rounded-full font-medium transition-all shadow-lg hover:shadow-xl hover:scale-105"
+            className="hidden md:absolute md:top-0 md:right-0 md:flex items-center gap-2 text-deep-indigo hover:text-navy-blue font-medium text-lg transition-colors group"
           >
             <span>See more</span>
-            <span>→</span>
+            <span className="group-hover:translate-x-1 transition-transform">→</span>
           </Link>
         </div>
         
@@ -282,6 +282,17 @@ const TrendingPatterns = () => {
             })}
           </div>
         )}
+        
+        {/* Mobile See More Link */}
+        <div className="mt-8 md:hidden text-center">
+          <Link 
+            href="/products?trending=true" 
+            className="inline-flex items-center gap-2 text-deep-indigo hover:text-navy-blue font-medium text-lg transition-colors"
+          >
+            <span>See more</span>
+            <span>→</span>
+          </Link>
+        </div>
       </div>
     </section>
   );
