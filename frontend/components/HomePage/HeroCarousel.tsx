@@ -267,33 +267,39 @@ const HeroCarousel = () => {
                       data-aos="fade-left"
                       data-aos-delay="200"
                     >
-                      <div className="relative w-full flex items-center justify-center bg-transparent" style={{ backgroundColor: 'transparent', background: 'none' }}>
-                         <img
-                           src={slide.image}
-                           alt={slide.title}
-                           className="w-full h-auto object-contain max-h-[200px] md:max-h-[600px] lg:max-h-[700px] rounded-2xl"
-                           style={{ 
-                             mixBlendMode: 'normal',
-                             backgroundColor: 'transparent',
-                             background: 'none',
-                             display: 'block'
-                           }}
-                           loading={index === 0 ? 'eager' : 'lazy'}
-                           decoding="async"
-                           onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            const fallbackImage = '/images2/hero sec(main photo).jpg';
-                            const pathParts = fallbackImage.split('/');
-                            const filename = pathParts.pop() || '';
-                            const encodedFilename = encodeURIComponent(filename);
-                            const encodedFallback = [...pathParts, encodedFilename].join('/');
-                            if (!target.src.includes(encodedFallback)) {
-                              target.src = encodedFallback;
-                              target.style.backgroundColor = 'transparent';
-                              target.style.background = 'none';
-                            }
-                          }}
-                        />
+                      <div className="relative w-full flex items-center justify-center">
+                        {/* Decorative Background Glow */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-300/20 via-transparent to-transparent rounded-[4rem] blur-2xl scale-110"></div>
+                        
+                        {/* Image Container with Modern Shape */}
+                        <div className="relative w-full max-w-full overflow-hidden rounded-[3rem] md:rounded-[4rem] lg:rounded-[5rem] shadow-2xl border-4 border-white/20 backdrop-blur-sm">
+                          <img
+                            src={slide.image}
+                            alt={slide.title}
+                            className="w-full h-auto object-cover object-center max-h-[200px] md:max-h-[600px] lg:max-h-[700px]"
+                            style={{ 
+                              mixBlendMode: 'normal',
+                              backgroundColor: 'transparent',
+                              background: 'none',
+                              display: 'block'
+                            }}
+                            loading={index === 0 ? 'eager' : 'lazy'}
+                            decoding="async"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              const fallbackImage = '/images2/hero sec(main photo).jpg';
+                              const pathParts = fallbackImage.split('/');
+                              const filename = pathParts.pop() || '';
+                              const encodedFilename = encodeURIComponent(filename);
+                              const encodedFallback = [...pathParts, encodedFilename].join('/');
+                              if (!target.src.includes(encodedFallback)) {
+                                target.src = encodedFallback;
+                                target.style.backgroundColor = 'transparent';
+                                target.style.background = 'none';
+                              }
+                            }}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
