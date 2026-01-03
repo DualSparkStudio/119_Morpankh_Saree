@@ -200,19 +200,19 @@ const HeroCarousel = () => {
                 <div className="container mx-auto px-4 md:px-6 lg:px-8 w-full bg-transparent">
                   <div className="grid grid-cols-2 gap-3 md:gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
                     {/* Text Content - Left on All Screens */}
-                    <div className="text-white space-y-2 md:space-y-4 lg:space-y-6 z-20 text-left">
+                    <div className="text-white space-y-3 md:space-y-4 lg:space-y-5 z-20 text-left">
                       {/* Marathi Tagline 1 */}
-                      <p className="text-sm md:text-xl lg:text-2xl font-sahitya text-white/95 mb-1 md:mb-2 leading-relaxed">
+                      <p className="text-lg md:text-2xl lg:text-3xl xl:text-4xl font-sahitya font-bold text-white leading-relaxed" style={{ fontFamily: 'var(--font-sahitya), serif' }}>
                         परंपरेचा मोरपंखी स्पर्श, सौंदर्याची नवी ओळख
                       </p>
                       
                       {/* Marathi Tagline 2 */}
-                      <p className="text-xs md:text-lg lg:text-xl font-sahitya text-white/90 mb-1 md:mb-2 leading-relaxed">
+                      <p className="text-lg md:text-2xl lg:text-3xl xl:text-4xl font-sahitya font-bold text-white leading-relaxed" style={{ fontFamily: 'var(--font-sahitya), serif' }}>
                         मोरपंखासारखी नजाकत, प्रत्येक साडीमध्ये
                       </p>
                       
                       {/* Marathi Tagline 3 */}
-                      <p className="text-xs md:text-base lg:text-lg font-sahitya text-white/85 leading-relaxed hidden md:block">
+                      <p className="text-lg md:text-2xl lg:text-3xl xl:text-4xl font-sahitya font-bold text-white leading-relaxed" style={{ fontFamily: 'var(--font-sahitya), serif' }}>
                         सौंदर्य, सुसंस्कृती आणि साडी – मोरपंखची खासियत
                       </p>
                       

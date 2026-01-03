@@ -30,6 +30,7 @@ const sahitya = Sahitya({
   subsets: ["latin", "devanagari"],
   weight: ["400", "700"],
   display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
