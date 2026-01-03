@@ -5,6 +5,7 @@ import { Heart, Eye, ShoppingCart, Star, Percent } from 'lucide-react';
 import Link from 'next/link';
 import { useStore } from '@/lib/store';
 import { productsApi, Product } from '@/lib/api/products';
+import { getImageUrl } from '@/lib/utils/imageHelper';
 
 const PremiumPatterns = () => {
   const { wishlist, addToWishlist, removeFromWishlist, addToCart } = useStore();
@@ -35,53 +36,6 @@ const PremiumPatterns = () => {
     }
   };
 
-  const getImageUrl = (image: string | undefined, product?: Product, index: number = 0): string => {
-    // If image exists and is valid, return it
-    if (image && image.trim() !== '') {
-      // Convert old Google Drive format to thumbnail format for better reliability
-      if (image.includes('drive.google.com/uc?export=view&id=')) {
-        const fileIdMatch = image.match(/id=([a-zA-Z0-9_-]+)/);
-        if (fileIdMatch) {
-          image = `https://drive.google.com/thumbnail?id=${fileIdMatch[1]}&sz=w1920`;
-        }
-      }
-      
-      if (image.startsWith('http://') || image.startsWith('https://')) {
-        // Add cache busting for external URLs using product updatedAt timestamp
-        if (product?.updatedAt) {
-          const separator = image.includes('?') ? '&' : '?';
-          return `${image}${separator}v=${new Date(product.updatedAt).getTime()}`;
-        }
-        return image;
-      }
-      
-      if (image.startsWith('/uploads')) {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-        let url = '';
-        if (apiUrl.startsWith('http')) {
-          const baseUrl = apiUrl.replace('/api', '');
-          url = `${baseUrl}${image}`;
-        } else {
-          url = image;
-        }
-        // Add cache busting using product updatedAt timestamp
-        if (product?.updatedAt) {
-          const separator = url.includes('?') ? '&' : '?';
-          url = `${url}${separator}v=${new Date(product.updatedAt).getTime()}`;
-        }
-        return url;
-      }
-      
-      if (image.startsWith('/')) {
-        return image;
-      }
-      
-      return image;
-    }
-    
-    // No fallback - return empty string
-    return '';
-  };
 
   const isInWishlist = (productId: string) => {
     return wishlist ? wishlist.includes(productId) : false;
@@ -207,7 +161,7 @@ const PremiumPatterns = () => {
                           productImage = product.images?.[0];
                         }
                         
-                        const imageUrl = getImageUrl(productImage, product, products.indexOf(product));
+                        const imageUrl = getImageUrl(productImage, products.indexOf(product));
                         return imageUrl ? (
                           <img
                             src={imageUrl}

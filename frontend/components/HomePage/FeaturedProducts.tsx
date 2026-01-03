@@ -28,31 +28,35 @@ const getProductImage = (product: Product, index: number = 0) => {
   // Get colorImages (new structure) or colors (legacy)
   const colorImages = product.colorImages || product.colors || [];
   
-  if (colorImages.length > 0) {
+  if (colorImages && Array.isArray(colorImages) && colorImages.length > 0) {
     // Collect all images from all active colors
     const allImages: string[] = [];
     colorImages.forEach((color: any) => {
-      if (color.isActive !== false && color.images && Array.isArray(color.images)) {
+      if (color && color.isActive !== false && color.images && Array.isArray(color.images)) {
         color.images.forEach((img: string) => {
-          if (img && img.trim() !== '') {
-            allImages.push(img);
+          if (img && typeof img === 'string' && img.trim() !== '') {
+            allImages.push(img.trim());
           }
         });
       }
     });
     
-    // Pick a random image
+    // Pick a random image from valid images
     if (allImages.length > 0) {
       productImage = allImages[Math.floor(Math.random() * allImages.length)];
     }
   }
   
   // Fallback to product images if no color images found
-  if (!productImage) {
-    productImage = product.images?.[0];
+  if (!productImage && product.images && Array.isArray(product.images) && product.images.length > 0) {
+    // Filter out empty/invalid images
+    const validImages = product.images.filter(img => img && typeof img === 'string' && img.trim() !== '');
+    if (validImages.length > 0) {
+      productImage = validImages[0];
+    }
   }
   
-  if (!productImage) return '';
+  if (!productImage || typeof productImage !== 'string' || productImage.trim() === '') return '';
   
   // Process the image URL
   let image = productImage;
