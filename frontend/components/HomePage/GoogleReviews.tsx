@@ -234,23 +234,62 @@ export default function GoogleReviews() {
           </div>
         )}
 
-        {/* CTA to Write Review */}
-        <div className="mt-12 text-center">
-          <div className="bg-gradient-to-br from-deep-indigo to-navy-blue rounded-lg p-8 text-white inline-block w-full max-w-2xl">
-            <Star className="w-12 h-12 mx-auto mb-4 text-yellow-300 fill-yellow-300" />
-            <h3 className="text-2xl font-heading mb-2">Love Our Products?</h3>
-            <p className="text-white/90 mb-6">
-              Share your experience and help others discover quality sarees
-            </p>
-            <a
-              href={`${googleMapsUrl}&action=write`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-8 py-3 rounded-lg font-semibold transition-colors"
-            >
-              <Star className="w-5 h-5 fill-current" />
-              <span>Write a Review</span>
-            </a>
+        {/* CTA to Write Review - Redesigned */}
+        <div className="mt-12 flex justify-center">
+          <div className="relative w-full max-w-3xl">
+            {/* Modern Card Design */}
+            <div className="bg-gradient-to-br from-deep-indigo via-navy-blue to-deep-indigo rounded-2xl shadow-2xl overflow-hidden">
+              {/* Decorative Pattern Background */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-yellow-300 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-yellow-300 rounded-full blur-3xl"></div>
+              </div>
+              
+              {/* Content */}
+              <div className="relative p-8 md:p-12 text-center">
+                {/* Star Icon with Animation */}
+                <div className="mb-6 flex justify-center">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-yellow-300 rounded-full blur-xl opacity-50 animate-pulse"></div>
+                    <Star className="w-16 h-16 md:w-20 md:h-20 text-yellow-300 fill-yellow-300 relative z-10 drop-shadow-lg" />
+                  </div>
+                </div>
+                
+                {/* Heading */}
+                <h3 className="text-3xl md:text-4xl font-heading mb-4 text-white drop-shadow-md">
+                  Love Our Products?
+                </h3>
+                
+                {/* Description */}
+                <p className="text-lg md:text-xl text-white/90 mb-8 max-w-xl mx-auto leading-relaxed">
+                  Share your experience and help others discover quality sarees
+                </p>
+                
+                {/* Write Review Button - Enhanced */}
+                <a
+                  href="https://www.google.com/maps/place/Morpankh+Saree/@18.5618115,73.9314482,17z/data=!3m1!4b1!4m6!3m5!1s0x3bc2c10075547f01:0x3f3c947c85c0923e!8m2!3d18.5618115!4d73.9314482!16s%2Fg%2F11t0x3bc2c1?entry=ttu"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-10 py-4 rounded-xl font-bold text-lg md:text-xl transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 transform group"
+                >
+                  <Star className="w-6 h-6 fill-current group-hover:rotate-12 transition-transform" />
+                  <span>Write a Review</span>
+                  <svg 
+                    className="w-5 h-5 group-hover:translate-x-1 transition-transform" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </a>
+                
+                {/* Additional Info */}
+                <p className="text-white/70 text-sm mt-6">
+                  Your feedback helps us serve you better
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
