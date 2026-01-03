@@ -149,7 +149,7 @@ const HeroCarousel = () => {
 
   if (loading) {
     return (
-      <section className="relative h-[600px] md:h-[700px] lg:h-[800px] overflow-hidden bg-gradient-to-br from-deep-indigo via-navy-blue to-deep-indigo flex items-center justify-center">
+      <section className="relative h-[300px] md:h-[700px] lg:h-[800px] overflow-hidden bg-gradient-to-br from-deep-indigo via-navy-blue to-deep-indigo flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
       </section>
     );
@@ -161,7 +161,7 @@ const HeroCarousel = () => {
 
   return (
     <section 
-      className="relative h-[600px] md:h-[700px] lg:h-[800px] overflow-hidden bg-gradient-to-br from-deep-indigo via-navy-blue to-deep-indigo"
+      className="relative h-[300px] md:h-[700px] lg:h-[800px] overflow-hidden bg-gradient-to-br from-deep-indigo via-navy-blue to-deep-indigo"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
@@ -198,14 +198,42 @@ const HeroCarousel = () => {
               {/* Content */}
               <div className="relative h-full flex items-center z-10 bg-transparent py-4 md:py-0">
                 <div className="container mx-auto px-4 md:px-6 lg:px-8 w-full bg-transparent">
-                  <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
-                    {/* Image - Above on Mobile, Right on Desktop */}
-                    <div className="relative z-20 bg-transparent order-1 md:order-2 w-full md:w-auto">
-                      <div className="relative w-full max-w-sm md:max-w-lg mx-auto flex items-center justify-center bg-transparent" style={{ backgroundColor: 'transparent', background: 'none' }}>
+                  <div className="grid grid-cols-2 gap-3 md:gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
+                    {/* Text Content - Left on All Screens */}
+                    <div className="text-white space-y-1 md:space-y-4 lg:space-y-6 z-20 text-left">
+                      {/* Small Script Text */}
+                      <p className="text-sm md:text-2xl lg:text-3xl font-script text-white/90 mb-0.5 md:mb-2">
+                        Amazing
+                      </p>
+                      
+                      {/* Main Title - Large White with Heading Font (same as Categories) */}
+                      <h1 className="text-lg md:text-3xl lg:text-4xl xl:text-5xl font-heading font-bold leading-tight text-white">
+                        {slide.title || 'Premium Indian Sarees'}
+                      </h1>
+                      
+                      {/* Modern Stunning Tagline */}
+                      <p className="text-xs md:text-lg lg:text-xl xl:text-2xl text-white/90 font-light max-w-lg leading-relaxed hidden md:block">
+                        Where Tradition Meets Elegance, Every Thread Tells a Story
+                      </p>
+                      
+                      {/* CTA Button - White with Dark Blue Text */}
+                      <div className="pt-1 md:pt-4">
+                        <Link
+                          href={slide.link || '/products'}
+                          className="inline-block bg-white text-deep-indigo hover:bg-white/95 px-3 py-1.5 md:px-8 md:py-3 lg:px-10 lg:py-4 rounded-lg font-semibold text-[10px] md:text-xs lg:text-sm transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform border border-deep-indigo/20"
+                        >
+                          {slide.linkText || 'Shop Now'}
+                        </Link>
+                      </div>
+                    </div>
+                    
+                    {/* Image - Right on All Screens */}
+                    <div className="relative z-20 bg-transparent w-full">
+                      <div className="relative w-full flex items-center justify-center bg-transparent" style={{ backgroundColor: 'transparent', background: 'none' }}>
                          <img
                            src={slide.image}
                            alt={slide.title}
-                           className="w-full h-auto object-contain max-h-[350px] md:max-h-[600px] lg:max-h-[700px] rounded-2xl"
+                           className="w-full h-auto object-contain max-h-[200px] md:max-h-[600px] lg:max-h-[700px] rounded-2xl"
                            style={{ 
                              mixBlendMode: 'normal',
                              backgroundColor: 'transparent',
@@ -228,34 +256,6 @@ const HeroCarousel = () => {
                             }
                           }}
                         />
-                      </div>
-                    </div>
-                    
-                    {/* Text Content - Below on Mobile, Left on Desktop */}
-                    <div className="text-white space-y-2 md:space-y-4 lg:space-y-6 z-20 text-center md:text-left order-2 md:order-1">
-                      {/* Small Script Text */}
-                      <p className="text-xl md:text-2xl lg:text-3xl font-script text-white/90 mb-1 md:mb-2">
-                        Amazing
-                      </p>
-                      
-                      {/* Main Title - Large White with Heading Font (same as Categories) */}
-                      <h1 className="text-xl md:text-3xl lg:text-4xl xl:text-5xl font-heading font-bold leading-tight text-white">
-                        {slide.title || 'Premium Indian Sarees'}
-                      </h1>
-                      
-                      {/* Modern Stunning Tagline - Centered */}
-                      <p className="text-base md:text-lg lg:text-xl xl:text-2xl text-white/90 font-light max-w-lg mx-auto md:mx-0 leading-relaxed">
-                        Where Tradition Meets Elegance, Every Thread Tells a Story
-                      </p>
-                      
-                      {/* CTA Button - White with Dark Blue Text */}
-                      <div className="pt-2 md:pt-4">
-                        <Link
-                          href={slide.link || '/products'}
-                          className="inline-block bg-white text-deep-indigo hover:bg-white/95 px-6 py-2.5 md:px-8 md:py-3 lg:px-10 lg:py-4 rounded-lg font-semibold text-[10px] md:text-xs lg:text-sm transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform border border-deep-indigo/20"
-                        >
-                          {slide.linkText || 'Shop Now'}
-                        </Link>
                       </div>
                     </div>
                   </div>
