@@ -93,7 +93,7 @@ const PremiumPatterns = () => {
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between mb-12">
           <div className="text-center md:text-left mb-4 md:mb-0">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-heading text-deep-indigo mb-3">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading text-deep-indigo mb-3">
               Premium Patterns
             </h2>
             <p className="text-gray-600 text-lg font-light">Exquisite designs for the modern woman</p>

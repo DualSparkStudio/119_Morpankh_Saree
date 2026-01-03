@@ -42,7 +42,7 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center">
           <Link
             href="/products"
-            className="inline-flex items-center gap-3 bg-deep-indigo hover:bg-navy-blue text-white px-8 py-4 rounded-full font-semibold text-base transition-all shadow-xl hover:shadow-2xl hover:scale-105"
+            className="inline-flex items-center gap-3 bg-deep-indigo hover:bg-navy-blue text-white px-8 py-4 rounded-full font-semibold text-sm transition-all shadow-xl hover:shadow-2xl hover:scale-105"
           >
             <span>Browse All Products</span>
             <span className="text-xl">→</span>

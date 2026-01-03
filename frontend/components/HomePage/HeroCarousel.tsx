@@ -239,7 +239,7 @@ const HeroCarousel = () => {
                       </p>
                       
                       {/* Main Title - Large White with Heading Font (same as Categories) */}
-                      <h1 className="text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-heading font-bold leading-tight text-white">
+                      <h1 className="text-xl md:text-3xl lg:text-4xl xl:text-5xl font-heading font-bold leading-tight text-white">
                         {slide.title || 'Premium Indian Sarees'}
                       </h1>
                       
@@ -252,7 +252,7 @@ const HeroCarousel = () => {
                       <div className="pt-2 md:pt-4">
                         <Link
                           href={slide.link || '/products'}
-                          className="inline-block bg-white text-deep-indigo hover:bg-white/95 px-6 py-2.5 md:px-8 md:py-3 lg:px-10 lg:py-4 rounded-lg font-semibold text-xs md:text-sm lg:text-base transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform border border-deep-indigo/20"
+                          className="inline-block bg-white text-deep-indigo hover:bg-white/95 px-6 py-2.5 md:px-8 md:py-3 lg:px-10 lg:py-4 rounded-lg font-semibold text-[10px] md:text-xs lg:text-sm transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 transform border border-deep-indigo/20"
                         >
                           {slide.linkText || 'Shop Now'}
                         </Link>

@@ -51,7 +51,7 @@ export default function Hero({ banners = [] }: HeroProps) {
           className="max-w-2xl text-white"
         >
           {banner.title && (
-            <h1 className="font-heading text-5xl md:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="font-heading text-4xl md:text-6xl font-bold mb-6 leading-tight">
               {banner.title}
             </h1>
           )}
@@ -63,7 +63,7 @@ export default function Hero({ banners = [] }: HeroProps) {
           {banner.link && (
             <Link
               href={banner.link}
-              className="inline-flex items-center gap-2 bg-[#d4af37] hover:bg-[#b8941f] text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors shadow-lg hover:shadow-xl"
+              className="inline-flex items-center gap-2 bg-[#d4af37] hover:bg-[#b8941f] text-white px-8 py-4 rounded-lg font-semibold text-base transition-colors shadow-lg hover:shadow-xl"
             >
               {banner.linkText || 'Shop Now'}
               <ArrowRight className="w-5 h-5" />

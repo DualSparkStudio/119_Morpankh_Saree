@@ -57,18 +57,18 @@ export default function Header() {
   return (
     <header className="bg-[#fffef9] border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-opacity-95">
       <div className="container mx-auto px-2 md:px-3">
-        <div className="flex items-center justify-between h-24 md:h-28 lg:h-32">
+        <div className="flex items-center justify-between h-16 md:h-20 lg:h-20">
           {/* Logo */}
           <Link 
             href="/" 
-            className="flex items-center h-full py-2 hover:opacity-80 transition-opacity"
+            className="flex items-center h-full py-1 hover:opacity-80 transition-opacity"
           >
             <Image
               src="/images/Moprpankh-Sarees-Logo.png"
               alt="Morpankh Saree Logo"
               width={320}
               height={120}
-              className="h-20 md:h-28 lg:h-32 w-auto object-contain"
+              className="h-12 md:h-14 lg:h-16 w-auto object-contain"
               priority
             />
           </Link>
