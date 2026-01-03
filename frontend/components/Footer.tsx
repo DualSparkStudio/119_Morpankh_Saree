@@ -9,7 +9,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#1e3a8a] text-white mt-20">
       <div className="container mx-auto px-4 md:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
           {/* Brand Description - Left Section */}
           <div className="lg:col-span-1">
             <p className="text-sm md:text-base text-white/90 leading-relaxed">
@@ -56,46 +56,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Order & Policy Links - Third Section */}
-          <div>
-            <h3 className="text-white font-semibold mb-4 text-lg">Track Order</h3>
-            <ul className="space-y-3 text-sm md:text-base list-disc list-inside">
-              <li>
-                <Link 
-                  href="/orders" 
-                  className="text-white/90 hover:text-white transition-colors"
-                >
-                  Track Order
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/returns" 
-                  className="text-white/90 hover:text-white transition-colors"
-                >
-                  Returns
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/terms" 
-                  className="text-white/90 hover:text-white transition-colors"
-                >
-                  Terms & Conditions
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/privacy" 
-                  className="text-white/90 hover:text-white transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Social Media Icons - Fourth Section */}
+          {/* Social Media Icons - Third Section */}
           <div className="flex items-start">
             <div className="flex space-x-4">
               <a
@@ -137,7 +98,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Google Maps - Fifth Section */}
+          {/* Google Maps - Fourth Section */}
           <div className="lg:col-span-1">
             <h3 className="text-white font-semibold mb-4 text-lg">Find Us</h3>
             <div className="relative w-full rounded-lg overflow-hidden" style={{ height: '200px' }}>
