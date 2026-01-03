@@ -100,6 +100,29 @@ const PremiumPatterns = () => {
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Get image for cart - use random from colorImages or fallback to product.images
+    let cartImage: string | undefined = undefined;
+    const colorImages = product.colorImages || product.colors || [];
+    if (colorImages.length > 0) {
+      const allImages: string[] = [];
+      colorImages.forEach((color: any) => {
+        if (color.isActive !== false && color.images && Array.isArray(color.images)) {
+          color.images.forEach((img: string) => {
+            if (img && img.trim() !== '') {
+              allImages.push(img);
+            }
+          });
+        }
+      });
+      if (allImages.length > 0) {
+        cartImage = allImages[Math.floor(Math.random() * allImages.length)];
+      }
+    }
+    if (!cartImage) {
+      cartImage = product.images?.[0];
+    }
+    
     addToCart({
       id: `product-${product.id}`,
       productId: product.id,
@@ -107,7 +130,7 @@ const PremiumPatterns = () => {
       quantity: 1,
       price: product.basePrice,
       productName: product.name,
-      productImage: product.images?.[0] || '',
+      productImage: cartImage || '',
     });
   };
 
@@ -154,7 +177,37 @@ const PremiumPatterns = () => {
                   <div className="relative aspect-[7/8] bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                     <Link href={`/products/${product.slug}`} className="block w-full h-full">
                       {(() => {
-                        const imageUrl = getImageUrl(product.images?.[0], product, products.indexOf(product));
+                        // Get random image from any color that has images, otherwise from product images
+                        let productImage: string | undefined = undefined;
+                        
+                        // Get colorImages (new structure) or colors (legacy)
+                        const colorImages = product.colorImages || product.colors || [];
+                        
+                        if (colorImages.length > 0) {
+                          // Collect all images from all active colors
+                          const allImages: string[] = [];
+                          colorImages.forEach((color: any) => {
+                            if (color.isActive !== false && color.images && Array.isArray(color.images)) {
+                              color.images.forEach((img: string) => {
+                                if (img && img.trim() !== '') {
+                                  allImages.push(img);
+                                }
+                              });
+                            }
+                          });
+                          
+                          // Pick a random image
+                          if (allImages.length > 0) {
+                            productImage = allImages[Math.floor(Math.random() * allImages.length)];
+                          }
+                        }
+                        
+                        // Fallback to product images if no color images found
+                        if (!productImage) {
+                          productImage = product.images?.[0];
+                        }
+                        
+                        const imageUrl = getImageUrl(productImage, product, products.indexOf(product));
                         return imageUrl ? (
                           <img
                             src={imageUrl}

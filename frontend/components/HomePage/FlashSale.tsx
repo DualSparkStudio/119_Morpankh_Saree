@@ -11,36 +11,68 @@ interface FlashSaleProduct {
   name: string;
   slug: string;
   images: string[];
+  colorImages?: Array<{ color: string; images: string[]; isActive?: boolean }>;
+  colors?: Array<{ color: string; images: string[]; isActive?: boolean }>; // Legacy
   basePrice: number;
   compareAtPrice?: number;
   discount?: number;
 }
 
 const getProductImage = (product: FlashSaleProduct, index: number = 0) => {
-  if (product.images && product.images.length > 0 && product.images[0]) {
-    let image = product.images[0];
-    
-    // Convert old Google Drive format to thumbnail format
-    if (image.includes('drive.google.com/uc?export=view&id=')) {
-      const fileIdMatch = image.match(/id=([a-zA-Z0-9_-]+)/);
-      if (fileIdMatch) {
-        image = `https://drive.google.com/thumbnail?id=${fileIdMatch[1]}&sz=w1920`;
+  // Get random image from any color that has images, otherwise from product images
+  let productImage: string | undefined = undefined;
+  
+  // Get colorImages (new structure) or colors (legacy)
+  const colorImages = product.colorImages || product.colors || [];
+  
+  if (colorImages.length > 0) {
+    // Collect all images from all active colors
+    const allImages: string[] = [];
+    colorImages.forEach((color: any) => {
+      if (color.isActive !== false && color.images && Array.isArray(color.images)) {
+        color.images.forEach((img: string) => {
+          if (img && img.trim() !== '') {
+            allImages.push(img);
+          }
+        });
       }
-    }
+    });
     
-    // Handle /uploads paths
-    if (image.startsWith('/uploads')) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-      if (apiUrl.startsWith('http')) {
-        const baseUrl = apiUrl.replace('/api', '');
-        return `${baseUrl}${image}`;
-      }
-      return image;
+    // Pick a random image
+    if (allImages.length > 0) {
+      productImage = allImages[Math.floor(Math.random() * allImages.length)];
     }
-    
+  }
+  
+  // Fallback to product images if no color images found
+  if (!productImage) {
+    productImage = product.images?.[0];
+  }
+  
+  if (!productImage) return '';
+  
+  // Process the image URL
+  let image = productImage;
+  
+  // Convert old Google Drive format to thumbnail format
+  if (image.includes('drive.google.com/uc?export=view&id=')) {
+    const fileIdMatch = image.match(/id=([a-zA-Z0-9_-]+)/);
+    if (fileIdMatch) {
+      image = `https://drive.google.com/thumbnail?id=${fileIdMatch[1]}&sz=w1920`;
+    }
+  }
+  
+  // Handle /uploads paths
+  if (image.startsWith('/uploads')) {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
+    if (apiUrl.startsWith('http')) {
+      const baseUrl = apiUrl.replace('/api', '');
+      return `${baseUrl}${image}`;
+    }
     return image;
   }
-  return '';
+  
+  return image;
 };
 
 const getProductPrice = (product: FlashSaleProduct) => product.basePrice;
