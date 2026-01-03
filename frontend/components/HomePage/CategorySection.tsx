@@ -3,9 +3,15 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { categoriesApi, Category } from '@/lib/api/categories';
+import { productsApi, Product } from '@/lib/api/products';
+import { getImageUrl } from '@/lib/utils/imageHelper';
+
+interface CategoryWithImage extends Category {
+  displayImage?: string; // Random product image from this category
+}
 
 const CategorySection = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<CategoryWithImage[]>([]);
   const [loading, setLoading] = useState(true);
   const scrollWrapperRef = useRef<HTMLDivElement>(null);
   const scrollContentRef = useRef<HTMLDivElement>(null);
@@ -85,11 +91,81 @@ const CategorySection = () => {
     };
   }, [categoryIds, categories.length, loading]);
 
+  // Helper to get random image from product colorImages
+  const getProductImage = (product: Product): string | undefined => {
+    let productImage: string | undefined = undefined;
+    
+    // Get colorImages (new structure) or colors (legacy)
+    const colorImages = product.colorImages || product.colors || [];
+    
+    if (colorImages && Array.isArray(colorImages) && colorImages.length > 0) {
+      // Collect all images from all active colors
+      const allImages: string[] = [];
+      colorImages.forEach((color: any) => {
+        if (color && color.isActive !== false && color.images && Array.isArray(color.images)) {
+          color.images.forEach((img: string) => {
+            if (img && typeof img === 'string' && img.trim() !== '') {
+              allImages.push(img.trim());
+            }
+          });
+        }
+      });
+      
+      // Pick a random image from valid images
+      if (allImages.length > 0) {
+        productImage = allImages[Math.floor(Math.random() * allImages.length)];
+      }
+    }
+    
+    // Fallback to product images if no color images found
+    if (!productImage && product.images && Array.isArray(product.images) && product.images.length > 0) {
+      // Filter out empty/invalid images
+      const validImages = product.images.filter(img => img && typeof img === 'string' && img.trim() !== '');
+      if (validImages.length > 0) {
+        productImage = validImages[0];
+      }
+    }
+    
+    return productImage;
+  };
+
   const loadCategories = async () => {
     try {
       setLoading(true);
-      const data = await categoriesApi.getAll();
-      setCategories(data.filter(c => c.isActive).slice(0, 8));
+      const categoriesData = await categoriesApi.getAll();
+      const activeCategories = categoriesData.filter(c => c.isActive).slice(0, 8);
+      
+      // For each category, fetch products and get a random image from a random product
+      const categoriesWithImages = await Promise.all(
+        activeCategories.map(async (category) => {
+          try {
+            // Fetch multiple products from this category to have options
+            const productsData = await productsApi.getAll({
+              category: category.id,
+              limit: 10, // Get more products to have better selection
+              sort: 'createdAt',
+              order: 'desc',
+            });
+            
+            if (productsData.products && productsData.products.length > 0) {
+              // Pick a random product from the fetched products
+              const randomProduct = productsData.products[
+                Math.floor(Math.random() * productsData.products.length)
+              ];
+              const displayImage = getProductImage(randomProduct);
+              return { ...category, displayImage };
+            }
+            
+            // Fallback to category image if no products found
+            return { ...category, displayImage: category.image };
+          } catch (error) {
+            // If product fetch fails, use category image
+            return { ...category, displayImage: category.image };
+          }
+        })
+      );
+      
+      setCategories(categoriesWithImages);
     } catch (error: any) {
       // Silently handle rate limiting (429) errors
       if (error?.response?.status !== 429) {
@@ -101,38 +177,6 @@ const CategorySection = () => {
     }
   };
 
-  const getImageUrl = (image: string | undefined): string => {
-    if (!image || image.trim() === '') return '';
-    
-    // Convert old Google Drive format to thumbnail format for better reliability
-    if (image.includes('drive.google.com/uc?export=view&id=')) {
-      const fileIdMatch = image.match(/id=([a-zA-Z0-9_-]+)/);
-      if (fileIdMatch) {
-        image = `https://drive.google.com/thumbnail?id=${fileIdMatch[1]}&sz=w1920`;
-      }
-    }
-    
-    if (image.startsWith('http://') || image.startsWith('https://')) {
-      return image;
-    }
-    
-    if (image.startsWith('/uploads')) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-      if (apiUrl.startsWith('http')) {
-        const baseUrl = apiUrl.replace('/api', '');
-        return `${baseUrl}${image}`;
-      }
-      return image;
-    }
-    
-    if (image.startsWith('/')) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '/api';
-      const baseUrl = apiUrl.replace('/api', '');
-      return `${baseUrl}${image}`;
-    }
-    
-    return image;
-  };
 
   return (
     <section className="py-16 md:py-20 bg-gradient-to-b from-soft-cream to-white">
@@ -191,7 +235,9 @@ const CategorySection = () => {
                   <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-xl overflow-hidden border-4 border-white shadow-xl group-hover:shadow-2xl transition-all duration-300 group-hover:scale-110 group-hover:border-deep-indigo">
                     <div className="absolute inset-0 bg-gradient-to-br from-deep-indigo/20 to-navy-blue/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"></div>
                     {(() => {
-                      const imageUrl = getImageUrl(category.image);
+                      // Use displayImage (random product image) or fallback to category.image
+                      const imageToUse = category.displayImage || category.image;
+                      const imageUrl = getImageUrl(imageToUse, 0);
                       return imageUrl ? (
                         <img
                           src={imageUrl}
