@@ -1,5 +1,5 @@
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
-import GoogleMapsReviews from '@/components/GoogleMapsReviews';
+import GoogleMapsEmbed from '@/components/GoogleMapsReviews';
 
 export default function ContactPage() {
   return (
@@ -110,9 +110,9 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* Google Maps and Reviews Section */}
+          {/* Google Maps Section */}
           <div className="mt-12">
-            <GoogleMapsReviews />
+            <GoogleMapsEmbed />
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ import HeroCarousel from '@/components/HomePage/HeroCarousel';
 import CategorySection from '@/components/HomePage/CategorySection';
 import PremiumPatterns from '@/components/HomePage/PremiumPatterns';
 import TrendingPatterns from '@/components/HomePage/TrendingPatterns';
+import GoogleReviews from '@/components/HomePage/GoogleReviews';
 
 // Loading fallback component
 const SectionSkeleton = () => (
@@ -35,6 +36,11 @@ export default function Home() {
       </Suspense>
       <Suspense fallback={<SectionSkeleton />}>
         <TrendingPatterns />
+      </Suspense>
+      
+      {/* Google Reviews Section */}
+      <Suspense fallback={<SectionSkeleton />}>
+        <GoogleReviews />
       </Suspense>
       
       {/* General See More Button */}
