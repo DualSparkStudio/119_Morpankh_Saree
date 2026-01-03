@@ -1,4 +1,5 @@
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
+import GoogleMapsReviews from '@/components/GoogleMapsReviews';
 
 export default function ContactPage() {
   return (
@@ -6,7 +7,7 @@ export default function ContactPage() {
       <div className="container mx-auto px-4">
         <h1 className="text-4xl md:text-5xl font-heading text-deep-indigo mb-12 text-center">Contact Us</h1>
         
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-lg shadow-md p-8 md:p-12 mb-8">
             <p className="text-lg text-gray-700 mb-8 text-center">
               Get in touch with us for any inquiries, support, or feedback. We're here to help you find the perfect saree!
@@ -107,6 +108,11 @@ export default function ContactPage() {
                 </form>
               </div>
             </div>
+          </div>
+
+          {/* Google Maps and Reviews Section */}
+          <div className="mt-12">
+            <GoogleMapsReviews />
           </div>
         </div>
       </div>
