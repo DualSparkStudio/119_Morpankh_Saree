@@ -181,8 +181,8 @@ const CategorySection = () => {
   return (
     <section className="py-16 md:py-20 bg-gradient-to-b from-soft-cream to-white">
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-12">
-          <div className="text-center md:text-left w-full md:w-auto">
+        <div className="flex flex-col md:flex-row items-center justify-between mb-12">
+          <div className="text-center w-full md:w-auto">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading text-deep-indigo mb-2">
               Categories
             </h2>
