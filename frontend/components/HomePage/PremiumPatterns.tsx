@@ -91,8 +91,8 @@ const PremiumPatterns = () => {
   return (
     <section className="py-16 md:py-20 bg-gradient-to-b from-white to-soft-cream">
       <div className="container mx-auto px-4 md:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-12">
-          <div className="text-center mb-4 md:mb-0">
+        <div className="relative mb-12">
+          <div className="text-center w-full mb-4 md:mb-0">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading text-deep-indigo mb-3">
               Premium Patterns
             </h2>
@@ -100,7 +100,7 @@ const PremiumPatterns = () => {
           </div>
           <Link
             href="/products?premium=true"
-            className="inline-flex items-center gap-2 bg-deep-indigo hover:bg-navy-blue text-white px-6 py-3 rounded-full font-medium transition-all shadow-lg hover:shadow-xl hover:scale-105"
+            className="absolute top-0 right-0 inline-flex items-center gap-2 bg-deep-indigo hover:bg-navy-blue text-white px-6 py-3 rounded-full font-medium transition-all shadow-lg hover:shadow-xl hover:scale-105"
           >
             <span>See more</span>
             <span>→</span>
